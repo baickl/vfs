@@ -4,7 +4,6 @@
 
 pak* pak_open(const char* _pakfile)
 {
-
 	int i;
 	pak *_pak;
 	FILE *fp;
@@ -143,11 +142,11 @@ void pak_close(pak* _pak)
 
 	if( _pak->_M_iteminfos)
 		free(_pak->_M_iteminfos);
-	
+
 	free(_pak);
 }
 
-int pak_get_itemcount(pak* _pak)
+int pak_item_getcount(pak* _pak)
 {
 	if( !_pak)
 		return 0;
@@ -155,7 +154,7 @@ int pak_get_itemcount(pak* _pak)
 	return _pak->_M_header._M_count;
 }
 
-pak_iteminfo* pak_get_iteminfo(pak*_pak,int _index )
+pak_iteminfo* pak_item_getinfo(pak*_pak,int _index )
 {
 	if( !_pak)
 		return NULL;
@@ -166,7 +165,7 @@ pak_iteminfo* pak_get_iteminfo(pak*_pak,int _index )
 	return &_pak->_M_iteminfos[_index];
 }
 
-int  pak_locate_item(pak*_pak,const char* _file)
+int  pak_item_locate(pak*_pak,const char* _file)
 {
 	int i;
 
@@ -182,7 +181,7 @@ int  pak_locate_item(pak*_pak,const char* _file)
 	return -1;
 }
 
-bool pak_extract_item( pak* _pak,int _index,void *_buf,int _bufsize)
+bool pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 {
 
 	pak_iteminfo* iteminfo;
@@ -232,4 +231,16 @@ bool pak_extract_item( pak* _pak,int _index,void *_buf,int _bufsize)
 	}
 
 	return true;
+}
+
+bool pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,int _bufsize)
+{
+	int index;
+	pak_iteminfo* iteminfo;
+
+	index = pak_item_locate(_pak,_file);
+	if( index < 0 )
+		return false;
+
+	return pak_item_unpack_index(_pak,index,_buf,_bufsize);
 }

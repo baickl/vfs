@@ -2,7 +2,10 @@
 #define _PAK_H_
 
 
-#define MAX_FILENAME 512
+#define PAK_MAX_FILENAME	512
+
+#define PAK_COMPRESS_NONE	0x0001
+#define PAK_COMPRESS_BZIP2	0x0002
 
 /*
  * header DEFINE
@@ -23,7 +26,7 @@ typedef struct pak_iteminfo_s
 	int				_M_offset;
 	int				_M_size;
 	unsigned int	_M_crc32;
-	char			_M_filename[MAX_FILENAME+1];
+	char			_M_filename[PAK_MAX_FILENAME+1];
 }pak_iteminfo;
 
 /* 
@@ -31,7 +34,7 @@ typedef struct pak_iteminfo_s
  * */
 typedef struct pak_s
 {
-	char			_M_filename[MAX_FILENAME+1];
+	char			_M_filename[PAK_MAX_FILENAME+1];
 	pak_header		_M_header;
 	pak_iteminfo*	_M_iteminfos;
 }pak;
@@ -45,9 +48,9 @@ void			pak_close( pak* );
 
 unsigned int	pak_util_calc_crc32( void*, int );
 
-int				pak_util_compress_bound( int );
-int				pak_util_compress( const void*, int,void*, int );
-int				pak_util_decompress( const void*, int,void*, int );
+int				pak_util_compress_bound( int ,int );
+int				pak_util_compress( int,  const void*, int,void*, int );
+int				pak_util_decompress( int, const void*, int,void*, int );
 
 int				pak_item_getcount( pak* );
 pak_iteminfo*	pak_item_getinfo( pak*, int );

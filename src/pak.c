@@ -94,7 +94,7 @@ pak* pak_open(const char* _pakfile)
 			return NULL;
 		}
 
-		if( filenamelen <= 0 || filenamelen >= MAX_FILENAME )
+		if( filenamelen <= 0 || filenamelen >= PAK_MAX_FILENAME )
 		{
 			fclose(fp);
 			free(iteminfos);
@@ -154,18 +154,18 @@ unsigned int pak_util_calc_crc32(void*buf,int size)
 	return calc_crc32(buf,size);
 }
 
-int pak_util_compress_bound( int srclen )
+int pak_util_compress_bound( int compresstype, int srclen )
 {
 	return compressBound(srclen);
 }
 
-int pak_util_compress(const void*src,int srcsize,void*dst,int dstsize)
+int pak_util_compress(int compresstype, const void*src,int srcsize,void*dst,int dstsize)
 {
 
 	return compress2(dst,dstsize,src,srcsize,9);
 }
 
-int pak_util_decompress(const void*src,int srcsize,void*dst,int dstsize)
+int pak_util_decompress(int compresstype,const void*src,int srcsize,void*dst,int dstsize)
 {
 	return uncompress(dst,dstsize,src,srcsize);
 }
@@ -248,7 +248,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 	/*
 	 * 校验数据是否正确
 	 * */
-	unsigned int crc32 = pak_crc32_calc(_buf,iteminfo->_M_size);
+	unsigned int crc32 = pak_util_calc_crc32(_buf,iteminfo->_M_size);
 	if( crc32 != iteminfo->_M_crc32 )
 	{
 		return 0;
@@ -260,8 +260,6 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 int pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,int _bufsize)
 {
 	int index;
-	pak_iteminfo* iteminfo;
-
 	index = pak_item_locate(_pak,_file);
 	if( index < 0 )
 		return 0;

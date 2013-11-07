@@ -35,7 +35,7 @@ pak* pak_open(const char* _pakfile)
 		return NULL;
 	}
 
-	if( header._M_version > 1 )
+	if( header._M_version > PAK_VERSION )
 	{
 		fclose(fp);
 		return NULL;
@@ -319,6 +319,13 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 			return 0;
 		}
 
+		if( pak_util_calc_crc32(compress_buf,iteminfo->_M_compress_size) != iteminfo->_M_compress_crc32)
+		{
+			free(compress_buf);
+			fclose(fp);
+			return 0;
+		}
+
 		if( pak_util_decompress( iteminfo->_M_compress_type,
 								 compress_buf,iteminfo->_M_compress_size,
 								 _buf,_bufsize) != iteminfo->_M_size  )
@@ -331,6 +338,12 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		free(compress_buf);
 		fclose(fp);
 
+		if( pak_util_calc_crc32(_buf,iteminfo->_M_size) != iteminfo->_M_crc32) 
+		{
+			return 0;
+		}
+
+		
 		return iteminfo->_M_size;
 	}
 	else

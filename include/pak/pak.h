@@ -2,6 +2,12 @@
 #define _PAK_H_
 
 
+/* 
+ * MACRO DEFINE
+ * */
+
+#define PAK_VERSION			0x0001
+
 #define PAK_MAX_FILENAME	512
 
 #define PAK_COMPRESS_NONE	0x0000

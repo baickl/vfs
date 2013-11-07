@@ -86,6 +86,28 @@ pak* pak_open(const char* _pakfile)
 			return NULL;
 		}
 
+		if( fread(&iteminfos[i]._M_compress_type,sizeof(iteminfos[i]._M_compress_type),1,fp) != sizeof(iteminfos[i]._M_compress_type))
+		{
+			fclose(fp);
+			free(iteminfos);
+			return NULL;
+		}
+
+		if( fread(&iteminfos[i]._M_compress_size,sizeof(iteminfos[i]._M_compress_size),1,fp) != sizeof(iteminfos[i]._M_compress_size))
+		{
+			fclose(fp);
+			free(iteminfos);
+			return NULL;
+		}
+
+
+		if( fread(&iteminfos[i]._M_compress_crc32,sizeof(iteminfos[i]._M_compress_crc32),1,fp) != sizeof(iteminfos[i]._M_compress_crc32))
+		{
+			fclose(fp);
+			free(iteminfos);
+			return NULL;
+		}
+
 		filenamelen = 0;
 		if( fread(&filenamelen,sizeof(filenamelen),1,fp) != sizeof(filenamelen))
 		{
@@ -109,7 +131,6 @@ pak* pak_open(const char* _pakfile)
 			return NULL;
 		}
 	}
-
 
 
 	if( fp )
@@ -156,18 +177,41 @@ unsigned int pak_util_calc_crc32(void*buf,int size)
 
 int pak_util_compress_bound( int compresstype, int srclen )
 {
-	return compressBound(srclen);
+	switch(compresstype)
+	{
+	case PAK_COMPRESS_BZIP2:
+		return compressBound(srclen);
+
+	case PAK_COMPRESS_NONE:
+	default:
+		return srclen;
+	}
 }
 
 int pak_util_compress(int compresstype, const void*src,int srcsize,void*dst,int dstsize)
 {
+	switch(compresstype)
+	{
+	case PAK_COMPRESS_BZIP2:
+		return compress2(dst,dstsize,src,srcsize,9);
 
-	return compress2(dst,dstsize,src,srcsize,9);
+	case PAK_COMPRESS_NONE:
+	default:
+		return 0;
+	}
 }
 
 int pak_util_decompress(int compresstype,const void*src,int srcsize,void*dst,int dstsize)
 {
-	return uncompress(dst,dstsize,src,srcsize);
+	switch(compresstype)
+	{
+	case PAK_COMPRESS_BZIP2:
+		return uncompress(dst,dstsize,src,srcsize);
+
+	case PAK_COMPRESS_NONE:
+	default:
+		return 0;
+	}
 }
 
 int pak_item_getcount(pak* _pak)
@@ -214,7 +258,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 	if( !_pak || !_buf )
 		return 0;
 
-	iteminfo = pak_get_iteninfo(_pak,_index);
+	iteminfo = pak_item_getinfo(_pak,_index);
 	if( !iteminfo )
 		return 0;
 
@@ -236,25 +280,64 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		return 0;
 	}
 
-	if( fread(_buf,iteminfo->_M_size,1,fp) != iteminfo->_M_size)
+	if( iteminfo->_M_compress_type == PAK_COMPRESS_NONE)
+	{
+		if( fread(_buf,iteminfo->_M_size,1,fp) != iteminfo->_M_size)
+		{
+			fclose(fp);
+			return 0;
+		}
+
+		fclose(fp);
+		fp = 0;
+
+		/*
+		 * 校验数据是否正确
+		 * */
+		unsigned int crc32 = pak_util_calc_crc32(_buf,iteminfo->_M_size);
+		if( crc32 != iteminfo->_M_crc32 )
+		{
+			return 0;
+		}
+
+		return iteminfo->_M_size;
+	}
+	else if( iteminfo->_M_compress_type == PAK_COMPRESS_BZIP2 )
+	{
+
+		void* compress_buf = malloc(iteminfo->_M_compress_size);
+		if( !compress_buf )
+		{
+			fclose(fp);
+			return 0;
+		}
+
+		if( fread(compress_buf,iteminfo->_M_compress_size,1,fp) != iteminfo->_M_compress_size)
+		{
+			free(compress_buf);
+			fclose(fp);
+			return 0;
+		}
+
+		if( pak_util_decompress( iteminfo->_M_compress_type,
+								 compress_buf,iteminfo->_M_compress_size,
+								 _buf,_bufsize) != iteminfo->_M_size  )
+		{
+			free(compress_buf);
+			fclose(fp);
+			return 0;
+		}
+
+		free(compress_buf);
+		fclose(fp);
+
+		return iteminfo->_M_size;
+	}
+	else
 	{
 		fclose(fp);
 		return 0;
 	}
- 
-	fclose(fp);
-	fp = 0;
-
-	/*
-	 * 校验数据是否正确
-	 * */
-	unsigned int crc32 = pak_util_calc_crc32(_buf,iteminfo->_M_size);
-	if( crc32 != iteminfo->_M_crc32 )
-	{
-		return 0;
-	}
-
-	return iteminfo->_M_size;
 }
 
 int pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,int _bufsize)

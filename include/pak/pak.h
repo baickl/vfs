@@ -4,8 +4,8 @@
 
 #define PAK_MAX_FILENAME	512
 
-#define PAK_COMPRESS_NONE	0x0001
-#define PAK_COMPRESS_BZIP2	0x0002
+#define PAK_COMPRESS_NONE	0x0000
+#define PAK_COMPRESS_BZIP2	0x0001
 
 /*
  * header DEFINE
@@ -24,8 +24,14 @@ typedef struct pak_header_s
 typedef struct pak_iteminfo_s
 {
 	int				_M_offset;
+	
 	int				_M_size;
 	unsigned int	_M_crc32;
+	
+	int				_M_compress_type;
+	int				_M_compress_size;
+	int				_M_compress_crc32;
+
 	char			_M_filename[PAK_MAX_FILENAME+1];
 }pak_iteminfo;
 

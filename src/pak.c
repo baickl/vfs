@@ -1,5 +1,6 @@
 #include "pak/pak.h"
 #include "crc32/crc32.h"
+#include "bzip2/bzlib.h"
 #include <stdio.h>
 #include <memory.h>
 
@@ -147,6 +148,28 @@ void pak_close(pak* _pak)
 	free(_pak);
 }
 
+
+unsigned int pak_util_calc_crc32(void*buf,int size)
+{
+	return calc_crc32(buf,size);
+}
+
+int pak_util_compress_bound( int srclen )
+{
+	return compressBound(srclen);
+}
+
+int pak_util_compress(const void*src,int srcsize,void*dst,int dstsize)
+{
+
+	return compress2(dst,dstsize,src,srcsize,9);
+}
+
+int pak_util_decompress(const void*src,int srcsize,void*dst,int dstsize)
+{
+	return uncompress(dst,dstsize,src,srcsize);
+}
+
 int pak_item_getcount(pak* _pak)
 {
 	if( !_pak)
@@ -225,7 +248,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 	/*
 	 * 校验数据是否正确
 	 * */
-	unsigned int crc32 = calc_crc32(_buf,iteminfo->_M_size);
+	unsigned int crc32 = pak_crc32_calc(_buf,iteminfo->_M_size);
 	if( crc32 != iteminfo->_M_crc32 )
 	{
 		return 0;

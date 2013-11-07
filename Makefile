@@ -1,24 +1,48 @@
 
 CC = gcc
+AR =ar
 INCLUDE = include
 
 WARN=-O2 -Wall -fPIC -W 
 INCS=-I$(INCLUDE)
-CFLAGS = $(WARN) $(INCS) 
+BIGFILES=-D_FILE_OFFSET_BITS=64
+CFLAGS = $(WARN) $(INCS) $(BIGFILES) 
 LIB_OPTION=-shared
 
+OBJS=objs/pak.o 				\
+	 objs/crc32/crc32.o			\
+	 objs/bzip2/blocksort.o		\
+	 objs/bzip2/huffman.o		\
+	 objs/bzip2/crctable.o		\
+	 objs/bzip2/randtable.o		\
+	 objs/bzip2/compress.o		\
+	 objs/bzip2/decompress.o	\
+	 objs/bzip2/bzlib.o
 
 
-SRCS=src/pak.c src/crc32/crc32.c
-OBJS=src/pak.o src/crc32/crc32.o
-
-lib:lib/pak.so
+all:lib/pak.so
 
 lib/pak.so:$(OBJS)
 	$(CC) $(CFLAGS) $(LIB_OPTION) -o lib/pak.so $(OBJS) 
 
-PAK.o:PAK.c PAK.h crc32.h
-crc32.o:crc32.c crc32.h
+objs/pak.o:src/pak.c
+	$(CC) $(CFLAGS) -c src/pak.c -o objs/pak.o
+objs/crc32/crc32.o:src/crc32/crc32.c
+	$(CC) $(CFLAGS) -c src/crc32/crc32.c -o objs/crc32/crc32.o
+objs/bzip2/blocksort.o:src/bzip2/blocksort.c
+	$(CC) $(CFLAGS) -c src/bzip2/blocksort.c -o objs/bzip2/blocksort.o
+objs/bzip2/huffman.o:src/bzip2/huffman.c	
+	$(CC) $(CFLAGS) -c src/bzip2/huffman.c -o objs/bzip2/huffman.o
+objs/bzip2/crctable.o:src/bzip2/crctable.c
+	$(CC) $(CFLAGS) -c src/bzip2/crctable.c -o objs/bzip2/crctable.o
+objs/bzip2/randtable.o:src/bzip2/randtable.c
+	$(CC) $(CFLAGS) -c src/bzip2/randtable.c -o objs/bzip2/randtable.o
+objs/bzip2/compress.o:src/bzip2/compress.c	
+	$(CC) $(CFLAGS) -c src/bzip2/compress.c -o objs/bzip2/compress.o
+objs/bzip2/decompress.o:src/bzip2/decompress.c
+	$(CC) $(CFLAGS) -c src/bzip2/decompress.c -o objs/bzip2/decompress.o
+objs/bzip2/bzlib.o:src/bzip2/bzlib.c
+	$(CC) $(CFLAGS) -c src/bzip2/bzlib.c -o objs/bzip2/bzlib.o
 
 clean:
 	rm -f lib/pak.so $(OBJS)

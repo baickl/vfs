@@ -40,15 +40,20 @@ typedef struct pak_s
 /* 
  * pak API
  * */
-pak*			pak_open(const char*);
-void			pak_close(pak*);
+pak*			pak_open( const char* );
+void			pak_close( pak* );
 
-int				pak_item_getcount(pak*);
-pak_iteminfo*	pak_item_getinfo( pak*,int );
+unsigned int	pak_util_calc_crc32( void*, int );
 
-int				pak_item_locate(pak*,const char*);
-int				pak_item_unpack_index(pak*,int,void*,int);
-int			pak_item_unpack_filename(pak*,const char*,void*,int);
+int				pak_util_compress_bound( int );
+int				pak_util_compress( const void*, int,void*, int );
+int				pak_util_decompress( const void*, int,void*, int );
 
+int				pak_item_getcount( pak* );
+pak_iteminfo*	pak_item_getinfo( pak*, int );
 
-#endif//_PAK_H_
+int				pak_item_locate( pak*, const char*);
+int				pak_item_unpack_index( pak*, int, void*, int);
+int				pak_item_unpack_filename( pak*, const char*, void*, int) ;
+
+#endif/*_PAK_H_*/

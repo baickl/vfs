@@ -2,7 +2,7 @@
 #define _PAK_H_
 
 
-#define MAX_FILENAME = 512;
+#define MAX_FILENAME 512
 
 /*
  * header DEFINE
@@ -47,8 +47,8 @@ int				pak_item_getcount(pak*);
 pak_iteminfo*	pak_item_getinfo( pak*,int );
 
 int				pak_item_locate(pak*,const char*);
-bool			pak_item_unpack_index(pak*,int,void*,int);
-bool			pak_item_unpack_filename(pak*,const char*,void*,int);
+int				pak_item_unpack_index(pak*,int,void*,int);
+int			pak_item_unpack_filename(pak*,const char*,void*,int);
 
 
 #endif//_PAK_H_

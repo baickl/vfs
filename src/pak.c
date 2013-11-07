@@ -1,6 +1,7 @@
-#include "PAK/PAK.h"
+#include "pak/pak.h"
 #include "crc32/crc32.h"
-
+#include <stdio.h>
+#include <memory.h>
 
 pak* pak_open(const char* _pakfile)
 {
@@ -50,7 +51,7 @@ pak* pak_open(const char* _pakfile)
 	 * 提取文件信息
 	 * */
 
-	iteminfos = (pak_iteminfo*)malloc(header.M_count*sizeof(pak_iteminfo));
+	iteminfos = (pak_iteminfo*)malloc(header._M_count*sizeof(pak_iteminfo));
 	if( !iteminfos )
 	{
 		fclose(fp);
@@ -70,17 +71,17 @@ pak* pak_open(const char* _pakfile)
 
 		iteminfos[i]._M_offset += header._M_offset; 
 
-		if( fread(&iteminfo[i]._M_size,sizeof(iteminfos[i]._M_size),1,fp) != sizeof(iteminfos[i]._M_size))
+		if( fread(&iteminfos[i]._M_size,sizeof(iteminfos[i]._M_size),1,fp) != sizeof(iteminfos[i]._M_size))
 		{
 			fclose(fp);
 			free(iteminfos);
 			return NULL;
 		}
 
-		if( fread(&iteminfo[i]._M_crc32,sizeof(iteminfos[i]._M_crc32),1,fp) != sizeof(iteminfos[i]._M_size))
+		if( fread(&iteminfos[i]._M_crc32,sizeof(iteminfos[i]._M_crc32),1,fp) != sizeof(iteminfos[i]._M_size))
 		{
 			fclose(fp);
-			free(ieminfos);
+			free(iteminfos);
 			return NULL;
 		}
 
@@ -127,7 +128,7 @@ pak* pak_open(const char* _pakfile)
 		return NULL;
 	}
 	memset(_pak->_M_filename,0,sizeof(_pak->_M_filename));
-	memset(_pak->_M_header,0,sizeof(_pak->_M_header));
+	memset(&_pak->_M_header,0,sizeof(_pak->_M_header));
 	strcpy(_pak->_M_filename,_pakfile);
 	memcpy(&_pak->_M_header,&header,sizeof(header));
 	_pak->_M_iteminfos = iteminfos;
@@ -159,7 +160,7 @@ pak_iteminfo* pak_item_getinfo(pak*_pak,int _index )
 	if( !_pak)
 		return NULL;
 
-	if( _index < 0 || _index >= _pak->_M_itemcount )
+	if( _index < 0 || _index >= _pak->_M_header._M_count )
 		return NULL;
 
 	return &_pak->_M_iteminfos[_index];
@@ -181,21 +182,21 @@ int  pak_item_locate(pak*_pak,const char* _file)
 	return -1;
 }
 
-bool pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
+int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 {
 
 	pak_iteminfo* iteminfo;
 	FILE* fp;
 
 	if( !_pak || !_buf )
-		return false;
+		return 0;
 
 	iteminfo = pak_get_iteninfo(_pak,_index);
 	if( !iteminfo )
-		return false;
+		return 0;
 
 	if( iteminfo->_M_size > _bufsize )
-		return false;
+		return 0;
 
 	
 	/* 
@@ -204,18 +205,18 @@ bool pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 
 	fp = fopen(_pak->_M_filename,"rb");
 	if( !fp )
-		return false;
+		return 0;
 
 	if( fseek(fp,iteminfo->_M_offset,SEEK_SET) != iteminfo->_M_offset)
 	{
 		fclose(fp);
-		return false;
+		return 0;
 	}
 
 	if( fread(_buf,iteminfo->_M_size,1,fp) != iteminfo->_M_size)
 	{
 		fclose(fp);
-		return false;
+		return 0;
 	}
  
 	fclose(fp);
@@ -227,20 +228,20 @@ bool pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 	unsigned int crc32 = calc_crc32(_buf,iteminfo->_M_size);
 	if( crc32 != iteminfo->_M_crc32 )
 	{
-		return false;
+		return 0;
 	}
 
-	return true;
+	return iteminfo->_M_size;
 }
 
-bool pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,int _bufsize)
+int pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,int _bufsize)
 {
 	int index;
 	pak_iteminfo* iteminfo;
 
 	index = pak_item_locate(_pak,_file);
 	if( index < 0 )
-		return false;
+		return 0;
 
 	return pak_item_unpack_index(_pak,index,_buf,_bufsize);
 }

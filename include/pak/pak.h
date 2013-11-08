@@ -13,15 +13,18 @@
 #define PAK_COMPRESS_NONE	0x0000
 #define PAK_COMPRESS_BZIP2	0x0001
 
+#define PAK_ERROR_OK		1
+#define PAK_ERROR_FAILED	0
+
 /*
  * header DEFINE
  * */
 typedef struct pak_header_s
 {
-	int _M_flag;
-	int _M_version;
-	int _M_count;
-	int _M_offset;
+	int				_M_flag;
+	int				_M_version;
+	int				_M_count;
+	int				_M_offset;
 }pak_header;
 
 /* 

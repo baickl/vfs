@@ -20,7 +20,7 @@ OBJS=objs/pak.o 				\
 	 objs/bzip2/bzlib.o
 
 
-all:libpak
+all:libpak pack_dir
 
 libpak:$(OBJS)
 	rm -f lib/libpak.a
@@ -45,5 +45,9 @@ objs/bzip2/decompress.o:src/bzip2/decompress.c
 objs/bzip2/bzlib.o:src/bzip2/bzlib.c
 	$(CC) $(CFLAGS) -c src/bzip2/bzlib.c -o objs/bzip2/bzlib.o
 
+pack_dir:
+	cd tools ; make
+
 clean:
 	rm -f lib/libpak.a  $(OBJS)
+	cd tools ; make clean

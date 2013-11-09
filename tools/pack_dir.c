@@ -472,7 +472,7 @@ int dir_pack( const char *path,const char* output )
 		printf("\tcompress_type=%d\n",iteminfo->_M_compress_type);
 		printf("\tcompress_size=%d\n",iteminfo->_M_compress_size);
 		printf("\tcompress_crc32=%d\n",iteminfo->_M_compress_crc32);
-		printf("\toffset=%d\n",iteminfo->_M_offset);
+		printf("\toffset=%d\n\n",iteminfo->_M_offset);
 
 	}
 

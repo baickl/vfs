@@ -188,17 +188,18 @@ int pak_util_compress_bound( int compresstype, int srclen )
 	}
 }
 
-int pak_util_compress(int compresstype, const void*src,int srcsize,void*dst,int *dstsize)
+int pak_util_compress(int compresstype, const void*src,int srcsize,void*dst,int dstsize)
 {
 	int r;
+	int compressed_size = dstsize;
 
 	switch(compresstype)
 	{
 	case PAK_COMPRESS_BZIP2:
-		r = BZ2_bzBuffToBuffCompress(dst,dstsize,src,srcsize,9,0,0);
+		r = BZ2_bzBuffToBuffCompress(dst,&compressed_size,src,srcsize,9,3,30);
 		if( r != BZ_OK)
 			return 0;
-		return 1;
+		return compressed_size;
 
 	case PAK_COMPRESS_NONE:
 	default:
@@ -206,16 +207,17 @@ int pak_util_compress(int compresstype, const void*src,int srcsize,void*dst,int 
 	}
 }
 
-int pak_util_decompress(int compresstype,const void*src,int srcsize,void*dst,int* dstsize)
+int pak_util_decompress(int compresstype,const void*src,int srcsize,void*dst,int dstsize)
 {
 	int r;
+	int uncompressed_size = dstsize;
 	switch(compresstype)
 	{
 	case PAK_COMPRESS_BZIP2:
-		r = BZ2_bzBuffToBuffDecompress(dst,dstsize,src,srcsize,0,0);
-		if( r == BZ_OK )
-			return 1;
-		return 0;
+		r = BZ2_bzBuffToBuffDecompress(dst,&uncompressed_size,src,srcsize,0,2);
+		if( r != BZ_OK )
+			return 0;
+		return uncompressed_size;
 	case PAK_COMPRESS_NONE:
 	default:
 		return 0;

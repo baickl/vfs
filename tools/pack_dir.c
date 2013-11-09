@@ -427,8 +427,8 @@ int dir_pack( const char *path,const char* output )
 			compress_buf_size = pak_util_compress_bound(PAK_COMPRESS_BZIP2,iteminfo->_M_size);
 			compress_buf = malloc(compress_buf_size);
 
-			compress_result = pak_util_compress(PAK_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,&compress_buf_size);
-			if(compress_result == 0 || compress_buf_size >= iteminfo->_M_size)
+			compress_result = pak_util_compress(PAK_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,compress_buf_size);
+			if(compress_result == 0 || compress_result >= iteminfo->_M_size)
 			{
 				iteminfo->_M_compress_type = PAK_COMPRESS_NONE;
 				iteminfo->_M_compress_size = 0;
@@ -437,7 +437,7 @@ int dir_pack( const char *path,const char* output )
 				SAFE_FREE(compress_buf);
 				compress_buf_size = 0;
 
-				if( fwrite(buf,1,iteminfo->_M_size,fp_data) != iteminfo->_M_size)
+				if( !CHECK_FWRITE(fp_data,buf,iteminfo->_M_size))
 				{
 					printf("error:dir_pack pack file[no compress] %s failed\n",iteminfo->_M_filename);
 					goto LBL_DP_ERROR;
@@ -449,11 +449,11 @@ int dir_pack( const char *path,const char* output )
 			{
 				iteminfo->_M_compress_type = PAK_COMPRESS_BZIP2;
 				iteminfo->_M_compress_size = compress_result;
-				iteminfo->_M_compress_crc32 = pak_util_calc_crc32(compress_buf,iteminfo->_M_compress_size);
+				iteminfo->_M_compress_crc32 = pak_util_calc_crc32(compress_buf,compress_result);
 
 				SAFE_FREE(buf);
 
-				if( fwrite(compress_buf,1,iteminfo->_M_compress_size,fp_data) != iteminfo->_M_compress_size)
+				if( !CHECK_FWRITE(fp_data,compress_buf,compress_result))
 				{
 					printf("error:dir_pack pack file[compress] %s failed\n",iteminfo->_M_filename);
 					goto LBL_DP_ERROR;

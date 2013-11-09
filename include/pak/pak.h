@@ -65,8 +65,8 @@ void			pak_close( pak* );
 unsigned int	pak_util_calc_crc32( void*, int );
 
 int				pak_util_compress_bound( int ,int );
-int				pak_util_compress( int,  const void*, int,void*, int* );
-int				pak_util_decompress( int, const void*, int,void*, int* );
+int				pak_util_compress( int,  const void*, int,void*, int );
+int				pak_util_decompress( int, const void*, int,void*, int );
 
 int				pak_item_getcount( pak* );
 pak_iteminfo*	pak_item_getinfo( pak*, int );

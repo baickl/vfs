@@ -46,8 +46,7 @@ objs/bzip2/bzlib.o:src/bzip2/bzlib.c
 	$(CC) $(CFLAGS) -c src/bzip2/bzlib.c -o objs/bzip2/bzlib.o
 
 tool:
-	cd tools ; make
-
+	$(MAKE) -C tools
 clean:
-	rm -f lib/libpak.a  $(OBJS)
-	cd tools ; make clean
+	rm -f lib/libpak.a $(OBJS)
+	cd tools;$(MAKE) clean

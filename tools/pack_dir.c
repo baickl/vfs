@@ -8,11 +8,27 @@
 #define SAFE_FCLOSE(x)	if(x){fclose(x);x=NULL;}
 #define SAFE_FREE(x)	if(x){free((void*)x);	x=NULL;}
 
-#define CHECK_FWRITE(f,b,l) fwrite((const void*)b,l,1,f) !=l?0:1 
+#define CHECK_FWRITE(f,b,l) fwrite((const void*)b,1,l,f) !=l?0:1 
 
 static pak *g_pak = NULL;
 static int  g_maxcount = 0;
 static char g_dir[PAK_MAX_FILENAME+1];
+
+int file_getlen(FILE*fp)
+{
+	int curpos;
+	int flen = 0;
+
+	if( !fp )
+		return 0;
+
+	curpos = ftell(fp);
+	fseek(fp,0,SEEK_END);
+	flen = ftell(fp);
+	fseek(fp,curpos,SEEK_SET);
+	return flen;
+
+}
 
 int pak_begin( const char *path )
 {
@@ -51,7 +67,10 @@ int pak_additeminfo( const char* path )
 
 	memset(iteminfo,0,sizeof(pak_iteminfo));
 	strcpy(iteminfo->_M_filename,path);
-	return 0;
+
+
+	printf("add file:%s\n",iteminfo->_M_filename);
+	return 1;
 
 }
 
@@ -166,7 +185,7 @@ int fwrite_data(FILE*fp,void*buf,int bufsize)
 	if( !buf || bufsize <= 0  )
 		return 0;
 
-	if( fwrite(buf,bufsize,1,fp) != bufsize)
+	if( fwrite(buf,1,bufsize,fp) != bufsize)
 		return 0;
 
 	return 1;
@@ -263,16 +282,20 @@ int pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const char* o
 
 	fp = fopen(outputfile,"wb+");
 	if( !fp )
+	{
+		printf("error:pakfile_combine create outputfile %s failed\n",outputfile);
 		return 0;
+	}
 
 	fseek(fp_header,0,SEEK_SET);
 	fseek(fp_iteminfo,0,SEEK_SET);
 	fseek(fp_data,0,SEEK_SET);
 
+	printf("info:pakfile_combine begin pak header size=%d\n",file_getlen(fp_header));
 	fp_temp = fp_header;
 	while(!feof(fp_temp))
 	{
-		readsize = fread(buf,bufsize,1,fp_temp);
+		readsize = fread(buf,1,bufsize,fp_temp);
 		if(readsize>0)
 		{
 			if( !CHECK_FWRITE(fp,buf,readsize))
@@ -280,10 +303,11 @@ int pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const char* o
 		}
 	}
 
+	printf("info:pakfile_combine begin pak iteminfo size=%d\n",file_getlen(fp_iteminfo));
 	fp_temp = fp_iteminfo;
 	while(!feof(fp_temp))
 	{
-		readsize = fread(buf,bufsize,1,fp_temp);
+		readsize = fread(buf,1,bufsize,fp_temp);
 		if(readsize>0)
 		{
 			if( !CHECK_FWRITE(fp,buf,readsize))
@@ -291,10 +315,11 @@ int pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const char* o
 		}
 	}
 
+	printf("info:pakfile_combine begin pak data size=%d\n",file_getlen(fp_data));
 	fp_temp = fp_data;
 	while(!feof(fp_temp))
 	{
-		readsize = fread(buf,bufsize,1,fp_temp);
+		readsize = fread(buf,1,bufsize,fp_temp);
 		if(readsize>0)
 		{
 			if( !CHECK_FWRITE(fp,buf,readsize))
@@ -332,30 +357,45 @@ int dir_pack( const char *path,const char* output )
 	int compress_result = 0;
 	int combinefile_result = 0;
 
+	int tmp = 0;
+	
+	remove("pak_header.tmp");
+	remove("pak_iteminfo.tmp");
+	remove("pak_data.tmp");
+
 	fp_head = fopen("pak_header.tmp","wb+");
 	if( !fp_head )
+	{
+		printf("error:dir_pack create pak_header.tmp failed\n");
 		return 0;
+	}
 
 	fp_iteminfo = fopen("pak_iteminfo.tmp","wb+");
 	if( !fp_iteminfo )
+	{
+		printf("error:dir_pack create pak_iteminfo.tmp failed\n");
 		goto LBL_DP_ERROR;
+	}
 
 	fp_data = fopen("pak_data.tmp","wb+");
 	if( !fp_data )
+	{
+		printf("error:dir_pack create pak_data.tmp failed\n");
 		goto LBL_DP_ERROR;
+	}
 
 	for( i = 0; i<g_pak->_M_header._M_count; ++i )
 	{
 		iteminfo = &g_pak->_M_iteminfos[i];
 
-		fp = fopen(iteminfo->_M_filename,"rb");
+		fp = fopen(iteminfo->_M_filename,"r");
 		if( !fp )
+		{
+			printf("error:dir_pack open file %s failed\n",iteminfo->_M_filename);
 			goto LBL_DP_ERROR;
+		}
 
-		fseek(fp,0,SEEK_END);
-		iteminfo->_M_size = ftell(fp);
-		fseek(fp,0,SEEK_SET);
-
+		iteminfo->_M_size = file_getlen(fp);
 		iteminfo->_M_offset = ftell(fp_data);
 
 		if( iteminfo->_M_size <= 0 )
@@ -367,12 +407,18 @@ int dir_pack( const char *path,const char* output )
 			iteminfo->_M_compress_type = PAK_COMPRESS_NONE;
 			iteminfo->_M_compress_size = 0;
 			iteminfo->_M_compress_crc32 = 0;
+
+			printf("warning:dir_pack empty file %s\n",iteminfo->_M_filename);
 		}
 		else
 		{
 			buf = malloc(iteminfo->_M_size);
-			if(fread(buf,iteminfo->_M_size,1,fp) != iteminfo->_M_size)
+			tmp = fread(buf,1,iteminfo->_M_size,fp);
+			if( tmp != iteminfo->_M_size)
+			{
+				printf("error:dir_pack read file %s size=%d readsize=%d fpos=%d failed\n",iteminfo->_M_filename,iteminfo->_M_size,tmp,ftell(fp));
 				goto LBL_DP_ERROR;
+			}
 
 			SAFE_FCLOSE(fp);
 
@@ -391,8 +437,11 @@ int dir_pack( const char *path,const char* output )
 				SAFE_FREE(compress_buf);
 				compress_buf_size = 0;
 
-				if( fwrite(buf,iteminfo->_M_size,1,fp_data) != iteminfo->_M_size)
+				if( fwrite(buf,1,iteminfo->_M_size,fp_data) != iteminfo->_M_size)
+				{
+					printf("error:dir_pack pack file[no compress] %s failed\n",iteminfo->_M_filename);
 					goto LBL_DP_ERROR;
+				}
 
 				SAFE_FREE(buf);
 			}
@@ -404,22 +453,45 @@ int dir_pack( const char *path,const char* output )
 
 				SAFE_FREE(buf);
 
-				if( fwrite(compress_buf,iteminfo->_M_compress_size,1,fp_data) != iteminfo->_M_compress_size)
+				if( fwrite(compress_buf,1,iteminfo->_M_compress_size,fp_data) != iteminfo->_M_compress_size)
+				{
+					printf("error:dir_pack pack file[compress] %s failed\n",iteminfo->_M_filename);
 					goto LBL_DP_ERROR;
+				}
 
 				SAFE_FREE(compress_buf);
 				compress_buf_size = 0;
 			}
 		}
+
+
+		printf("\nsuccessed:dir_pack pack file %s OK\n",iteminfo->_M_filename);
+		printf("\tfile=%s\n",iteminfo->_M_filename);
+		printf("\tsize=%d\n",iteminfo->_M_size);
+		printf("\tcrc32=%d\n",iteminfo->_M_crc32);
+		printf("\tcompress_type=%d\n",iteminfo->_M_compress_type);
+		printf("\tcompress_size=%d\n",iteminfo->_M_compress_size);
+		printf("\tcompress_crc32=%d\n",iteminfo->_M_compress_crc32);
+		printf("\toffset=%d\n",iteminfo->_M_offset);
+
 	}
 
 	if( 0 == fwrite_iteminfos(fp_iteminfo) )
+	{
+
+		printf("error:dir_pack fwrite_iteminfos failed\n");
 		goto LBL_DP_ERROR;
+	}
 
 	g_pak->_M_header._M_offset = ftell(fp_iteminfo)+sizeof(pak_header);
 	if( 0 == fwrite_header(fp_head) )
+	{
+		
+		printf("error:dir_pack fwrite_header failed\n");
 		goto LBL_DP_ERROR;
+	}
 
+	remove(output);
 	combinefile_result = pakfile_combine(fp_head,fp_iteminfo,fp_data,output);
 
 	SAFE_FCLOSE(fp_data);
@@ -446,27 +518,45 @@ void pak_end( const char *path )
 		SAFE_FREE(g_pak->_M_iteminfos);
 		SAFE_FREE(g_pak);
 	}
+	
+	remove("pak_header.tmp");
+	remove("pak_iteminfo.tmp");
+	remove("pak_data.tmp");
 }
 
 int main( int argc,char *argv[] )
 {
 	if(argc != 3 )
+	{
+		printf("usage: pack_dir <directory> <outputfile>\n");
 		return -1;
+	}
 
 	const char* path = argv[1];
 	const char* outfile = argv[2];
+
+	printf("pack_dir %s %s\n",path,outfile);
 
 	memset(g_dir,0,sizeof(g_dir));
 	strcpy(g_dir,path);
 
 	if( 0 == pak_begin(path) )
+	{
+		printf("error:pak_begin failed\n ");
 		goto ERROR;
+	}
 	
 	if( 0 == dir_collect_fileinfo(path))
+	{
+		printf("error:dir_collect_fileinfo failed \n");
 		goto ERROR;
+	}
 
 	if( 0 == dir_pack(path,outfile) )
+	{
+		printf("error:dir_pack failed\n");
 		goto ERROR;
+	}
 	
 	pak_end(path);
 	return 0;

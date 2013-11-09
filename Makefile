@@ -19,13 +19,12 @@ OBJS=objs/pak.o 				\
 	 objs/bzip2/decompress.o	\
 	 objs/bzip2/bzlib.o
 
-OBJS_TOOLS=objs/pack_dir.o 
-
 
 all:libpak
 
 libpak:$(OBJS)
-	$(CC) $(CFLAGS) $(LIB_OPTION) -o lib/libpak.so $(OBJS) 
+	rm -f lib/libpak.a
+	$(AR) cq lib/libpak.a $(OBJS) 
 
 objs/pak.o:src/pak.c
 	$(CC) $(CFLAGS) -c src/pak.c -o objs/pak.o
@@ -47,4 +46,4 @@ objs/bzip2/bzlib.o:src/bzip2/bzlib.c
 	$(CC) $(CFLAGS) -c src/bzip2/bzlib.c -o objs/bzip2/bzlib.o
 
 clean:
-	rm -f lib/libpak.so  $(OBJS)
+	rm -f lib/libpak.a  $(OBJS)

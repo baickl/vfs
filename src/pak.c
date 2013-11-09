@@ -23,7 +23,7 @@ pak* pak_open(const char* _pakfile)
 	/* 
 	 * 校验HEADER头
 	 * */
-	if( fread(&header,sizeof(header),1,fp) != sizeof(header))
+	if( fread(&header,1,sizeof(header),fp) != sizeof(header))
 	{
 		fclose(fp);
 		return NULL;
@@ -63,7 +63,7 @@ pak* pak_open(const char* _pakfile)
 	{
 
 
-		if( fread(&iteminfos[i]._M_offset,sizeof(iteminfos[i]._M_offset),1,fp) != sizeof(iteminfos[i]._M_offset))
+		if( fread(&iteminfos[i]._M_offset,1,sizeof(iteminfos[i]._M_offset),fp) != sizeof(iteminfos[i]._M_offset))
 		{
 			fclose(fp);
 			free(iteminfos);
@@ -72,28 +72,28 @@ pak* pak_open(const char* _pakfile)
 
 		iteminfos[i]._M_offset += header._M_offset; 
 
-		if( fread(&iteminfos[i]._M_size,sizeof(iteminfos[i]._M_size),1,fp) != sizeof(iteminfos[i]._M_size))
+		if( fread(&iteminfos[i]._M_size,1,sizeof(iteminfos[i]._M_size),fp) != sizeof(iteminfos[i]._M_size))
 		{
 			fclose(fp);
 			free(iteminfos);
 			return NULL;
 		}
 
-		if( fread(&iteminfos[i]._M_crc32,sizeof(iteminfos[i]._M_crc32),1,fp) != sizeof(iteminfos[i]._M_size))
+		if( fread(&iteminfos[i]._M_crc32,1,sizeof(iteminfos[i]._M_crc32),fp) != sizeof(iteminfos[i]._M_size))
 		{
 			fclose(fp);
 			free(iteminfos);
 			return NULL;
 		}
 
-		if( fread(&iteminfos[i]._M_compress_type,sizeof(iteminfos[i]._M_compress_type),1,fp) != sizeof(iteminfos[i]._M_compress_type))
+		if( fread(&iteminfos[i]._M_compress_type,1,sizeof(iteminfos[i]._M_compress_type),fp) != sizeof(iteminfos[i]._M_compress_type))
 		{
 			fclose(fp);
 			free(iteminfos);
 			return NULL;
 		}
 
-		if( fread(&iteminfos[i]._M_compress_size,sizeof(iteminfos[i]._M_compress_size),1,fp) != sizeof(iteminfos[i]._M_compress_size))
+		if( fread(&iteminfos[i]._M_compress_size,1,sizeof(iteminfos[i]._M_compress_size),fp) != sizeof(iteminfos[i]._M_compress_size))
 		{
 			fclose(fp);
 			free(iteminfos);
@@ -101,7 +101,7 @@ pak* pak_open(const char* _pakfile)
 		}
 
 
-		if( fread(&iteminfos[i]._M_compress_crc32,sizeof(iteminfos[i]._M_compress_crc32),1,fp) != sizeof(iteminfos[i]._M_compress_crc32))
+		if( fread(&iteminfos[i]._M_compress_crc32,1,sizeof(iteminfos[i]._M_compress_crc32),fp) != sizeof(iteminfos[i]._M_compress_crc32))
 		{
 			fclose(fp);
 			free(iteminfos);
@@ -109,7 +109,7 @@ pak* pak_open(const char* _pakfile)
 		}
 
 		filenamelen = 0;
-		if( fread(&filenamelen,sizeof(filenamelen),1,fp) != sizeof(filenamelen))
+		if( fread(&filenamelen,1,sizeof(filenamelen),fp) != sizeof(filenamelen))
 		{
 			fclose(fp);
 			free(iteminfos);
@@ -124,7 +124,7 @@ pak* pak_open(const char* _pakfile)
 		}
 
 		memset(iteminfos[i]._M_filename,0,sizeof(iteminfos[i]._M_filename));
-		if( fread(iteminfos[i]._M_filename,filenamelen,1,fp) != filenamelen )
+		if( fread(iteminfos[i]._M_filename,1,filenamelen,fp) != filenamelen )
 		{
 			fclose(fp);
 			free(iteminfos);
@@ -206,7 +206,7 @@ int pak_util_compress(int compresstype, const void*src,int srcsize,void*dst,int 
 	}
 }
 
-int pak_util_decompress(int compresstype,const void*src,int srcsize,void*dst,int*dstsize)
+int pak_util_decompress(int compresstype,const void*src,int srcsize,void*dst,int* dstsize)
 {
 	int r;
 	switch(compresstype)
@@ -290,7 +290,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 
 	if( iteminfo->_M_compress_type == PAK_COMPRESS_NONE)
 	{
-		if( fread(_buf,iteminfo->_M_size,1,fp) != iteminfo->_M_size)
+		if( fread(_buf,1,iteminfo->_M_size,fp) != iteminfo->_M_size)
 		{
 			fclose(fp);
 			return 0;
@@ -320,7 +320,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 			return 0;
 		}
 
-		if( fread(compress_buf,iteminfo->_M_compress_size,1,fp) != iteminfo->_M_compress_size)
+		if( fread(compress_buf,1,iteminfo->_M_compress_size,fp) != iteminfo->_M_compress_size)
 		{
 			free(compress_buf);
 			fclose(fp);

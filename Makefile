@@ -19,11 +19,22 @@ OBJS=objs/pak.o 				\
 	 objs/bzip2/decompress.o	\
 	 objs/bzip2/bzlib.o
 
+OBJS_TOOLS=objs/pack_dir.o 				\
+		   objs/pak.o 					\
+		   objs/crc32/crc32.o			\
+		   objs/bzip2/blocksort.o		\
+		   objs/bzip2/huffman.o			\
+		   objs/bzip2/crctable.o		\
+		   objs/bzip2/randtable.o		\
+		   objs/bzip2/compress.o		\
+		   objs/bzip2/decompress.o		\
+		   objs/bzip2/bzlib.o
 
-all:lib/pak.so
 
-lib/pak.so:$(OBJS)
-	$(CC) $(CFLAGS) $(LIB_OPTION) -o lib/pak.so $(OBJS) 
+all:lib/libpak.so bin/pack_dir
+
+lib/libpak.so:$(OBJS)
+	$(CC) $(CFLAGS) $(LIB_OPTION) -o lib/libpak.so $(OBJS) 
 
 objs/pak.o:src/pak.c
 	$(CC) $(CFLAGS) -c src/pak.c -o objs/pak.o
@@ -44,5 +55,11 @@ objs/bzip2/decompress.o:src/bzip2/decompress.c
 objs/bzip2/bzlib.o:src/bzip2/bzlib.c
 	$(CC) $(CFLAGS) -c src/bzip2/bzlib.c -o objs/bzip2/bzlib.o
 
+bin/pack_dir:$(OBJS_TOOLS)
+	$(CC) $(CFLAGS) -o bin/pack_dir $(OBJS_TOOLS) -lpak -Llib
+
+objs/pack_dir.o:tools/pack_dir.c
+	$(CC) $(CFLAGS) -c tools/pack_dir.c -o objs/pack_dir.o 
+
 clean:
-	rm -f lib/pak.so $(OBJS)
+	rm -f liib/libpak.so bin/pak_dir  $(OBJS) $(OBJS_TOOLS)

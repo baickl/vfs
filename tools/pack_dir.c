@@ -1,15 +1,18 @@
 #include "pak/pak.h"
 #include <stdio.h>
-#include <io.h>
+
+
+#include <sys/types.h>
+#include <dirent.h>
 
 #define SAFE_FCLOSE(x)	if(x){fclose(x);x=NULL;}
-#define SAFE_FREE(x)	if(x){free(x);	x=NULL;}
+#define SAFE_FREE(x)	if(x){free((void*)x);	x=NULL;}
 
-#define CHECK_FWRITE(f,b,l) fwrite(b,l,1,f) !=l?0:1 
+#define CHECK_FWRITE(f,b,l) fwrite((const void*)b,l,1,f) !=l?0:1 
 
 static pak *g_pak = NULL;
 static int  g_maxcount = 0;
-static char g_dir[PAK_MAX_FILENAMELEN+1];
+static char g_dir[PAK_MAX_FILENAME+1];
 
 int pak_begin( const char *path )
 {
@@ -39,12 +42,12 @@ int pak_additeminfo( const char* path )
 		else
 			g_maxcount += g_maxcount;
 
-		_pak->_M_iteminfos = (pak_iteminfo*)realloc(_pak->_M_iteminfos,g_maxcount*sizeof(pak_iteminfo));
-		if( !_pak->_M_iteminfos )
+		g_pak->_M_iteminfos = (pak_iteminfo*)realloc(g_pak->_M_iteminfos,g_maxcount*sizeof(pak_iteminfo));
+		if( !g_pak->_M_iteminfos )
 			return 0;
 	}
 
-	iteminfo = g_pak->_M_iteminfos[g_pak->_M_header._M_count++];
+	iteminfo = &g_pak->_M_iteminfos[g_pak->_M_header._M_count++];
 
 	memset(iteminfo,0,sizeof(pak_iteminfo));
 	strcpy(iteminfo->_M_filename,path);
@@ -54,11 +57,63 @@ int pak_additeminfo( const char* path )
 
 int dir_collect_fileinfo( const char *path )
 {
+	DIR* dir;
+	struct dirent *entry;
+
+	char find_full[PAK_MAX_FILENAME+1];
+	char path_temp[PAK_MAX_FILENAME+1];
+
+	strcpy(find_full,path);
+	
+	dir = opendir(path);
+	if( NULL == dir )
+		return 0;
+
+	while( (entry=readdir(dir)) != NULL )
+	{
+
+		if( entry->d_type & DT_DIR )
+		{
+			if( strcmp(entry->d_name,".")  == 0 ||
+				strcmp(entry->d_name,"..") == 0 )
+				continue;
+
+			memset(path_temp,0,sizeof(path_temp));
+			strcpy(path_temp,path);
+			strcat(path_temp,"/");
+			strcat(path_temp,entry->d_name);
+
+			if( 0 == dir_collect_fileinfo(path_temp) )
+				goto ERROR;
+		}		
+		else
+		{
+			memset(path_temp,0,sizeof(path_temp));
+			strcpy(path_temp,path);
+			strcat(path_temp,"/");
+			strcat(path_temp,entry->d_name);
+			
+			if( 0 == pak_additeminfo(path_temp) )
+				goto ERROR;
+		}
+	}
+
+	closedir(dir);
+	return 1;
+
+ERROR:
+	closedir(dir);
+	return 0;
+
+}
+/*  
+int dir_collect_fileinfo( const char *path )
+{
 	long handle;
 	struct _finddata_t fd;
 
-	char find_full[PAK_MAXFILENAME+1];
-	char path_temp[PAK_MAXFILENAME+1];
+	char find_full[PAK_MAX_FILENAME+1];
+	char path_temp[PAK_MAX_FILENAME+1];
 
 	strcpy(find_full,path);
 	strcat(find_full,"*");
@@ -70,7 +125,7 @@ int dir_collect_fileinfo( const char *path )
 	while( !_findnext(handle,&fd) )
 	{
 
-		if( fd.attrib & _A_SUBDIR )
+		if( fd.attrib & A_SUBDIR )
 		{
 			if( strcmp(fd.name,".")  == 0 ||
 				strcmp(fd.name,"..") == 0 )
@@ -101,6 +156,7 @@ ERROR:
 	_findclose(handle);
 	return 0;
 }
+*/
 
 int fwrite_data(FILE*fp,void*buf,int bufsize)
 {
@@ -132,7 +188,7 @@ int fwrite_iteminfos(FILE* fp)
 
 	for( i = 0; i<g_pak->_M_header._M_count; ++i )
 	{
-		iteminfo = g_pak->_M_iteminfos[i];
+		iteminfo = &g_pak->_M_iteminfos[i];
 
 		if( !CHECK_FWRITE(fp,&iteminfo->_M_offset,sizeof(iteminfo->_M_offset)))
 			goto LBL_FI_ERROR; 
@@ -213,7 +269,7 @@ int pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const char* o
 	fseek(fp_iteminfo,0,SEEK_SET);
 	fseek(fp_data,0,SEEK_SET);
 
-	fp_temp = fp_head;
+	fp_temp = fp_header;
 	while(!feof(fp_temp))
 	{
 		readsize = fread(buf,bufsize,1,fp_temp);
@@ -292,7 +348,7 @@ int dir_pack( const char *path,const char* output )
 	{
 		iteminfo = &g_pak->_M_iteminfos[i];
 
-		fp = fopen(iteminfo->_M_filename);
+		fp = fopen(iteminfo->_M_filename,"rb");
 		if( !fp )
 			goto LBL_DP_ERROR;
 
@@ -325,7 +381,7 @@ int dir_pack( const char *path,const char* output )
 			compress_buf_size = pak_util_compress_bound(PAK_COMPRESS_BZIP2,iteminfo->_M_size);
 			compress_buf = malloc(compress_buf_size);
 
-			compress_result = pak_util_compress(buf,iteminfo->_M_size,compress_buf,compress_buf_size);
+			compress_result = pak_util_compress(PAK_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,compress_buf_size);
 			if(compress_result >= iteminfo->_M_size)
 			{
 				iteminfo->_M_compress_type = PAK_COMPRESS_NONE;
@@ -344,7 +400,7 @@ int dir_pack( const char *path,const char* output )
 			{
 				iteminfo->_M_compress_type = PAK_COMPRESS_BZIP2;
 				iteminfo->_M_compress_size = compress_result;
-				iteminfo->_M_-compress_crc32 = pak_util_calc_crc32(compress_buf,iteminfo->_M_compress_size);
+				iteminfo->_M_compress_crc32 = pak_util_calc_crc32(compress_buf,iteminfo->_M_compress_size);
 
 				SAFE_FREE(buf);
 
@@ -387,9 +443,9 @@ int pak_end( const char *path )
 {
 	if( g_pak )
 	{
-		if ( g_pak->_M_iteminfo )
+		if ( g_pak->_M_iteminfos )
 		{
-			SAFE_FREE(g_pak->_M_iteminfo);
+			SAFE_FREE(g_pak->_M_iteminfos);
 		}
 
 		SAFE_FREE(g_pak);

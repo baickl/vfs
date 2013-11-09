@@ -1,0 +1,23 @@
+
+CC = gcc
+AR =ar
+INCLUDE = ./../include
+
+WARN=-O2 -Wall -fPIC -W 
+INCS=-I$(INCLUDE)
+BIGFILES=-D_FILE_OFFSET_BITS=64
+CFLAGS = $(WARN) $(INCS) $(BIGFILES) 
+LIB_OPTION=-shared
+
+OBJS_TOOLS=pack_dir.o 
+
+all:pack_dir
+
+pack_dir:$(OBJS_TOOLS)
+	$(CC) $(CFLAGS) -o ./../bin/pack_dir $(OBJS_TOOLS) -lpak -L./../lib
+
+objs/pack_dir.o:pack_dir.c
+	$(CC) $(CFLAGS) -c pack_dir.c -o pack_dir.o 
+
+clean:
+	rm -f  ./../bin/pak_dir $(OBJS_TOOLS)

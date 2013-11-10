@@ -4,6 +4,29 @@
 #include <stdio.h>
 #include <memory.h>
 
+
+int pak_item_sort_cmp(const void*a,const void*b)
+{
+
+	pak_iteminfo* _a;
+	pak_iteminfo* _b;
+	
+	_a = (const pak_iteminfo*)a;
+	_b = (const pak_iteminfo*)b;
+	return strcasecmp(_a->_M_filename,_b->_M_filename);
+}
+
+int pak_item_search_cmp(const void*key,const void*item)
+{
+
+	const char*_key;
+	pak_iteminfo* _item;
+
+	_key  = (const char*)key;
+	_item = (const pak_iteminfo*)item;
+	return strcasecmp(_key,_item->_M_filename);
+}
+
 pak* pak_open(const char* _pakfile)
 {
 	int i;
@@ -155,6 +178,12 @@ pak* pak_open(const char* _pakfile)
 	memcpy(&_pak->_M_header,&header,sizeof(header));
 	_pak->_M_iteminfos = iteminfos;
 
+
+	/*
+	 * 排序
+	 * */
+	qsort(_pak->_M_iteminfos,_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_sort_cmp);
+
 	return _pak;
 }
 
@@ -245,18 +274,18 @@ pak_iteminfo* pak_item_getinfo(pak*_pak,int _index )
 
 int  pak_item_locate(pak*_pak,const char* _file)
 {
-	int i;
+	int ret = -1;
+	pak_iteminfo* iteminfo=NULL;
 
 	if( !_pak || !_file)
 		return -1;
 
-	for( i = 0; i<_pak->_M_header._M_count; ++i )
-	{
-		if( strcasecmp(_file,_pak->_M_iteminfos[i]._M_filename) == 0 )
-			return i;
-	}
+	iteminfo = (pak_iteminfo*)bsearch(_file,_pak->_M_iteminfos,_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_search_cmp);
+	if( !iteminfo )
+		return -1;
 
-	return -1;
+	return (iteminfo-_pak->_M_iteminfos)/sizeof(pak_iteminfo);
+
 }
 
 int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)

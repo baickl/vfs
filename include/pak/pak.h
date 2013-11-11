@@ -2,6 +2,8 @@
 #define _PAK_H_
 
 
+#define PAK_EXTERN extern
+
 /* 
  * MACRO DEFINE
  * */
@@ -13,8 +15,8 @@
 #define PAK_COMPRESS_NONE	0x0000
 #define PAK_COMPRESS_BZIP2	0x0001
 
-#define PAK_ERROR_OK		1
-#define PAK_ERROR_FAILED	0
+#define PAK_OK				1
+#define PAK_FAILED			-1
 
 
 /*
@@ -59,23 +61,23 @@ typedef struct pak_s
 /* 
  * pak API
  * */
-pak*			pak_open( const char* );
-void			pak_close( pak* );
+PAK_EXTERN pak*				pak_open( const char* );
+PAK_EXTERN void				pak_close( pak* );
 
-unsigned int	pak_util_calc_crc32( void*, int );
+PAK_EXTERN unsigned int		pak_util_calc_crc32( void*, int );
 
-int				pak_util_compress_bound( int ,int );
-int				pak_util_compress( int,  const void*, int,void*, int );
-int				pak_util_decompress( int, const void*, int,void*, int );
+PAK_EXTERN int				pak_util_compress_bound( int ,int );
+PAK_EXTERN int				pak_util_compress( int,  const void*, int,void*, int );
+PAK_EXTERN int				pak_util_decompress( int, const void*, int,void*, int );
 
-int				pak_item_sort_cmp(const void*,const void*);
-int				pak_item_search_cmp(const void*,const void*);
+PAK_EXTERN int				pak_item_sort_cmp(const void*,const void*);
+PAK_EXTERN int				pak_item_search_cmp(const void*,const void*);
 
-int				pak_item_getcount( pak* );
-pak_iteminfo*	pak_item_getinfo( pak*, int );
+PAK_EXTERN int				pak_item_getcount( pak* );
+PAK_EXTERN pak_iteminfo*	pak_item_getinfo( pak*, int );
 
-int				pak_item_locate( pak*, const char*);
-int				pak_item_unpack_index( pak*, int, void*, int);
-int				pak_item_unpack_filename( pak*, const char*, void*, int) ;
+PAK_EXTERN int				pak_item_locate( pak*, const char*);
+PAK_EXTERN int				pak_item_unpack_index( pak*, int, void*, int);
+PAK_EXTERN int				pak_item_unpack_filename( pak*, const char*, void*, int) ;
 
 #endif/*_PAK_H_*/

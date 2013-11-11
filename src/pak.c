@@ -11,20 +11,25 @@ int pak_item_sort_cmp(const void*a,const void*b)
 	pak_iteminfo* _a;
 	pak_iteminfo* _b;
 	
-	_a = (const pak_iteminfo*)a;
-	_b = (const pak_iteminfo*)b;
-	return strcasecmp(_a->_M_filename,_b->_M_filename);
+	_a = (pak_iteminfo*)a;
+	_b = (pak_iteminfo*)b;
+
+	printf("_a=%p _b-%d _a->_M_filename=%s,_b->_M_filename=%s\n",
+			_a,_b,
+			_a->_M_filename,_b->_M_filename);
+
+	return strcmp(_a->_M_filename,_b->_M_filename);
 }
 
 int pak_item_search_cmp(const void*key,const void*item)
 {
 
-	const char*_key;
+	char*_key;
 	pak_iteminfo* _item;
 
 	_key  = (const char*)key;
 	_item = (const pak_iteminfo*)item;
-	return strcasecmp(_key,_item->_M_filename);
+	return strcmp(_key,_item->_M_filename);
 }
 
 pak* pak_open(const char* _pakfile)
@@ -153,6 +158,17 @@ pak* pak_open(const char* _pakfile)
 			free(iteminfos);
 			return NULL;
 		}
+
+		printf("iteminfo[%d]:\nname=%s\nsize=%d\ncrc32=%d\nct=%d\ncs=%d\ncc=%d\n\n",
+				i,
+				iteminfos[i]._M_filename,
+				iteminfos[i]._M_size,
+				iteminfos[i]._M_crc32,
+				iteminfos[i]._M_compress_type,
+				iteminfos[i]._M_compress_size,
+				iteminfos[i]._M_compress_crc32);
+
+
 	}
 
 
@@ -182,8 +198,9 @@ pak* pak_open(const char* _pakfile)
 	/*
 	 * 排序
 	 * */
-	qsort(_pak->_M_iteminfos,_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_sort_cmp);
-
+	/*
+	 * qsort(&_pak->_M_iteminfos[0],_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_sort_cmp);
+	 * */
 	return _pak;
 }
 
@@ -284,7 +301,7 @@ int  pak_item_locate(pak*_pak,const char* _file)
 	if( !iteminfo )
 		return -1;
 
-	return (iteminfo-_pak->_M_iteminfos)/sizeof(pak_iteminfo);
+	return (iteminfo-_pak->_M_iteminfos);
 
 }
 

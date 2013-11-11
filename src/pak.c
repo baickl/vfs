@@ -14,10 +14,6 @@ int pak_item_sort_cmp(const void*a,const void*b)
 	_a = (pak_iteminfo*)a;
 	_b = (pak_iteminfo*)b;
 
-	printf("_a=%p _b-%d _a->_M_filename=%s,_b->_M_filename=%s\n",
-			_a,_b,
-			_a->_M_filename,_b->_M_filename);
-
 	return strcmp(_a->_M_filename,_b->_M_filename);
 }
 
@@ -194,13 +190,14 @@ pak* pak_open(const char* _pakfile)
 	memcpy(&_pak->_M_header,&header,sizeof(header));
 	_pak->_M_iteminfos = iteminfos;
 
+	printf("successed:open_pak count=%d,offset=%d\n",
+			_pak->_M_header._M_count,
+			_pak->_M_header._M_offset);
 
 	/*
 	 * 排序
 	 * */
-	/*
-	 * qsort(&_pak->_M_iteminfos[0],_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_sort_cmp);
-	 * */
+	qsort((void*)_pak->_M_iteminfos,_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_sort_cmp);
 	return _pak;
 }
 

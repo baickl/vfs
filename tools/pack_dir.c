@@ -205,6 +205,8 @@ int fwrite_iteminfos(FILE* fp)
 	if( g_pak->_M_header._M_count <= 0 )
 		return 0;
 
+	qsort(g_pak->_M_iteminfos,g_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_sort_cmp);
+
 	for( i = 0; i<g_pak->_M_header._M_count; ++i )
 	{
 		iteminfo = &g_pak->_M_iteminfos[i];

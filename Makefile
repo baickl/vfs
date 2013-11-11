@@ -20,7 +20,7 @@ OBJS=objs/pak.o 				\
 	 objs/bzip2/bzlib.o
 
 
-all:lib tool examples
+all:lib tool test
 
 lib:$(OBJS)
 	rm -f lib/libpak.a
@@ -48,7 +48,7 @@ objs/bzip2/bzlib.o:src/bzip2/bzlib.c
 tool:
 	$(MAKE) -C tools
 
-examples:
+test:
 	$(MAKE) -C examples
 
 clean:

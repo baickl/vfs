@@ -14,7 +14,7 @@ int pak_item_sort_cmp(const void*a,const void*b)
 	_a = (pak_iteminfo*)a;
 	_b = (pak_iteminfo*)b;
 
-	return strcmp(_a->_M_filename,_b->_M_filename);
+	return strcasecmp(_a->_M_filename,_b->_M_filename);
 }
 
 int pak_item_search_cmp(const void*key,const void*item)
@@ -25,7 +25,7 @@ int pak_item_search_cmp(const void*key,const void*item)
 
 	_key  = (const char*)key;
 	_item = (const pak_iteminfo*)item;
-	return strcmp(_key,_item->_M_filename);
+	return strcasecmp(_key,_item->_M_filename);
 }
 
 pak* pak_open(const char* _pakfile)
@@ -154,17 +154,6 @@ pak* pak_open(const char* _pakfile)
 			free(iteminfos);
 			return NULL;
 		}
-
-		printf("iteminfo[%d]:\nname=%s\nsize=%d\ncrc32=%d\nct=%d\ncs=%d\ncc=%d\n\n",
-				i,
-				iteminfos[i]._M_filename,
-				iteminfos[i]._M_size,
-				iteminfos[i]._M_crc32,
-				iteminfos[i]._M_compress_type,
-				iteminfos[i]._M_compress_size,
-				iteminfos[i]._M_compress_crc32);
-
-
 	}
 
 
@@ -318,7 +307,6 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 	if( iteminfo->_M_size > _bufsize )
 		return 0;
 
-	
 	/* 
 	 * 打开文件尝试读取数据
 	 * */
@@ -327,7 +315,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 	if( !fp )
 		return 0;
 
-	if( fseek(fp,iteminfo->_M_offset,SEEK_SET) != iteminfo->_M_offset)
+	if( fseek(fp,iteminfo->_M_offset,SEEK_SET) != 0)
 	{
 		fclose(fp);
 		return 0;
@@ -395,7 +383,6 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		{
 			return 0;
 		}
-
 		
 		return iteminfo->_M_size;
 	}

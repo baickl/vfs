@@ -78,11 +78,9 @@ PAK_EXTERN pak*				pak_open( const char* );
 PAK_EXTERN void				pak_close( pak* );
 
 PAK_EXTERN unsigned int		pak_util_calc_crc32( void*, int );
-
 PAK_EXTERN int				pak_util_compress_bound( int ,int );
 PAK_EXTERN int				pak_util_compress( int,  const void*, int,void*, int );
 PAK_EXTERN int				pak_util_decompress( int, const void*, int,void*, int );
-
 PAK_EXTERN int				pak_util_dir_foreach(const char*,dir_foreach_item_proc);
 
 PAK_EXTERN int				pak_item_sort_cmp(const void*,const void*);

@@ -136,9 +136,9 @@ void pak_close(pak* _pak)
 		return;
 
 	if( _pak->_M_iteminfos)
-		free(_pak->_M_iteminfos);
+		PAK_SAFE_FREE(_pak->_M_iteminfos);
 
-	free(_pak);
+	PAK_SAFE_FREE(_pak);
 }
 
 

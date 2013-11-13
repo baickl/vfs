@@ -12,7 +12,7 @@
 
 static pak *g_pak = NULL;
 static int  g_maxcount = 0;
-static char g_dir[PAK_MAX_FILENAME+1];
+static char g_dir[VFS_MAX_FILENAME+1];
 
 int file_getlen(FILE*fp)
 {
@@ -38,7 +38,7 @@ int pak_begin( const char *path )
 
 	g_pak = _pak;
 	g_pak->_M_header._M_flag = 'pakx';
-	g_pak->_M_header._M_version = PAK_VERSION;
+	g_pak->_M_header._M_version = VFS_VERSION;
 	g_pak->_M_header._M_count = 0;
 
 	g_maxcount = 0;
@@ -79,8 +79,8 @@ int dir_collect_fileinfo( const char *path )
 	DIR* dir;
 	struct dirent *entry;
 
-	char find_full[PAK_MAX_FILENAME+1];
-	char path_temp[PAK_MAX_FILENAME+1];
+	char find_full[VFS_MAX_FILENAME+1];
+	char path_temp[VFS_MAX_FILENAME+1];
 
 	strcpy(find_full,path);
 	
@@ -131,8 +131,8 @@ int dir_collect_fileinfo( const char *path )
 	long handle;
 	struct _finddata_t fd;
 
-	char find_full[PAK_MAX_FILENAME+1];
-	char path_temp[PAK_MAX_FILENAME+1];
+	char find_full[VFS_MAX_FILENAME+1];
+	char path_temp[VFS_MAX_FILENAME+1];
 
 	strcpy(find_full,path);
 	strcat(find_full,"*");
@@ -406,7 +406,7 @@ int dir_pack( const char *path,const char* output )
 			iteminfo->_M_size = 0;
 			iteminfo->_M_crc32 = 0;
 
-			iteminfo->_M_compress_type = PAK_COMPRESS_NONE;
+			iteminfo->_M_compress_type = VFS_COMPRESS_NONE;
 			iteminfo->_M_compress_size = 0;
 			iteminfo->_M_compress_crc32 = 0;
 
@@ -426,13 +426,13 @@ int dir_pack( const char *path,const char* output )
 
 			iteminfo->_M_crc32 = pak_util_calc_crc32(buf,iteminfo->_M_size);
 
-			compress_buf_size = pak_util_compress_bound(PAK_COMPRESS_BZIP2,iteminfo->_M_size);
+			compress_buf_size = pak_util_compress_bound(VFS_COMPRESS_BZIP2,iteminfo->_M_size);
 			compress_buf = malloc(compress_buf_size);
 
-			compress_result = pak_util_compress(PAK_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,compress_buf_size);
+			compress_result = pak_util_compress(VFS_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,compress_buf_size);
 			if(compress_result == 0 || compress_result >= iteminfo->_M_size)
 			{
-				iteminfo->_M_compress_type = PAK_COMPRESS_NONE;
+				iteminfo->_M_compress_type = VFS_COMPRESS_NONE;
 				iteminfo->_M_compress_size = 0;
 				iteminfo->_M_compress_crc32 = 0;
 
@@ -449,7 +449,7 @@ int dir_pack( const char *path,const char* output )
 			}
 			else
 			{
-				iteminfo->_M_compress_type = PAK_COMPRESS_BZIP2;
+				iteminfo->_M_compress_type = VFS_COMPRESS_BZIP2;
 				iteminfo->_M_compress_size = compress_result;
 				iteminfo->_M_compress_crc32 = pak_util_calc_crc32(compress_buf,compress_result);
 

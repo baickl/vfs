@@ -54,7 +54,7 @@ pak* pak_open(const char* _pakfile)
 	if( header._M_flag != 'pakx')
 		goto ERROR;
 
-	if( header._M_version > PAK_VERSION )
+	if( header._M_version > VFS_VERSION )
 		goto ERROR;
 
 	if( header._M_count <= 0 )
@@ -94,7 +94,7 @@ pak* pak_open(const char* _pakfile)
 		if( fread(&filenamelen,1,sizeof(filenamelen),fp) != sizeof(filenamelen))
 			goto ERROR;
 
-		if( filenamelen <= 0 || filenamelen >= PAK_MAX_FILENAME )
+		if( filenamelen <= 0 || filenamelen >= VFS_MAX_FILENAME )
 			goto ERROR;
 
 		memset(iteminfos[i]._M_filename,0,sizeof(iteminfos[i]._M_filename));
@@ -102,7 +102,7 @@ pak* pak_open(const char* _pakfile)
 			goto ERROR;
 	}
 
-	PAK_SAFE_FCLOSE(fp);
+	VFS_SAFE_FCLOSE(fp);
 
 
 	/* 
@@ -125,8 +125,8 @@ pak* pak_open(const char* _pakfile)
 	return _pak;
 
 ERROR:
-	PAK_SAFE_FCLOSE(fp);
-	PAK_SAFE_FREE(iteminfos);
+	VFS_SAFE_FCLOSE(fp);
+	VFS_SAFE_FREE(iteminfos);
 	return NULL;
 }
 
@@ -136,9 +136,9 @@ void pak_close(pak* _pak)
 		return;
 
 	if( _pak->_M_iteminfos)
-		PAK_SAFE_FREE(_pak->_M_iteminfos);
+		VFS_SAFE_FREE(_pak->_M_iteminfos);
 
-	PAK_SAFE_FREE(_pak);
+	VFS_SAFE_FREE(_pak);
 }
 
 
@@ -151,10 +151,10 @@ int pak_util_compress_bound( int compresstype, int srclen )
 {
 	switch(compresstype)
 	{
-	case PAK_COMPRESS_BZIP2:
+	case VFS_COMPRESS_BZIP2:
 		return (int)(srclen*1.01+600);
 
-	case PAK_COMPRESS_NONE:
+	case VFS_COMPRESS_NONE:
 	default:
 		return srclen;
 	}
@@ -167,13 +167,13 @@ int pak_util_compress(int compresstype, const void*src,int srcsize,void*dst,int 
 
 	switch(compresstype)
 	{
-	case PAK_COMPRESS_BZIP2:
+	case VFS_COMPRESS_BZIP2:
 		r = BZ2_bzBuffToBuffCompress(dst,&compressed_size,src,srcsize,9,3,30);
 		if( r != BZ_OK)
 			return 0;
 		return compressed_size;
 
-	case PAK_COMPRESS_NONE:
+	case VFS_COMPRESS_NONE:
 	default:
 		return 0;
 	}
@@ -185,12 +185,12 @@ int pak_util_decompress(int compresstype,const void*src,int srcsize,void*dst,int
 	int uncompressed_size = dstsize;
 	switch(compresstype)
 	{
-	case PAK_COMPRESS_BZIP2:
+	case VFS_COMPRESS_BZIP2:
 		r = BZ2_bzBuffToBuffDecompress(dst,&uncompressed_size,src,srcsize,0,2);
 		if( r != BZ_OK )
 			return 0;
 		return uncompressed_size;
-	case PAK_COMPRESS_NONE:
+	case VFS_COMPRESS_NONE:
 	default:
 		return 0;
 	}
@@ -201,8 +201,8 @@ int pak_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 	DIR* dir;
 	struct dirent *entry = NULL;
 
-	char find_full[PAK_MAX_FILENAME+1];
-	char path_temp[PAK_MAX_FILENAME+1];
+	char find_full[VFS_MAX_FILENAME+1];
+	char path_temp[VFS_MAX_FILENAME+1];
 
 	strcpy(find_full,path);
 	
@@ -315,12 +315,12 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 	if( fseek(fp,iteminfo->_M_offset,SEEK_SET) != 0)
 		goto ERROR;
 
-	if( iteminfo->_M_compress_type == PAK_COMPRESS_NONE)
+	if( iteminfo->_M_compress_type == VFS_COMPRESS_NONE)
 	{
 		if( fread(_buf,1,iteminfo->_M_size,fp) != iteminfo->_M_size)
 			goto ERROR;
 
-		PAK_SAFE_FCLOSE(fp);
+		VFS_SAFE_FCLOSE(fp);
 		
 		/*
 		 * 校验数据是否正确
@@ -331,7 +331,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 
 		return iteminfo->_M_size;
 	}
-	else if( iteminfo->_M_compress_type == PAK_COMPRESS_BZIP2 )
+	else if( iteminfo->_M_compress_type == VFS_COMPRESS_BZIP2 )
 	{
 
 		compress_buf = malloc(iteminfo->_M_compress_size);
@@ -349,8 +349,8 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 								 _buf,_bufsize) != iteminfo->_M_size  )
 			goto ERROR;
 
-		PAK_SAFE_FREE(compress_buf);
-		PAK_SAFE_FCLOSE(fp);
+		VFS_SAFE_FREE(compress_buf);
+		VFS_SAFE_FCLOSE(fp);
 
 		if( pak_util_calc_crc32(_buf,iteminfo->_M_size) != iteminfo->_M_crc32) 
 			return 0;
@@ -359,8 +359,8 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 	}
 	
 ERROR:
-	PAK_SAFE_FREE(compress_buf);
-	PAK_SAFE_FCLOSE(fp);
+	VFS_SAFE_FREE(compress_buf);
+	VFS_SAFE_FCLOSE(fp);
 
 	return 0;
 }

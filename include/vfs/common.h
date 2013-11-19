@@ -33,7 +33,7 @@
 #define VFS_FALSE			(0)
 
 #ifndef _WIN32
-#define stricmp _strcasecmp
+#define stricmp strcasecmp
 #endif 
 
 

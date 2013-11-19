@@ -1,5 +1,6 @@
 #include "vfs/pak.h"
 #include "vfs/util.h"
+#include "vfs/common.h"
 #include <stdio.h>
 #include <memory.h>
 
@@ -189,7 +190,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		return VFS_FALSE;
 
 	if( iteminfo->_M_size > _bufsize )
-		return VFS_FALSE
+		return VFS_FALSE;
 
 	/* 
 	 * 打开文件尝试读取数据

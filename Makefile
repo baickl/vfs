@@ -11,6 +11,7 @@ LIB_OPTION=-shared
 
 OBJS=objs/pak.o 				\
 	 objs/util.o				\
+	 objs/vfs.o					\
 	 objs/crc32/crc32.o			\
 	 objs/bzip2/blocksort.o		\
 	 objs/bzip2/huffman.o		\
@@ -31,6 +32,8 @@ objs/pak.o:src/pak.c
 	$(CC) $(CFLAGS) -c src/pak.c -o objs/pak.o
 objs/util.o:src/util.c
 	$(CC) $(CFLAGS) -c src/util.c -o objs/util.o
+objs/vfs.o:src/vfs.c
+	$(CC) $(CFLAGS) -c src/vfs.c -o objs/vfs.o
 objs/crc32/crc32.o:src/crc32/crc32.c
 	$(CC) $(CFLAGS) -c src/crc32/crc32.c -o objs/crc32/crc32.o
 objs/bzip2/blocksort.o:src/bzip2/blocksort.c

@@ -4,15 +4,15 @@
 #include "pak.h"
 
 /* VFS  */
-typedef vfs_t
+typedef struct vfs_t
 {
 	int			_M_count;
 	int			_M_maxcount;
-	pak*		_M_paks;
+	pak**		_M_paks;
 }vfs;
 
 /* VFS_FILE */
-typedef vfs_file_t
+typedef struct vfs_file_t
 {
 	int			_M_size;
 	int			_M_position;
@@ -38,7 +38,7 @@ VFS_EXTERN void				vfs_fclose(vfs_file*);
 VFS_EXTERN int				vfs_feof(vfs_file*);
 VFS_EXTERN int				vfs_ftell(vfs_file*);
 VFS_EXTERN int				vfs_fseek(vfs_file*,int,int);
-VFS_EXTERN int				vfs_fread(void*,size_t,size_t,vfs_file*);
-VFS_EXTERN int				vfs_fwrite(const void*,size_t,size_t,vfs_file*);
+VFS_EXTERN size_t			vfs_fread(void*,size_t,size_t,vfs_file*);
+VFS_EXTERN size_t			vfs_fwrite(void*,size_t,size_t,vfs_file*);
 
 #endif

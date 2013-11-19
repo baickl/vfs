@@ -1,4 +1,6 @@
 #include "vfs/vfs.h"
+#include "vfs/common.h"
+#include <stdio.h>
 
 static vfs * g_vfs = NULL;
 
@@ -8,8 +10,8 @@ int vfs_pak_sort_cmp(const void*a,const void*b)
 	pak* _a;
 	pak* _b;
 	
-	_a = (pak*)a;
-	_b = (pak*)b;
+	_a = *(pak**)a;
+	_b = *(pak**)b;
 
 	return stricmp(_a->_M_filename,_b->_M_filename);
 }
@@ -21,33 +23,32 @@ int vfs_pak_search_cmp(const void*key,const void*item)
 	pak* _item;
 
 	_key  = (const char*)key;
-	_item = (const pak*)item;
+	_item = *(const pak**)item;
 	return stricmp(_key,_item->_M_filename);
 }
 
 void vfs_pak_sort()
 {
-	qsort((void*)g_vfs->_M_paks,g_vfs->_M_count,sizeof(pak),vfs_pak_sort_cmp);
+	qsort((void*)g_vfs->_M_paks,g_vfs->_M_count,sizeof(pak*),vfs_pak_sort_cmp);
 }
 
 int vfs_pak_search(const char* pakfile)
 {
 	int ret = -1;
-	pak* p=NULL;
+	pak** p=NULL;
 
 	if( !g_vfs || !pakfile)
 		return -1;
 
-	p = (pak*)bsearch(pakfile,g_vfs->_M_paks,g_vfs->_M_count,sizeof(pak),vfs_pak_search_cmp);
+	p = (pak**)bsearch(pakfile,g_vfs->_M_paks,g_vfs->_M_count,sizeof(pak*),vfs_pak_search_cmp);
 	if( !p )
 		return -1;
 
-	return (p-g_vfs->_M_paks);
+	return (p - g_vfs->_M_paks);
 }
 
 int vfs_create()
 {
-
 	if( g_vfs )
 		return VFS_TRUE;
 
@@ -95,7 +96,7 @@ int vfs_pak_add(const char* pakfile )
 		if( g_vfs->_M_count == 0 )
 		{
 			g_vfs->_M_maxcount = 32;
-			g_vfs->_M_paks = (pak*)malloc(g_vfs->_M_maxcount*sizeof(pak));
+			g_vfs->_M_paks = (pak**)malloc(g_vfs->_M_maxcount*sizeof(pak*));
 			if( !g_vfs->_M_paks )
 			{
 				g_vfs->_M_maxcount = 0;
@@ -106,7 +107,7 @@ int vfs_pak_add(const char* pakfile )
 		else
 		{
 			g_vfs->_M_maxcount += 32;
-			_paks = (pak*)realloc(g_vfs->_M_paks,g_vfs->_M_maxcount*sizeof(pak));
+			_paks = (pak**)realloc(g_vfs->_M_paks,g_vfs->_M_maxcount*sizeof(pak*));
 			if( !_paks )
 			{
 				g_vfs->_M_maxcount -= 32;
@@ -122,7 +123,7 @@ int vfs_pak_add(const char* pakfile )
 	}
 	
 	/* 新增 */
-	g_vfs->paks[g_vfs->_M_count++] = pak;
+	g_vfs->_M_paks[g_vfs->_M_count++] = p;
 	vfs_pak_sort();
 
 	return VFS_TRUE;
@@ -137,17 +138,18 @@ int vfs_pak_del(const char* pakfile )
 		return VFS_FALSE;
 
 	if( !pakfile )
-		return vFS_FALSE;
+		return VFS_FALSE;
 
 	index = vfs_pak_search(pakfile);
 	if( index < 0 || index >= g_vfs->_M_count )
 		return VFS_FALSE;
 
-	memcpyp(&g_vfs->_M_paks[index], g_vfs->_M_paks[g_vfs->_M_count -1] ,sizeof(pak));
+	pak_close(g_vfs->_M_paks[index]);\
+	g_vfs->_M_paks[index]= g_vfs->_M_paks[g_vfs->_M_count -1];
 	--g_vfs->_M_count;
 
 	vfs_pak_sort();
-	return vFS_TRUE;
+	return VFS_TRUE;
 }
 
 
@@ -161,7 +163,7 @@ int vfs_pak_get_count()
 pak* vfs_pak_get_index(int idx )
 {
 	if( g_vfs && idx >= 0 && idx <= g_vfs->_M_count )
-		return &g_vfs->_M_paks[idx];
+		return g_vfs->_M_paks[idx];
 
 	return NULL;
 }
@@ -191,11 +193,11 @@ vfs_file* vfs_fopen(const char* file,const char* mode )
 
 	for( i = 0; i<g_vfs->_M_count; ++i )
 	{
-		index = pak_item_locate(&g_vfs->_M_paks[i],file);
+		index = pak_item_locate(g_vfs->_M_paks[i],file);
 		if(index < 0 )
 			continue;
 
-		iteminfo = pak_item_getinfo(&g_vfs->_M_paks[i],index);
+		iteminfo = pak_item_getinfo(g_vfs->_M_paks[i],index);
 		if( !iteminfo )
 			continue;
 
@@ -204,7 +206,7 @@ vfs_file* vfs_fopen(const char* file,const char* mode )
 		if( !buf )
 			return NULL;
 		
-		if( VFS_TRUE != pak_item_unpack_index(&g_vfs->_M_paks[i],index,buf,size) ) 
+		if( VFS_TRUE != pak_item_unpack_index(g_vfs->_M_paks[i],index,buf,size) ) 
 		{
 			VFS_SAFE_FREE(buf);
 			return NULL;
@@ -236,7 +238,7 @@ int vfs_feof(vfs_file* file )
 	if( file && file->_M_position == file->_M_size -1 )
 		return VFS_TRUE;
 	else
-		return vFS_FALSE;
+		return VFS_FALSE;
 }
 
 int vfs_ftell(vfs_file* file)
@@ -255,14 +257,14 @@ int vfs_fseek(vfs_file* file,int pos, int mod )
 
 	if( mod == SEEK_CUR )
 	{
-		_pos = file->_M_postion + pos;
+		_pos = file->_M_position + pos;
 		if( _pos >= 0 && _pos < file->_M_size  )
 			file->_M_position = pos;
 	}
 	else if( mod == SEEK_END )
 	{
 		_pos = file->_M_size -1 + pos;
-		if( _pos >= 0 && _pos < file->_Msize )
+		if( _pos >= 0 && _pos < file->_M_size )
 			file->_M_position = _pos;
 	}
 	else
@@ -300,14 +302,14 @@ size_t vfs_fread( void* buf , size_t size , size_t count , vfs_file*fp )
 
 		if( (fp->_M_size - fp->_M_position - 1 ) >= size )
 		{
-			memcpy(p,fp->_M_buffer[fp->_M_position],size);
+			memcpy(p,&fp->_M_buffer[fp->_M_position],size);
 			fp->_M_position += size;
-			++realcount;
-			p+=size;
+			p += size;
+			++realread;
 		}
 	}
 
-	return realcount;
+	return realread;
 }
 
 size_t vfs_fwrite(void* buf , size_t size , size_t count , vfs_file*fp )
@@ -315,6 +317,8 @@ size_t vfs_fwrite(void* buf , size_t size , size_t count , vfs_file*fp )
 	int i;
 	int realwrite;
 	char* p;
+	
+	void* tmp;
 	
 	if( !fp )
 		return 0;
@@ -328,13 +332,21 @@ size_t vfs_fwrite(void* buf , size_t size , size_t count , vfs_file*fp )
 	p = (char*)buf;
 	for( i = 0; i<count; ++i )
 	{
-		if( (fp->_M_size - fp->_M_position - 1 ) >= size )
+		if( (fp->_M_size - fp->_M_position - 1 ) < size )
 		{
-			memcpy(fp->_M_buffer[fp->_M_position],p,size);
-			fp->_M_position += size;
-			p += size;
-			++ realwrite;
+			tmp = (void*)realloc(fp->_M_buffer,fp->_M_size + size );
+			if( !tmp )
+				break;
+
+			fp->_M_buffer = tmp;
+			fp->_M_size += size;
 		}
+
+		memcpy(&fp->_M_buffer[fp->_M_position],p,size);
+		fp->_M_position += size;
+		p += size;
+		++realwrite;
+
 	}
 
 	return realwrite;

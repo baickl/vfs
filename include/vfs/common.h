@@ -32,9 +32,9 @@
 #define VFS_TRUE			(1)
 #define VFS_FALSE			(0)
 
-#ifdef _linux
+#ifndef _WIN32
 #define stricmp _strcasecmp
-#endif _linux
+#endif 
 
 
 #endif/*_VFS_COMMON_H_*/

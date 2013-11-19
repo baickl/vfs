@@ -408,7 +408,7 @@ int dir_pack( const char *path,const char* output )
 	char file_data[VFS_MAX_FILENAME+1]={0};
 
 	strcpy(file_header,g_dir);
-#ifndef _linux 
+#ifdef _WIN32
 	strcat(file_header,"\\");
 #else
 	strcat(file_header,"/");
@@ -416,7 +416,7 @@ int dir_pack( const char *path,const char* output )
 	strcat(file_header,"pak_header.tmp");
 
 	strcpy(file_iteminfo,g_dir);
-#ifndef _linux 
+#ifdef _WIN32 
 	strcat(file_iteminfo,"\\");
 #else
 	strcat(file_iteminfo,"/");
@@ -424,7 +424,7 @@ int dir_pack( const char *path,const char* output )
 	strcat(file_iteminfo,"pak_iteminfo.tmp");
 
 	strcpy(file_data,g_dir);
-#ifndef _linux 
+#ifdef _WIN32 
 	strcat(file_data,"\\");
 #else
 	strcat(file_data,"/");
@@ -489,7 +489,11 @@ int dir_pack( const char *path,const char* output )
 			tmp = fread(buf,1,iteminfo->_M_size,fp);
 			if( tmp != iteminfo->_M_size)
 			{
-				printf("error:dir_pack read file %s size=%d readsize=%d fpos=%d failed\n",iteminfo->_M_filename,iteminfo->_M_size,tmp,ftell(fp));
+				printf("error:dir_pack read file %s size=%d readsize=%d fpos=%d failed\n",
+						iteminfo->_M_filename,
+						iteminfo->_M_size,
+						tmp,
+						(int)ftell(fp));
 				goto LBL_DP_ERROR;
 			}
 

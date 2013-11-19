@@ -12,7 +12,7 @@ int pak_item_sort_cmp(const void*a,const void*b)
 	_a = (pak_iteminfo*)a;
 	_b = (pak_iteminfo*)b;
 
-	return strcasecmp(_a->_M_filename,_b->_M_filename);
+	return stricmp(_a->_M_filename,_b->_M_filename);
 }
 
 int pak_item_search_cmp(const void*key,const void*item)
@@ -23,7 +23,7 @@ int pak_item_search_cmp(const void*key,const void*item)
 
 	_key  = (const char*)key;
 	_item = (const pak_iteminfo*)item;
-	return strcasecmp(_key,_item->_M_filename);
+	return stricmp(_key,_item->_M_filename);
 }
 
 pak* pak_open(const char* _pakfile)
@@ -182,14 +182,14 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 	void* compress_buf = NULL;
 
 	if( !_pak || !_buf )
-		return 0;
+		return VFS_FALSE;
 
 	iteminfo = pak_item_getinfo(_pak,_index);
 	if( !iteminfo )
-		return 0;
+		return VFS_FALSE;
 
 	if( iteminfo->_M_size > _bufsize )
-		return 0;
+		return VFS_FALSE
 
 	/* 
 	 * 打开文件尝试读取数据
@@ -197,7 +197,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 
 	fp = fopen(_pak->_M_filename,"rb");
 	if( !fp )
-		return 0;
+		return VFS_FALSE;
 
 	if( fseek(fp,iteminfo->_M_offset,SEEK_SET) != 0)
 		goto ERROR;
@@ -214,7 +214,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		 * */
 		unsigned int crc32 = vfs_util_calc_crc32(_buf,iteminfo->_M_size);
 		if( crc32 != iteminfo->_M_crc32 )
-			return 0;
+			goto ERROR;
 
 		return iteminfo->_M_size;
 	}
@@ -240,16 +240,16 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		VFS_SAFE_FCLOSE(fp);
 
 		if( vfs_util_calc_crc32(_buf,iteminfo->_M_size) != iteminfo->_M_crc32) 
-			return 0;
-		
-		return iteminfo->_M_size;
+			goto ERROR;
+
+		return VFS_TRUE;
 	}
 	
 ERROR:
 	VFS_SAFE_FREE(compress_buf);
 	VFS_SAFE_FCLOSE(fp);
 
-	return 0;
+	return VFS_FALSE;
 }
 
 int pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,int _bufsize)
@@ -257,7 +257,7 @@ int pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,int _bufsize)
 	int index;
 	index = pak_item_locate(_pak,_file);
 	if( index < 0 )
-		return 0;
+		return VFS_FALSE;
 
 	return pak_item_unpack_index(_pak,index,_buf,_bufsize);
 }

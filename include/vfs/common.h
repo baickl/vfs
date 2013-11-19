@@ -15,8 +15,8 @@
 #define VFS_SAFE_FCLOSE(x)		if(x){fclose(x);x=NULL;}
 #define VFS_SAFE_FREE(x)		if(x){free((void*)x);x=NULL;}
 
-#define VFS_CHECK_FREAD(f,b,l)	(fp ? (fread((void*)b,1,l,f)        != l ? 0 : 1) : 0 )
-#define VFS_CHECK_FWRITE(f,b,l) (fp ? (fwrite((const void*)b,1,l,f) != l ? 0 : 1) : 0 )
+#define VFS_CHECK_FREAD(f,b,l)	(f ? (fread((void*)b,1,l,f)        != l ? 0 : 1) : 0 )
+#define VFS_CHECK_FWRITE(f,b,l) (f ? (fwrite((const void*)b,1,l,f) != l ? 0 : 1) : 0 )
 
 /* 
  * MACRO DEFINE
@@ -32,5 +32,9 @@
 #define VFS_TRUE			(1)
 #define VFS_FALSE			(0)
 
+#ifdef _linux
+#define stricmp _strcasecmp
+#endif _linux
 
-#endif
+
+#endif/*_VFS_COMMON_H_*/

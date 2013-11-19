@@ -1,11 +1,11 @@
-#include "pak.h"
-#include "util.h"
+#include "vfs/pak.h"
+#include "vfs/util.h"
 #include <stdio.h>
 
 #include <string.h>
 
 #include <sys/types.h>
-#ifdef _linux
+#ifndef _WIN32
 #include <dirent.h>
 #else
 #include <io.h>  
@@ -19,7 +19,9 @@ void createNeedFile();
 
 FILE* sfopen(const char* filename,const char* mode)
 {
-#ifndef _linux 
+#ifndef _WIN32
+	return fopen(filename,mode);
+#else
 	FILE* fp = NULL;
 	int err;
 	
@@ -32,8 +34,6 @@ FILE* sfopen(const char* filename,const char* mode)
 	{
 		return NULL;
 	}
-#else
-	return fopen(filename,mode);
 #endif
 }
 
@@ -106,7 +106,7 @@ int pak_additeminfo( const char* filepath )
 
 }
 
-#ifdef _linux
+#ifndef _WIN32
 int dir_collect_fileinfo( const char *path )
 {
 	DIR* dir;
@@ -164,7 +164,7 @@ LB_ERROR:
 int dir_collect_fileinfo( const char *_path )
 {
 	long handle;
-	struct _finddata_t fd = {0};
+	struct _finddata_t fd;
 
 	char find_full[VFS_MAX_FILENAME+1] = {0};
 	char path_temp[VFS_MAX_FILENAME+1] = {0};

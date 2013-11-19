@@ -1,4 +1,4 @@
-#include "pak/pak.h"
+#include "vfs/pak.h"
 #include <stdio.h>
 
 
@@ -65,7 +65,7 @@ int main(int argc,char* argv[])
 	int itemcount;
 	pak_iteminfo *iteminfo;
 
-	char filename[PAK_MAX_FILENAME];
+	char filename[VFS_MAX_FILENAME];
 
 	_pak = pak_open(media);
 	if( !_pak )

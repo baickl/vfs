@@ -1,5 +1,7 @@
-#include "pak/pak.h"
+#include "vfs/pak.h"
+#include "vfs/util.h"
 #include <stdio.h>
+
 #include <string.h>
 
 #include <sys/types.h>
@@ -424,12 +426,12 @@ int dir_pack( const char *path,const char* output )
 
 			SAFE_FCLOSE(fp);
 
-			iteminfo->_M_crc32 = pak_util_calc_crc32(buf,iteminfo->_M_size);
+			iteminfo->_M_crc32 = vfs_util_calc_crc32(buf,iteminfo->_M_size);
 
-			compress_buf_size = pak_util_compress_bound(VFS_COMPRESS_BZIP2,iteminfo->_M_size);
+			compress_buf_size = vfs_util_compress_bound(VFS_COMPRESS_BZIP2,iteminfo->_M_size);
 			compress_buf = malloc(compress_buf_size);
 
-			compress_result = pak_util_compress(VFS_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,compress_buf_size);
+			compress_result = vfs_util_compress(VFS_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,compress_buf_size);
 			if(compress_result == 0 || compress_result >= iteminfo->_M_size)
 			{
 				iteminfo->_M_compress_type = VFS_COMPRESS_NONE;
@@ -451,7 +453,7 @@ int dir_pack( const char *path,const char* output )
 			{
 				iteminfo->_M_compress_type = VFS_COMPRESS_BZIP2;
 				iteminfo->_M_compress_size = compress_result;
-				iteminfo->_M_compress_crc32 = pak_util_calc_crc32(compress_buf,compress_result);
+				iteminfo->_M_compress_crc32 = vfs_util_calc_crc32(compress_buf,compress_result);
 
 				SAFE_FREE(buf);
 

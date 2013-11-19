@@ -4,7 +4,6 @@
 #include "common.h"
 
 
-typedef int (*dir_foreach_item_proc)(const char*fullpath,int dir);
 
 /*
  * header DEFINE
@@ -50,12 +49,6 @@ typedef struct pak_s
  * */
 VFS_EXTERN pak*				pak_open( const char* );
 VFS_EXTERN void				pak_close( pak* );
-
-VFS_EXTERN unsigned int		pak_util_calc_crc32( void*, int );
-VFS_EXTERN int				pak_util_compress_bound( int ,int );
-VFS_EXTERN int				pak_util_compress( int,  const void*, int,void*, int );
-VFS_EXTERN int				pak_util_decompress( int, const void*, int,void*, int );
-VFS_EXTERN int				pak_util_dir_foreach(const char*,dir_foreach_item_proc);
 
 VFS_EXTERN int				pak_item_sort_cmp(const void*,const void*);
 VFS_EXTERN int				pak_item_search_cmp(const void*,const void*);

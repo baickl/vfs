@@ -1,10 +1,7 @@
-#include "pak/pak.h"
-#include "crc32/crc32.h"
-#include "bzip2/bzlib.h"
+#include "vfs/pak.h"
+#include "vfs/util.h"
 #include <stdio.h>
 #include <memory.h>
-#include <sys/types.h>
-#include <dirent.h>
 
 int pak_item_sort_cmp(const void*a,const void*b)
 {
@@ -142,116 +139,6 @@ void pak_close(pak* _pak)
 }
 
 
-unsigned int pak_util_calc_crc32(void*buf,int size)
-{
-	return calc_crc32(buf,size);
-}
-
-int pak_util_compress_bound( int compresstype, int srclen )
-{
-	switch(compresstype)
-	{
-	case VFS_COMPRESS_BZIP2:
-		return (int)(srclen*1.01+600);
-
-	case VFS_COMPRESS_NONE:
-	default:
-		return srclen;
-	}
-}
-
-int pak_util_compress(int compresstype, const void*src,int srcsize,void*dst,int dstsize)
-{
-	int r;
-	int compressed_size = dstsize;
-
-	switch(compresstype)
-	{
-	case VFS_COMPRESS_BZIP2:
-		r = BZ2_bzBuffToBuffCompress(dst,&compressed_size,src,srcsize,9,3,30);
-		if( r != BZ_OK)
-			return 0;
-		return compressed_size;
-
-	case VFS_COMPRESS_NONE:
-	default:
-		return 0;
-	}
-}
-
-int pak_util_decompress(int compresstype,const void*src,int srcsize,void*dst,int dstsize)
-{
-	int r;
-	int uncompressed_size = dstsize;
-	switch(compresstype)
-	{
-	case VFS_COMPRESS_BZIP2:
-		r = BZ2_bzBuffToBuffDecompress(dst,&uncompressed_size,src,srcsize,0,2);
-		if( r != BZ_OK )
-			return 0;
-		return uncompressed_size;
-	case VFS_COMPRESS_NONE:
-	default:
-		return 0;
-	}
-}
-
-int pak_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
-{
-	DIR* dir;
-	struct dirent *entry = NULL;
-
-	char find_full[VFS_MAX_FILENAME+1];
-	char path_temp[VFS_MAX_FILENAME+1];
-
-	strcpy(find_full,path);
-	
-	dir = opendir(path);
-	if( NULL == dir )
-		return 0;
-
-	if( NULL == proc )
-		return 0;
-
-	while( (entry=readdir(dir)) != NULL )
-	{
-
-		if( entry->d_type & DT_DIR )
-		{
-			if( strcmp(entry->d_name,".")  == 0 ||
-				strcmp(entry->d_name,"..") == 0 )
-				continue;
-			memset(path_temp,0,sizeof(path_temp));
-			strcpy(path_temp,path);
-			strcat(path_temp,"/");
-			strcat(path_temp,entry->d_name);
-
-			if( proc )
-				proc(path_temp,1);
-
-			if( 0 == pak_util_dir_foreach(path_temp,proc) )
-				goto ERROR;
-		}		
-		else
-		{
-			memset(path_temp,0,sizeof(path_temp));
-			strcpy(path_temp,path);
-			strcat(path_temp,"/");
-			strcat(path_temp,entry->d_name);
-
-			if( proc )
-				proc(path_temp,0);
-		}
-	}
-
-	closedir(dir);
-	return 1;
-
-ERROR:
-	closedir(dir);
-	return 0;
-
-}
 
 int pak_item_getcount(pak* _pak)
 {
@@ -325,7 +212,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		/*
 		 * 校验数据是否正确
 		 * */
-		unsigned int crc32 = pak_util_calc_crc32(_buf,iteminfo->_M_size);
+		unsigned int crc32 = vfs_util_calc_crc32(_buf,iteminfo->_M_size);
 		if( crc32 != iteminfo->_M_crc32 )
 			return 0;
 
@@ -341,10 +228,10 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		if( fread(compress_buf,1,iteminfo->_M_compress_size,fp) != iteminfo->_M_compress_size)
 			goto ERROR;
 
-		if( pak_util_calc_crc32(compress_buf,iteminfo->_M_compress_size) != iteminfo->_M_compress_crc32)
+		if( vfs_util_calc_crc32(compress_buf,iteminfo->_M_compress_size) != iteminfo->_M_compress_crc32)
 			goto ERROR;
 
-		if( pak_util_decompress( iteminfo->_M_compress_type,
+		if( vfs_util_decompress( iteminfo->_M_compress_type,
 								 compress_buf,iteminfo->_M_compress_size,
 								 _buf,_bufsize) != iteminfo->_M_size  )
 			goto ERROR;
@@ -352,7 +239,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		VFS_SAFE_FREE(compress_buf);
 		VFS_SAFE_FCLOSE(fp);
 
-		if( pak_util_calc_crc32(_buf,iteminfo->_M_size) != iteminfo->_M_crc32) 
+		if( vfs_util_calc_crc32(_buf,iteminfo->_M_size) != iteminfo->_M_crc32) 
 			return 0;
 		
 		return iteminfo->_M_size;

@@ -58,6 +58,5 @@ typedef unsigned short wchar_t;
 		((uvar32)(uvar8)(c0) | ((uvar32)(uvar8)(c1) << 8) | \
 		((uvar32)(uvar8)(c2) << 16) | ((uvar32)(uvar8)(c3) << 24 ))
 
-
 #endif 
 

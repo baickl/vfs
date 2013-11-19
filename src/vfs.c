@@ -342,7 +342,7 @@ size_t vfs_fwrite(void* buf , size_t size , size_t count , vfs_file*fp )
 			fp->_M_size += size;
 		}
 
-		memcpy(&fp->_M_buffer[fp->_M_position],p,size);
+		memcpy(&((char*)fp->_M_buffer)[fp->_M_position],p,size);
 		fp->_M_position += size;
 		p += size;
 		++realwrite;

@@ -59,5 +59,6 @@ test:
 
 clean:
 	rm -f lib/libpak.a $(OBJS)
+	rm -f bin/pack_dir
 	cd tools;$(MAKE) clean
 	cd examples;$(MAKE) clean

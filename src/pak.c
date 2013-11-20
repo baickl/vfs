@@ -265,13 +265,9 @@ var32 pak_item_unpack_index( pak* _pak,var32 _index,void *_buf,uvar64 _bufsize)
 	if( !fp )
 		return VFS_FALSE;
 
-#ifdef _WIN32
-	if( _fseeki64(fp,iteminfo->_M_offset,SEEK_SET) != 0)
+	if( VFS_FSEEK(fp,iteminfo->_M_offset,SEEK_SET) != 0)
 		goto ERROR;
-#else
-	if( fseeko(fp,iteminfo->_M_offset,SEEK_SET) != 0)
-		goto ERROR;
-#endif
+
 	if( iteminfo->_M_compress_type == VFS_COMPRESS_NONE)
 	{
 		if( fread(_buf,1,(size_t)iteminfo->_M_size,fp) != iteminfo->_M_size)

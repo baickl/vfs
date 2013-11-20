@@ -135,10 +135,10 @@ var32 dir_collect_fileinfo_proc(const char*fullpath,var32 dir)
 {
 	const char* strfile;
 
-	strfile = fullpath + g_dirlen + 1;
+	strfile = fullpath + g_dirlen;
 	if( !dir )
 	{
-		strfile = fullpath + g_dirlen + 1;
+		strfile = fullpath + g_dirlen;
 		pak_additeminfo(strfile);
 
 		printf("\tfind file:%s\n",strfile);
@@ -394,7 +394,10 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 
 
 		memset(filetemp,0,sizeof(filetemp));
-		vfs_util_path_combine(filetemp,g_dir,iteminfo->_M_filename);
+		if( g_dirlen > 0 )
+			vfs_util_path_combine(filetemp,g_dir,iteminfo->_M_filename);
+		else
+			vfs_util_path_clone(filetemp,iteminfo->_M_filename);
 
 		fp = sfopen(filetemp,"rb");
 		if( !fp )
@@ -553,6 +556,9 @@ int main( int argc,char *argv[] )
 	char path[VFS_MAX_FILENAME+1] = {0};
 	char outfile[VFS_MAX_FILENAME+1] = {0};
 
+	int i;
+	int index;
+
 	if(argc != 2 )
 	{
 		printf("usage: pack_dir <directory> \n");
@@ -572,8 +578,28 @@ int main( int argc,char *argv[] )
 	printf("pack_dir %s %s\n",path,outfile);
 
 	memset(g_dir,0,sizeof(g_dir));
-	strcpy(g_dir,path);
+	vfs_util_path_clone(g_dir,path);
+	vfs_util_path_remove_backslash(g_dir);
+	
+	index = 0;
 	g_dirlen = strlen(g_dir);
+	for( i = 0; i<g_dirlen; ++i )
+	{
+		if( g_dir[i] == '/' )
+			index = i+1;
+	}
+
+	if( index != 0 )
+	{
+		g_dirlen = index;
+		g_dir[g_dirlen] = 0;
+	}
+	else
+	{
+		g_dirlen = 0;
+	}
+	
+
 
 	if( VFS_FALSE == pak_begin(path) )
 	{

@@ -26,6 +26,11 @@ typedef unsigned int								uvar32;
 #if defined(_MSC_VER) || ((__BORLANDC__ >= 0x530) && !defined(__STRICT_ANSI__))
 	typedef __int64									var64;
 	typedef unsigned __int64						uvar64;
+	
+	#define I64FMT "%016I64X"
+	#define I64FMTD "%I64u"
+	#define SI64FMTD "%I64d"
+
 #elif __GNUC__
 	#if __WORDSIZE == 64
 		typedef long int							var64;
@@ -34,9 +39,18 @@ typedef unsigned int								uvar32;
 		__extension__ typedef long long				var64;
 		__extension__ typedef unsigned long long	uvar64;
 	#endif
+
+	#define I64FMT "%016llX"
+	#define I64FMTD "%llu"
+	#define SI64FMTD "%lld"
 #else
 	typedef long long								var64;
 	typedef unsigned long long						uvar64;
+
+	#define I64FMT "%016llX"
+	#define I64FMTD "%llu"
+	#define SI64FMTD "%lld"
+
 #endif
 
 #include <wchar.h>

@@ -158,18 +158,18 @@ VFS_BOOL dir_collect_fileinfo( const char *_path )
 }
 
 
-var32 fwrite_data(FILE*fp,void*buf,var32 bufsize)
+VFS_BOOL fwrite_data(FILE*fp,void*buf,var32 bufsize)
 {
 	if( !fp )
-		return 0;
+		return VFS_FALSE;
 
 	if( !buf || bufsize <= 0  )
-		return 0;
+		return VFS_FALSE;
 
 	if( fwrite(buf,1,bufsize,fp) != bufsize)
-		return 0;
+		return VFS_FALSE;
 
-	return 1;
+	return VFS_TRUE;
 }
 
 VFS_BOOL fwrite_iteminfos(FILE* fp)
@@ -225,10 +225,10 @@ LBL_FI_ERROR:
 	return VFS_FALSE;
 }
 
-var32 fwrite_header(FILE*fp)
+VFS_BOOL fwrite_header(FILE*fp)
 {
 	if( !fp )
-		return 0;
+		return VFS_FALSE;
 
 	if( VFS_FSEEK(fp,0,SEEK_SET) != 0 )
 		goto LBL_FH_ERROR;
@@ -245,9 +245,9 @@ var32 fwrite_header(FILE*fp)
 	if( !VFS_CHECK_FWRITE(fp,&g_pak->_M_header._M_offset,sizeof(g_pak->_M_header._M_offset)))
 		goto LBL_FH_ERROR;
 
-	return 1;
+	return VFS_TRUE;
 LBL_FH_ERROR:
-	return 0;
+	return VFS_FALSE;
 }
 
 
@@ -488,14 +488,14 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 
 	}
 
-	if( 0 == fwrite_iteminfos(fp_iteminfo) )
+	if( VFS_FALSE == fwrite_iteminfos(fp_iteminfo) )
 	{
 		printf("error:dir_pack fwrite_iteminfos failed\n");
 		goto LBL_DP_ERROR;
 	}
 
 	g_pak->_M_header._M_offset = VFS_FTELL(fp_iteminfo)+pak_header_size;
-	if( 0 == fwrite_header(fp_head) )
+	if( VFS_FALSE == fwrite_header(fp_head) )
 	{
 		printf("error:dir_pack fwrite_header failed\n");
 		goto LBL_DP_ERROR;
@@ -548,7 +548,7 @@ void pak_end( const char *path )
 
 
 
-var32 main( var32 argc,char *argv[] )
+int main( int argc,char *argv[] )
 {
 	char path[VFS_MAX_FILENAME+1] = {0};
 	char outfile[VFS_MAX_FILENAME+1] = {0};

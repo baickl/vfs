@@ -24,7 +24,7 @@ int pak_item_saveas(pak* _pak,const char *_file,const char *_saveas)
 	if( item->_M_size <= 0 )
 		goto ERROR;
 
-	buf = malloc(item->_M_size);
+	buf = malloc((size_t)item->_M_size);
 	if( !pak_item_unpack_filename(_pak,_file,buf,item->_M_size))
 		goto ERROR;
 
@@ -35,23 +35,14 @@ int pak_item_saveas(pak* _pak,const char *_file,const char *_saveas)
 	if( fwrite(buf,1,item->_M_size,fp) != item->_M_size )
 		goto ERROR;
 
-	free(buf);
-	fclose(fp);
+	VFS_SAFE_FREE(buf);
+	VFS_SAFE_FCLOSE(fp);
 
 	return 1;
 
 ERROR:
-	if(buf)
-	{
-		free(buf);
-		buf = NULL;
-	}
-
-	if(fp)
-	{
-		fclose(fp);
-		fp = NULL;
-	}
+	VFS_SAFE_FREE(buf);
+	VFS_SAFE_FCLOSE(fp);
 
 	return 0;
 }

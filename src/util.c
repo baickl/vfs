@@ -192,3 +192,39 @@ LB_ERROR:
 
 #endif
 
+
+
+char* vfs_util_path_assign(char* path )
+{
+	return path;
+}
+
+char* vfs_util_path_append(char* path ,char* append )
+{
+	return path;
+}
+
+char* vfs_util_path_combine(char* path ,const char* dir ,const char* append )
+{
+	return path;
+}
+
+char* vfs_util_path_add_backslash(char* path )
+{
+	return path;
+}
+
+char* vfs_util_path_remove_backslash(char* path )
+{
+	return path;
+}
+
+char* vfs_util_path_remove_filename(char* path )
+{
+	return path;
+}
+
+char* vfs_util_path_remove_extension(char* path )
+{
+
+}

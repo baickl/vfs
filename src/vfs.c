@@ -421,7 +421,7 @@ VFS_BOOL vfs_fflush(vfs_file* file,const char* saveas)
 	offset = vfs_ftell(file);
 	while( !vfs_feof(file) )
 	{
-		realsize = vfs_fread(buf,1,buf,file);
+		realsize = vfs_fread(buf,1,512,file);
 		if( realsize > 0 )
 		{
 			buf[realsize] = 0;

@@ -79,7 +79,7 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 
 	int rt;
 
-	if( !vfs_util_path_combine(find_full,path))
+	if( !vfs_util_path_clone(find_full,path))
 		return 0;
 	
 	dir = opendir(path);

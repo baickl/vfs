@@ -594,7 +594,7 @@ void pak_end( const char *path )
 	char file_iteminfo[VFS_MAX_FILENAME+1]={0};
 	char file_data[VFS_MAX_FILENAME+1]={0};
 	strcpy(file_header,g_dir);
-#ifndef _linux 
+#ifdef _WIN32
 	strcat(file_header,"\\");
 #else
 	strcat(file_header,"/");
@@ -602,7 +602,7 @@ void pak_end( const char *path )
 	strcat(file_header,"pak_header.tmp");
 
 	strcpy(file_iteminfo,g_dir);
-#ifndef _linux 
+#ifdef _WIN32
 	strcat(file_iteminfo,"\\");
 #else
 	strcat(file_iteminfo,"/");
@@ -610,7 +610,7 @@ void pak_end( const char *path )
 	strcat(file_iteminfo,"pak_iteminfo.tmp");
 
 	strcpy(file_data,g_dir);
-#ifndef _linux 
+#ifdef _WIN32
 	strcat(file_data,"\\");
 #else
 	strcat(file_data,"/");
@@ -638,7 +638,7 @@ void createNeedFile()
 	char file_iteminfo[VFS_MAX_FILENAME+1]={0};
 	char file_data[VFS_MAX_FILENAME+1]={0};
 	strcpy(file_header,g_dir);
-#ifndef _linux 
+#ifdef _WIN32
 	strcat(file_header,"\\");
 #else
 	strcat(file_header,"/");
@@ -646,7 +646,7 @@ void createNeedFile()
 	strcat(file_header,"pak_header.tmp");
 
 	strcpy(file_iteminfo,g_dir);
-#ifndef _linux 
+#ifdef _WIN32
 	strcat(file_iteminfo,"\\");
 #else
 	strcat(file_iteminfo,"/");
@@ -654,7 +654,7 @@ void createNeedFile()
 	strcat(file_iteminfo,"pak_iteminfo.tmp");
 
 	strcpy(file_data,g_dir);
-#ifndef _linux 
+#ifdef _WIN32
 	strcat(file_data,"\\");
 #else
 	strcat(file_data,"/");

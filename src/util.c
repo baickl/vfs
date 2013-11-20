@@ -158,6 +158,7 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 	struct _finddata_t fileinfo; 
 
 	strcpy(find_full,path);
+	strcat(find_full,"\\");
 	strcat(find_full,"*");
 
 	if((hFile=_findfirst(find_full,&fileinfo)) != -1)

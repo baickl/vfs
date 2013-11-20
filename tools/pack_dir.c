@@ -15,7 +15,6 @@
 static pak *g_pak = NULL;
 static int  g_maxcount = 0;
 static char g_dir[VFS_MAX_FILENAME+1];
-void createNeedFile();
 
 FILE* sfopen(const char* filename,const char* mode)
 {
@@ -106,114 +105,26 @@ int pak_additeminfo( const char* filepath )
 
 }
 
-#ifndef _WIN32
-int dir_collect_fileinfo( const char *path )
+int dir_collect_fileinfo_proc(const char*fullpath,int dir)
 {
-	DIR* dir;
-	struct dirent *entry;
-
-	char find_full[VFS_MAX_FILENAME+1];
-	char path_temp[VFS_MAX_FILENAME+1];
-
-	strcpy(find_full,path);
-	
-	dir = opendir(path);
-	if( NULL == dir )
-		return 0;
-
-	while( (entry=readdir(dir)) != NULL )
+	if( !dir )
 	{
-
-		if( entry->d_type & DT_DIR )
-		{
-			if( strcmp(entry->d_name,".")  == 0 ||
-				strcmp(entry->d_name,"..") == 0 )
-				continue;
-
-			memset(path_temp,0,sizeof(path_temp));
-			strcpy(path_temp,path);
-			strcat(path_temp,"/");
-			strcat(path_temp,entry->d_name);
-
-			if( 0 == dir_collect_fileinfo(path_temp) )
-				goto LB_ERROR;
-		}		
-		else
-		{
-			memset(path_temp,0,sizeof(path_temp));
-			strcpy(path_temp,path);
-			strcat(path_temp,"/");
-			strcat(path_temp,entry->d_name);
-			
-			if( 0 == pak_additeminfo(path_temp) )
-				goto LB_ERROR;
-		}
+		printf("find file:%s\n",fullpath);
+		pak_additeminfo(fullpath);
+	}
+	else
+	{
+		printf("enter dir:%s\n",fullpath);
 	}
 
-	closedir(dir);
-	return 1;
-
-LB_ERROR:
-	closedir(dir);
-	return 0;
-
+	return DIR_FOREACH_CONTINUE;
 }
 
-#else
 
 int dir_collect_fileinfo( const char *_path )
 {
-	long handle;
-	struct _finddata_t fd;
-
-	char find_full[VFS_MAX_FILENAME+1] = {0};
-	char path_temp[VFS_MAX_FILENAME+1] = {0};
-
-	strcpy(find_full,_path);
-	strcat(find_full,"\\*");
-
-	handle = _findfirst(find_full,&fd);
-	if( -1 == handle )
-		return 0;
-
-
-	while( _findnext(handle,&fd) != -1 )
-	{
-		if( fd.attrib & _A_SUBDIR )
-		{
-			if( strcmp(fd.name,".")  == 0 ||
-				strcmp(fd.name,"..") == 0 )
-				continue;
-
-			memset(path_temp,0,sizeof(path_temp));
-			strcpy(path_temp,_path);
-			strcat(path_temp,"\\");
-			strcat(path_temp,fd.name);
-
-			if( 0 == dir_collect_fileinfo(path_temp) )
-				goto LB_ERROR;
-		}		
-		else
-		{
-			memset(path_temp,0,sizeof(path_temp));
-			strcpy(path_temp,_path);
-			strcat(path_temp,"\\");
-			strcat(path_temp,fd.name);
-
-			if( 0 == pak_additeminfo(path_temp) )
-				goto LB_ERROR;
-		}
-	}
-
-	_findclose(handle);
-	return 1;
-
-LB_ERROR:
-	_findclose(handle);
-	return 0;
+	vfs_util_dir_foreach(_path,dir_collect_fileinfo_proc);
 }
-
-#endif
 
 
 int fwrite_data(FILE*fp,void*buf,int bufsize)
@@ -408,28 +319,13 @@ int dir_pack( const char *path,const char* output )
 	char file_data[VFS_MAX_FILENAME+1]={0};
 
 	strcpy(file_header,g_dir);
-#ifdef _WIN32
-	strcat(file_header,"\\");
-#else
-	strcat(file_header,"/");
-#endif
-	strcat(file_header,"pak_header.tmp");
+	strcat(file_header,".pak_header.tmp");
 
 	strcpy(file_iteminfo,g_dir);
-#ifdef _WIN32 
-	strcat(file_iteminfo,"\\");
-#else
-	strcat(file_iteminfo,"/");
-#endif
-	strcat(file_iteminfo,"pak_iteminfo.tmp");
+	strcat(file_iteminfo,".pak_iteminfo.tmp");
 
 	strcpy(file_data,g_dir);
-#ifdef _WIN32 
-	strcat(file_data,"\\");
-#else
-	strcat(file_data,"/");
-#endif
-	strcat(file_data,"pak_data.tmp");
+	strcat(file_data,".pak_data.tmp");
 	
 	
  	remove(file_header);
@@ -594,28 +490,13 @@ void pak_end( const char *path )
 	char file_iteminfo[VFS_MAX_FILENAME+1]={0};
 	char file_data[VFS_MAX_FILENAME+1]={0};
 	strcpy(file_header,g_dir);
-#ifdef _WIN32
-	strcat(file_header,"\\");
-#else
-	strcat(file_header,"/");
-#endif
-	strcat(file_header,"pak_header.tmp");
+	strcat(file_header,".pak_header.tmp");
 
 	strcpy(file_iteminfo,g_dir);
-#ifdef _WIN32
-	strcat(file_iteminfo,"\\");
-#else
-	strcat(file_iteminfo,"/");
-#endif
-	strcat(file_iteminfo,"pak_iteminfo.tmp");
+	strcat(file_iteminfo,".pak_iteminfo.tmp");
 
 	strcpy(file_data,g_dir);
-#ifdef _WIN32
-	strcat(file_data,"\\");
-#else
-	strcat(file_data,"/");
-#endif
-	strcat(file_data,"pak_data.tmp");
+	strcat(file_data,".pak_data.tmp");
 
 	remove(file_header);
 	remove(file_iteminfo);
@@ -628,63 +509,6 @@ void pak_end( const char *path )
 	}
 }
 
-void createNeedFile()
-{
-	FILE *fp_head;
-	FILE *fp_iteminfo;
-	FILE *fp_data;
-
-	char file_header[VFS_MAX_FILENAME+1]={0};
-	char file_iteminfo[VFS_MAX_FILENAME+1]={0};
-	char file_data[VFS_MAX_FILENAME+1]={0};
-	strcpy(file_header,g_dir);
-#ifdef _WIN32
-	strcat(file_header,"\\");
-#else
-	strcat(file_header,"/");
-#endif
-	strcat(file_header,"pak_header.tmp");
-
-	strcpy(file_iteminfo,g_dir);
-#ifdef _WIN32
-	strcat(file_iteminfo,"\\");
-#else
-	strcat(file_iteminfo,"/");
-#endif
-	strcat(file_iteminfo,"pak_iteminfo.tmp");
-
-	strcpy(file_data,g_dir);
-#ifdef _WIN32
-	strcat(file_data,"\\");
-#else
-	strcat(file_data,"/");
-#endif
-	strcat(file_data,"pak_data.tmp");
-
-
-	remove(file_header);
-	remove(file_iteminfo);
-	remove(file_data);
-
-	fp_head = sfopen(file_header,"wb+");
-	if( fp_head )
-	{
-		fclose(fp_head);
-	}
-
-	fp_iteminfo = sfopen(file_iteminfo,"wb+");
-	if( fp_iteminfo )
-	{
-		fclose(fp_iteminfo);
-	}
-
-	fp_data = sfopen(file_data,"wb+");
-	if( fp_data )
-	{
-		fclose(fp_data);
-	}
-}
-
 
 
 int main( int argc,char *argv[] )
@@ -692,16 +516,16 @@ int main( int argc,char *argv[] )
 	char path[VFS_MAX_FILENAME+1] = {0};
 	char outfile[VFS_MAX_FILENAME+1] = {0};
 
-	if(argc != 3 )
+	if(argc != 2 )
 	{
-		printf("usage: pack_dir <directory> <outputfile>\n");
+		printf("usage: pack_dir <directory> \n");
 		return -1;
 	}
 
 	strcpy(path, argv[1]);
-	strcpy(outfile , argv[2]);
+	strcpy(outfile , path);
+	strcat(outfile , ".pak");
 	
-
 	remove(outfile);
 	printf("pack_dir %s %s\n",path,outfile);
 

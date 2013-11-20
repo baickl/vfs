@@ -515,6 +515,10 @@ LBL_DP_ERROR:
 
 void pak_end( const char *path )
 {
+	remove(g_file_header);
+	remove(g_file_iteminfo);
+	remove(g_file_data);
+
 	if( g_pak )
 	{
 		VFS_SAFE_FREE(g_pak->_M_iteminfos);

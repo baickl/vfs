@@ -2,6 +2,26 @@
 #include <stdio.h>
 
 
+static FILE* sfopen(const char* filename,const char* mode)
+{
+#ifndef _WIN32
+	return fopen(filename,mode);
+#else
+	FILE* fp = NULL;
+	var32 err;
+
+	err = fopen_s(&fp,filename,mode);
+	if( err == 0 )
+	{
+		return fp;
+	}
+	else
+	{
+		return NULL;
+	}
+#endif
+}
+
 const char* media = "../media/test.pak";
 
 
@@ -67,7 +87,7 @@ int main(int argc,char* argv[])
 	for( i = 0; i<itemcount; ++i )
 	{
 		iteminfo = pak_item_getinfo(_pak,i);
-		printf("pak[%d]:\nname=%s\noffset=%d\nsize=%d\ncrc32=%d\nct-%d\ncs=%d\ncc=%d\n\n",
+		printf("pak[%d]:\nname=%s\noffset="I64FMTD"\nsize="I64FMTD"\ncrc32=%d\nct-%d\ncs="I64FMTD"\ncc=%d\n\n",
 				i,
 				iteminfo->_M_filename,
 				iteminfo->_M_offset,

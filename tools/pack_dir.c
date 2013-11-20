@@ -37,20 +37,18 @@ static FILE* sfopen(const char* filename,const char* mode)
 #endif
 }
 
-var32 file_getlen(FILE*fp)
+uvar64 file_getlen(FILE*fp)
 {
-	var32 curpos;
-	var32 flen = 0;
+	uvar64 curpos;
+	uvar64 flen = 0;
 
 	if( !fp )
 		return 0;
-
-	curpos = ftell(fp);
-	fseek(fp,0,SEEK_END);
-	flen = ftell(fp);
-	fseek(fp,curpos,SEEK_SET);
+	curpos = VFS_FTELL(fp);
+	VFS_FSEEK(fp,0,SEEK_END);
+	flen = VFS_FTELL(fp);
+	VFS_FSEEK(fp,curpos,SEEK_SET);
 	return flen;
-
 }
 
 VFS_BOOL pak_begin( const char *path )
@@ -145,7 +143,7 @@ var32 fwrite_data(FILE*fp,void*buf,var32 bufsize)
 	return 1;
 }
 
-var32 fwrite_iteminfos(FILE* fp)
+VFS_BOOL fwrite_iteminfos(FILE* fp)
 {
 	var32 i;
 	uvar16 len;
@@ -154,7 +152,7 @@ var32 fwrite_iteminfos(FILE* fp)
 	if( !fp )
 		goto LBL_FI_ERROR;
 
-	if( fseek(fp,0,SEEK_SET) != 0 )
+	if( VFS_FSEEK(fp,0,SEEK_SET) != 0 )
 		goto LBL_FI_ERROR;
 
 	if( g_pak->_M_header._M_count <= 0 )
@@ -192,10 +190,10 @@ var32 fwrite_iteminfos(FILE* fp)
 			goto LBL_FI_ERROR; 
 	}
 
-	return 1;
+	return VFS_TRUE;
 
 LBL_FI_ERROR:
-	return 0;
+	return VFS_FALSE;
 }
 
 var32 fwrite_header(FILE*fp)
@@ -203,7 +201,7 @@ var32 fwrite_header(FILE*fp)
 	if( !fp )
 		return 0;
 
-	if( fseek(fp,0,SEEK_SET) != 0 )
+	if( VFS_FSEEK(fp,0,SEEK_SET) != 0 )
 		goto LBL_FH_ERROR;
 
 	if( !VFS_CHECK_FWRITE(fp,&g_pak->_M_header._M_flag,sizeof(g_pak->_M_header._M_flag)))
@@ -244,11 +242,11 @@ VFS_BOOL pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const ch
 		return VFS_FALSE;
 	}
 
-	fseek(fp_header,0,SEEK_SET);
-	fseek(fp_iteminfo,0,SEEK_SET);
-	fseek(fp_data,0,SEEK_SET);
+	VFS_FSEEK(fp_header,0,SEEK_SET);
+	VFS_FSEEK(fp_iteminfo,0,SEEK_SET);
+	VFS_FSEEK(fp_data,0,SEEK_SET);
 
-	printf("info:pakfile_combine begin pak header size=%d\n",file_getlen(fp_header));
+	printf("info:pakfile_combine begin pak header size="I64FMTD"\n",file_getlen(fp_header));
 	fp_temp = fp_header;
 	while(!feof(fp_temp))
 	{
@@ -260,7 +258,7 @@ VFS_BOOL pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const ch
 		}
 	}
 
-	printf("info:pakfile_combine begin pak iteminfo size=%d\n",file_getlen(fp_iteminfo));
+	printf("info:pakfile_combine begin pak iteminfo size="I64FMTD"\n",file_getlen(fp_iteminfo));
 	fp_temp = fp_iteminfo;
 	while(!feof(fp_temp))
 	{
@@ -272,7 +270,7 @@ VFS_BOOL pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const ch
 		}
 	}
 
-	printf("info:pakfile_combine begin pak data size=%d\n",file_getlen(fp_data));
+	printf("info:pakfile_combine begin pak data size="I64FMTD"\n",file_getlen(fp_data));
 	fp_temp = fp_data;
 	while(!feof(fp_temp))
 	{
@@ -377,7 +375,7 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 		}
 
 		iteminfo->_M_size = file_getlen(fp);
-		iteminfo->_M_offset = ftell(fp_data);
+		iteminfo->_M_offset = VFS_FTELL(fp_data);
 
 		if( iteminfo->_M_size <= 0 )
 		{
@@ -397,11 +395,11 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 			tmp = fread(buf,1,(size_t)iteminfo->_M_size,fp);
 			if( tmp != iteminfo->_M_size)
 			{
-				printf("error:dir_pack read file %s size=%d readsize=%d fpos=%d failed\n",
+				printf("error:dir_pack read file %s size=%d readsize=%d fpos=" I64FMTD " failed\n",
 						iteminfo->_M_filename,
 						iteminfo->_M_size,
 						tmp,
-						(var32)ftell(fp));
+						VFS_FTELL(fp));
 				goto LBL_DP_ERROR;
 			}
 
@@ -452,12 +450,12 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 
 		printf("\nsuccessed:dir_pack pack file %s OK\n",iteminfo->_M_filename);
 		printf("\tfile=%s\n",iteminfo->_M_filename);
-		printf("\tsize=%d\n",iteminfo->_M_size);
+		printf("\tsize="I64FMTD"\n",iteminfo->_M_size);
 		printf("\tcrc32=%d\n",iteminfo->_M_crc32);
 		printf("\tcompress_type=%d\n",iteminfo->_M_compress_type);
-		printf("\tcompress_size=%d\n",iteminfo->_M_compress_size);
+		printf("\tcompress_size="I64FMTD"\n",iteminfo->_M_compress_size);
 		printf("\tcompress_crc32=%d\n",iteminfo->_M_compress_crc32);
-		printf("\toffset=%d\n\n",iteminfo->_M_offset);
+		printf("\toffset="I64FMTD"\n\n",iteminfo->_M_offset);
 
 	}
 
@@ -467,7 +465,7 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 		goto LBL_DP_ERROR;
 	}
 
-	g_pak->_M_header._M_offset = ftell(fp_iteminfo)+pak_header_size;
+	g_pak->_M_header._M_offset = VFS_FTELL(fp_iteminfo)+pak_header_size;
 	if( 0 == fwrite_header(fp_head) )
 	{
 		printf("error:dir_pack fwrite_header failed\n");

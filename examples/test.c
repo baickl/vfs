@@ -30,29 +30,7 @@
 #include "vfs/pak.h"
 #include <stdio.h>
 
-
-static FILE* sfopen(const char* filename,const char* mode)
-{
-#ifndef _WIN32
-	return fopen(filename,mode);
-#else
-	FILE* fp = NULL;
-	var32 err;
-
-	err = fopen_s(&fp,filename,mode);
-	if( err == 0 )
-	{
-		return fp;
-	}
-	else
-	{
-		return NULL;
-	}
-#endif
-}
-
 const char* media = "../media/test.pak";
-
 
 int pak_item_saveas(pak* _pak,const char *_file,const char *_saveas)
 {
@@ -112,11 +90,10 @@ int main(int argc,char* argv[])
 		return -1;
 
 	itemcount = pak_item_getcount(_pak);
-
 	for( i = 0; i<itemcount; ++i )
 	{
 		iteminfo = pak_item_getinfo(_pak,i);
-		printf("pak[%d]:\nname=%s\noffset="I64FMTD"\nsize="I64FMTD"\ncrc32=%d\nct-%d\ncs="I64FMTD"\ncc=%d\n\n",
+		printf("pak[%d]:\nname=%s\noffset="I64FMTD"\nsize="I64FMTD"\ncrc32=%d\nct=%d\ncs="I64FMTD"\ncc=%d\n\n",
 				i,
 				iteminfo->_M_filename,
 				iteminfo->_M_offset,
@@ -130,9 +107,7 @@ int main(int argc,char* argv[])
 		if(pak_item_saveas(_pak,iteminfo->_M_filename,filename))
 			printf("pak save file:%s to %s\n",iteminfo->_M_filename,filename);
 	}
-
 	pak_close(_pak);
-
 }
 
 

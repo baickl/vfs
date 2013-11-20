@@ -29,6 +29,8 @@
 ***********************************************************************************/
 #include "vfs/util.h"
 #include "crc32/crc32.h"
+
+#define BZ_NO_STDIO
 #include "bzip2/bzlib.h"
 #include <stdio.h>
 #include <memory.h>
@@ -41,6 +43,11 @@
 #include <direct.h>
 #endif 
 
+
+
+void bz_internal_error ( int errcode )
+{
+}
 
 uvar32 vfs_util_calc_crc32(void*buf,var32 size)
 {

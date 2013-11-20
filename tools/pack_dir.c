@@ -700,8 +700,9 @@ int main( int argc,char *argv[] )
 
 	strcpy(path, argv[1]);
 	strcpy(outfile , argv[2]);
+	
 
-
+	remove(outfile);
 	printf("pack_dir %s %s\n",path,outfile);
 
 	memset(g_dir,0,sizeof(g_dir));

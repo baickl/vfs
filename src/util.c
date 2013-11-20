@@ -77,6 +77,8 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 	char find_full[VFS_MAX_FILENAME+1];
 	char path_temp[VFS_MAX_FILENAME+1];
 
+	int rt;
+
 	strcpy(find_full,path);
 	
 	dir = opendir(path);
@@ -88,23 +90,32 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 
 	while( (entry=readdir(dir)) != NULL )
 	{
-
 		if( entry->d_type & DT_DIR )
 		{
-			if( strcmp(entry->d_name,".")  == 0 ||
-				strcmp(entry->d_name,"..") == 0 )
+			if( strcmp(entry->d_name,".")  == 0 || strcmp(entry->d_name,"..") == 0 )
 				continue;
+
 			memset(path_temp,0,sizeof(path_temp));
 			strcpy(path_temp,path);
 			strcat(path_temp,"/");
 			strcat(path_temp,entry->d_name);
 
-			if( proc )
-				proc(path_temp,1);
-
-			if( 0 == vfs_util_dir_foreach(path_temp,proc) )
-				goto ERROR;
-		}		
+			rt = proc(path_temp,1);
+			switch(rt)
+			{
+			case DIR_FOREACH_IGNORE:
+				break;
+			case DIR_FOREACH_BREAK:
+				goto FIND_BREAK;
+			case DIR_FOREACH_CONTINUE:
+			default:
+				{
+					if( 0 == vfs_util_dir_foreach(path_temp,proc) )
+						goto LB_ERROR;
+				}
+				break;
+			}		
+		}
 		else
 		{
 			memset(path_temp,0,sizeof(path_temp));
@@ -112,15 +123,20 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 			strcat(path_temp,"/");
 			strcat(path_temp,entry->d_name);
 
-			if( proc )
-				proc(path_temp,0);
+			rt = proc(path_temp,0);
+			switch(rt)
+			{
+			case DIR_FOREACH_BREAK:
+				goto FIND_BREAK;
+			}		
 		}
 	}
 
+FIND_BREAK:
 	closedir(dir);
 	return 1;
 
-ERROR:
+LB_ERROR:
 	closedir(dir);
 	return 0;
 
@@ -132,6 +148,8 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 {
 	char find_full[VFS_MAX_FILENAME+1] = {0};
 	char path_temp[VFS_MAX_FILENAME+1] = {0};
+
+	int rt;
 
 	/*нд╪Ч╬Д╠З  */
 	long hFile=0;  
@@ -158,11 +176,21 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 					strcat(path_temp,"\\");
 					strcat(path_temp,fileinfo.name);
 					
-					if( proc )
-						proc(path_temp,1);
-
-					if( 0 == vfs_util_dir_foreach(path_temp,proc) )
-						goto LB_ERROR;
+					rt = proc(path_temp,1);
+					switch(rt)
+					{
+					case DIR_FOREACH_IGNORE:
+						break;
+					case DIR_FOREACH_BREAK:
+						goto FIND_BREAK;
+					case DIR_FOREACH_CONTINUE:
+					default:
+						{
+							if( 0 == vfs_util_dir_foreach(path_temp,proc) )
+								goto LB_ERROR;
+						}
+						break;
+					}		
 				}
 			}
 			else
@@ -172,12 +200,17 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 				strcat(path_temp,"\\");
 				strcat(path_temp,fileinfo.name);
 
-				if( proc )
-					proc(path_temp,0);
+				rt = proc(path_temp,0);
+				switch(rt)
+				{
+				case DIR_FOREACH_BREAK:
+					goto FIND_BREAK;
+				}		
 
 			}  
 		}while(_findnext(hFile,&fileinfo) == 0);  
 
+FIND_BREAK:
 		_findclose(hFile);  
 	}
 

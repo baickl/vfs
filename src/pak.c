@@ -4,7 +4,27 @@
 #include <stdio.h>
 #include <memory.h>
 
-int pak_item_sort_cmp(const void*a,const void*b)
+static FILE* sfopen(const char* filename,const char* mode)
+{
+#ifndef _WIN32
+	return fopen(filename,mode);
+#else
+	FILE* fp = NULL;
+	var32 err;
+
+	err = fopen_s(&fp,filename,mode);
+	if( err == 0 )
+	{
+		return fp;
+	}
+	else
+	{
+		return NULL;
+	}
+#endif
+}
+
+var32 pak_item_sort_cmp(const void*a,const void*b)
 {
 
 	pak_iteminfo* _a;
@@ -16,46 +36,58 @@ int pak_item_sort_cmp(const void*a,const void*b)
 	return stricmp(_a->_M_filename,_b->_M_filename);
 }
 
-int pak_item_search_cmp(const void*key,const void*item)
+var32 pak_item_search_cmp(const void*key,const void*item)
 {
 
 	char*_key;
 	pak_iteminfo* _item;
 
-	_key  = (const char*)key;
-	_item = (const pak_iteminfo*)item;
+	_key  = (char*)key;
+	_item = (pak_iteminfo*)item;
 	return stricmp(_key,_item->_M_filename);
 }
 
 pak* pak_open(const char* _pakfile)
 {
-	int i;
+	var32 i;
 	pak *_pak = NULL;
 	FILE *fp = NULL;
 	pak_header header;
 	pak_iteminfo*iteminfos = NULL;
-	int filenamelen;
+	uvar16 filenamelen;
 
 	/*
 	 * 打开文件
 	 * */
-	fp = fopen(_pakfile,"rb");
+	fp = sfopen(_pakfile,"rb");
 	if( !fp )
 		return NULL;
 
 	/* 
 	 * 校验HEADER头
 	 * */
-	if( fread(&header,1,sizeof(header),fp) != sizeof(header))
+	if( fread(&header._M_flag,1,sizeof(header._M_flag),fp) != sizeof(header._M_flag))
 		goto ERROR;
 
 	if( header._M_flag != 'pakx')
 		goto ERROR;
 
+	if( fread(&header._M_version,1,sizeof(header._M_version),fp) != sizeof(header._M_version))
+		goto ERROR;
+
 	if( header._M_version > VFS_VERSION )
 		goto ERROR;
 
+	if( fread(&header._M_count,1,sizeof(header._M_count),fp) != sizeof(header._M_count))
+		goto ERROR;
+
 	if( header._M_count <= 0 )
+		goto ERROR;	
+
+	if( fread(&header._M_offset,1,sizeof(header._M_offset),fp) != sizeof(header._M_offset))
+		goto ERROR;
+
+	if( header._M_offset <= 0 )
 		goto ERROR;	
 
 	/* 
@@ -71,12 +103,13 @@ pak* pak_open(const char* _pakfile)
 
 		if( fread(&iteminfos[i]._M_offset,1,sizeof(iteminfos[i]._M_offset),fp) != sizeof(iteminfos[i]._M_offset))
 			goto ERROR;
+
 		iteminfos[i]._M_offset += header._M_offset; 
 		
 		if( fread(&iteminfos[i]._M_size,1,sizeof(iteminfos[i]._M_size),fp) != sizeof(iteminfos[i]._M_size))
 			goto ERROR;
 
-		if( fread(&iteminfos[i]._M_crc32,1,sizeof(iteminfos[i]._M_crc32),fp) != sizeof(iteminfos[i]._M_size))
+		if( fread(&iteminfos[i]._M_crc32,1,sizeof(iteminfos[i]._M_crc32),fp) != sizeof(iteminfos[i]._M_crc32))
 			goto ERROR;	
 
 		if( fread(&iteminfos[i]._M_compress_type,1,sizeof(iteminfos[i]._M_compress_type),fp) != sizeof(iteminfos[i]._M_compress_type))
@@ -141,7 +174,7 @@ void pak_close(pak* _pak)
 
 
 
-int pak_item_getcount(pak* _pak)
+var32 pak_item_getcount(pak* _pak)
 {
 	if( !_pak)
 		return 0;
@@ -149,7 +182,7 @@ int pak_item_getcount(pak* _pak)
 	return _pak->_M_header._M_count;
 }
 
-pak_iteminfo* pak_item_getinfo(pak*_pak,int _index )
+pak_iteminfo* pak_item_getinfo(pak*_pak,var32 _index )
 {
 	if( !_pak)
 		return NULL;
@@ -160,9 +193,9 @@ pak_iteminfo* pak_item_getinfo(pak*_pak,int _index )
 	return &_pak->_M_iteminfos[_index];
 }
 
-int  pak_item_locate(pak*_pak,const char* _file)
+var32  pak_item_locate(pak*_pak,const char* _file)
 {
-	int ret = -1;
+	var32 ret = -1;
 	pak_iteminfo* iteminfo=NULL;
 
 	if( !_pak || !_file)
@@ -177,13 +210,13 @@ int  pak_item_locate(pak*_pak,const char* _file)
 
 }
 
-int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
+var32 pak_item_unpack_index( pak* _pak,var32 _index,void *_buf,uvar64 _bufsize)
 {
 	pak_iteminfo* iteminfo = NULL;
 	FILE* fp = NULL;
 	void* compress_buf = NULL;
 
-	unsigned int crc32;
+	uvar32 crc32;
 
 	if( !_pak || !_buf )
 		return VFS_FALSE;
@@ -199,16 +232,16 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 	 * 打开文件尝试读取数据
 	 * */
 
-	fp = fopen(_pak->_M_filename,"rb");
+	fp = sfopen(_pak->_M_filename,"rb");
 	if( !fp )
 		return VFS_FALSE;
 
-	if( fseek(fp,iteminfo->_M_offset,SEEK_SET) != 0)
+	if( _fseeki64(fp,iteminfo->_M_offset,SEEK_SET) != 0)
 		goto ERROR;
 
 	if( iteminfo->_M_compress_type == VFS_COMPRESS_NONE)
 	{
-		if( fread(_buf,1,iteminfo->_M_size,fp) != iteminfo->_M_size)
+		if( fread(_buf,1,(size_t)iteminfo->_M_size,fp) != iteminfo->_M_size)
 			goto ERROR;
 
 		VFS_SAFE_FCLOSE(fp);
@@ -216,23 +249,23 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		/*
 		 * 校验数据是否正确
 		 * */
-		crc32 = vfs_util_calc_crc32(_buf,iteminfo->_M_size);
+		crc32 = vfs_util_calc_crc32(_buf,(var32)iteminfo->_M_size);
 		if( crc32 != iteminfo->_M_crc32 )
 			goto ERROR;
 
-		return iteminfo->_M_size;
+		return VFS_TRUE;
 	}
 	else if( iteminfo->_M_compress_type == VFS_COMPRESS_BZIP2 )
 	{
 
-		compress_buf = malloc(iteminfo->_M_compress_size);
+		compress_buf = (void*)malloc(iteminfo->_M_compress_size);
 		if( !compress_buf )
 			goto ERROR;
 
-		if( fread(compress_buf,1,iteminfo->_M_compress_size,fp) != iteminfo->_M_compress_size)
+		if( fread(compress_buf,1,(size_t)iteminfo->_M_compress_size,fp) != iteminfo->_M_compress_size)
 			goto ERROR;
 
-		if( vfs_util_calc_crc32(compress_buf,iteminfo->_M_compress_size) != iteminfo->_M_compress_crc32)
+		if( vfs_util_calc_crc32(compress_buf,(var32)iteminfo->_M_compress_size) != iteminfo->_M_compress_crc32)
 			goto ERROR;
 
 		if( vfs_util_decompress( iteminfo->_M_compress_type,
@@ -243,7 +276,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		VFS_SAFE_FREE(compress_buf);
 		VFS_SAFE_FCLOSE(fp);
 
-		if( vfs_util_calc_crc32(_buf,iteminfo->_M_size) != iteminfo->_M_crc32) 
+		if( vfs_util_calc_crc32(_buf,(var32)iteminfo->_M_size) != iteminfo->_M_crc32) 
 			goto ERROR;
 
 		return VFS_TRUE;
@@ -256,9 +289,9 @@ ERROR:
 	return VFS_FALSE;
 }
 
-int pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,int _bufsize)
+VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bufsize)
 {
-	int index;
+	var32 index;
 	index = pak_item_locate(_pak,_file);
 	if( index < 0 )
 		return VFS_FALSE;

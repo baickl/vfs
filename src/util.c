@@ -13,17 +13,17 @@
 #endif 
 
 
-unsigned int vfs_util_calc_crc32(void*buf,int size)
+uvar32 vfs_util_calc_crc32(void*buf,var32 size)
 {
 	return calc_crc32(buf,size);
 }
 
-int vfs_util_compress_bound( int compresstype, int srclen )
+var32 vfs_util_compress_bound( var8 compresstype, var32 srclen )
 {
 	switch(compresstype)
 	{
 	case VFS_COMPRESS_BZIP2:
-		return (int)(srclen*1.01+600);
+		return (var32)(srclen*1.01+600);
 
 	case VFS_COMPRESS_NONE:
 	default:
@@ -31,15 +31,15 @@ int vfs_util_compress_bound( int compresstype, int srclen )
 	}
 }
 
-int vfs_util_compress(int compresstype, const void*src,int srcsize,void*dst,int dstsize)
+uvar64 vfs_util_compress(var32 compresstype, const void*src,uvar64 srcsize,void*dst,uvar64 dstsize)
 {
-	int r;
-	int compressed_size = dstsize;
+	uvar64 r;
+	uvar64 compressed_size = dstsize;
 
 	switch(compresstype)
 	{
 	case VFS_COMPRESS_BZIP2:
-		r = BZ2_bzBuffToBuffCompress((char*)dst,&compressed_size,(char*)src,srcsize,9,3,30);
+		r = BZ2_bzBuffToBuffCompress((char*)dst,(unsigned int*)&compressed_size,(char*)src,(unsigned int)srcsize,9,3,30);
 		if( r != BZ_OK)
 			return 0;
 		return compressed_size;
@@ -50,14 +50,14 @@ int vfs_util_compress(int compresstype, const void*src,int srcsize,void*dst,int 
 	}
 }
 
-int vfs_util_decompress(int compresstype,const void*src,int srcsize,void*dst,int dstsize)
+uvar64 vfs_util_decompress(var32 compresstype,const void*src,uvar64 srcsize,void*dst,uvar64 dstsize)
 {
-	int r;
-	int uncompressed_size = dstsize;
+	uvar64 r;
+	uvar64 uncompressed_size = dstsize;
 	switch(compresstype)
 	{
 	case VFS_COMPRESS_BZIP2:
-		r = BZ2_bzBuffToBuffDecompress((char*)dst,&uncompressed_size,(char*)src,srcsize,0,2);
+		r = BZ2_bzBuffToBuffDecompress((char*)dst,(unsigned int*)&uncompressed_size,(char*)src,(unsigned int)srcsize,0,2);
 		if( r != BZ_OK )
 			return 0;
 		return uncompressed_size;
@@ -69,7 +69,7 @@ int vfs_util_decompress(int compresstype,const void*src,int srcsize,void*dst,int
 
 
 #ifndef _WIN32
-int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
+VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 {
 	DIR* dir;
 	struct dirent *entry = NULL;
@@ -77,17 +77,17 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 	char find_full[VFS_MAX_FILENAME+1];
 	char path_temp[VFS_MAX_FILENAME+1];
 
-	int rt;
+	var32 rt;
 
 	if( !vfs_util_path_clone(find_full,path))
-		return 0;
+		return VFS_FALSE;
 	
 	dir = opendir(path);
 	if( NULL == dir )
-		return 0;
+		return VFS_FALSE;
 
 	if( NULL == proc )
-		return 0;
+		return VFS_FALSE;
 
 	while( (entry=readdir(dir)) != NULL )
 	{
@@ -133,28 +133,28 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 
 FIND_BREAK:
 	closedir(dir);
-	return 1;
+	return VFS_TRUE;
 
 LB_ERROR:
 	closedir(dir);
-	return 0;
+	return VFS_FALSE;
 
 }
 
 #else
 
-int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
+VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 {
 	char find_full[VFS_MAX_FILENAME+1] = {0};
 	char path_temp[VFS_MAX_FILENAME+1] = {0};
 
-	int rt;
+	var32 rt;
 
 	long hFile=0;  
 	struct _finddata_t fileinfo; 
 
 	if( !vfs_util_path_combine(find_full,path,"*") )
-		return 0;
+		return VFS_FALSE;
 
 	if((hFile=_findfirst(find_full,&fileinfo)) != -1)
 	{
@@ -205,12 +205,12 @@ FIND_BREAK:
 		_findclose(hFile);  
 	}
 
-	return 1;
+	return VFS_TRUE;
 
 LB_ERROR:
 	if( hFile )
 		_findclose(hFile);  
-	return 0;
+	return VFS_FALSE;
 
 }
 
@@ -273,9 +273,9 @@ char* vfs_util_path_append(char* path ,char* append )
 
 char* vfs_util_path_join(char* path ,char* join )
 {
-	char *p ;
 	if( !path || !join)
 		return NULL;
+
 	strcat(path,join);
 	return vfs_util_path_checkfix(path);
 }
@@ -293,7 +293,7 @@ char* vfs_util_path_combine(char* path ,const char* dir ,const char* append )
 
 char* vfs_util_path_add_backslash(char* path )
 {
-	int len;
+	var32 len;
 	if( !path )
 		return NULL;
 
@@ -310,7 +310,7 @@ char* vfs_util_path_add_backslash(char* path )
 
 char* vfs_util_path_remove_backslash(char* path )
 {
-	int len;
+	var32 len;
 	if( !path )
 		return path;
 

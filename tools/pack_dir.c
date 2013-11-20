@@ -13,17 +13,17 @@
 #endif 
 
 static pak *g_pak = NULL;
-static int  g_maxcount = 0;
+static var32  g_maxcount = 0;
 static char g_dir[VFS_MAX_FILENAME+1];
-static int  g_dirlen = 0;
+static var32  g_dirlen = 0;
 
-FILE* sfopen(const char* filename,const char* mode)
+static FILE* sfopen(const char* filename,const char* mode)
 {
 #ifndef _WIN32
 	return fopen(filename,mode);
 #else
 	FILE* fp = NULL;
-	int err;
+	var32 err;
 	
 	err = fopen_s(&fp,filename,mode);
 	if( err == 0 )
@@ -37,10 +37,10 @@ FILE* sfopen(const char* filename,const char* mode)
 #endif
 }
 
-int file_getlen(FILE*fp)
+var32 file_getlen(FILE*fp)
 {
-	int curpos;
-	int flen = 0;
+	var32 curpos;
+	var32 flen = 0;
 
 	if( !fp )
 		return 0;
@@ -53,11 +53,11 @@ int file_getlen(FILE*fp)
 
 }
 
-int pak_begin( const char *path )
+VFS_BOOL pak_begin( const char *path )
 {
 	pak* _pak = (pak*)malloc(sizeof(pak));
 	if( !_pak)
-		return 0;
+		return VFS_FALSE;
 
 	memset(_pak,0,sizeof(pak));
 
@@ -69,10 +69,10 @@ int pak_begin( const char *path )
 
 	g_maxcount = 0;
 
-	return 1;
+	return VFS_TRUE;
 }
 
-int pak_additeminfo( const char* filepath )
+VFS_BOOL pak_additeminfo( const char* filepath )
 {
 	pak_iteminfo* iteminfo;
 
@@ -92,7 +92,7 @@ int pak_additeminfo( const char* filepath )
 
 		
 		if( !g_pak->_M_iteminfos )
-			return 0;
+			return VFS_FALSE;
 	}
 
 	iteminfo = &g_pak->_M_iteminfos[g_pak->_M_header._M_count++];
@@ -100,11 +100,11 @@ int pak_additeminfo( const char* filepath )
 	memset(iteminfo,0,sizeof(pak_iteminfo));
 	strcpy(iteminfo->_M_filename,filepath);
 	vfs_util_path_checkfix(iteminfo->_M_filename);
-	return 1;
+	return VFS_TRUE;
 
 }
 
-int dir_collect_fileinfo_proc(const char*fullpath,int dir)
+var32 dir_collect_fileinfo_proc(const char*fullpath,var32 dir)
 {
 	const char* strfile;
 
@@ -125,13 +125,13 @@ int dir_collect_fileinfo_proc(const char*fullpath,int dir)
 }
 
 
-int dir_collect_fileinfo( const char *_path )
+VFS_BOOL dir_collect_fileinfo( const char *_path )
 {
 	return vfs_util_dir_foreach(_path,dir_collect_fileinfo_proc);
 }
 
 
-int fwrite_data(FILE*fp,void*buf,int bufsize)
+var32 fwrite_data(FILE*fp,void*buf,var32 bufsize)
 {
 	if( !fp )
 		return 0;
@@ -145,10 +145,10 @@ int fwrite_data(FILE*fp,void*buf,int bufsize)
 	return 1;
 }
 
-int fwrite_iteminfos(FILE* fp)
+var32 fwrite_iteminfos(FILE* fp)
 {
-	int i;
-	int len;
+	var32 i;
+	uvar16 len;
 	pak_iteminfo * iteminfo;
 
 	if( !fp )
@@ -169,7 +169,7 @@ int fwrite_iteminfos(FILE* fp)
 		if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_offset,sizeof(iteminfo->_M_offset)))
 			goto LBL_FI_ERROR; 
 
-		if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_size,sizeof(iteminfo->_M_offset)))
+		if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_size,sizeof(iteminfo->_M_size)))
 			goto LBL_FI_ERROR; 
 
 		if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_crc32,sizeof(iteminfo->_M_crc32)))
@@ -198,7 +198,7 @@ LBL_FI_ERROR:
 	return 0;
 }
 
-int fwrite_header(FILE*fp)
+var32 fwrite_header(FILE*fp)
 {
 	if( !fp )
 		return 0;
@@ -224,24 +224,24 @@ LBL_FH_ERROR:
 }
 
 
-int pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const char* outputfile)
+VFS_BOOL pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const char* outputfile)
 {
 
 	FILE *fp = NULL;
 	FILE *fp_temp = NULL;
 
-	int bufsize = 1024;
-	int readsize =0;
+	var32 bufsize = 1024;
+	var32 readsize =0;
 	char buf[1024];
 
 	if( !fp_header || !fp_iteminfo || !fp_data )
-		return 0;
+		return VFS_FALSE;
 
 	fp = sfopen(outputfile,"wb+");
 	if( !fp )
 	{
 		printf("error:pakfile_combine create outputfile %s failed\n",outputfile);
-		return 0;
+		return VFS_FALSE;
 	}
 
 	fseek(fp_header,0,SEEK_SET);
@@ -285,18 +285,18 @@ int pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const char* o
 	}
 	
 	VFS_SAFE_FCLOSE(fp);
-	return 1;
+	return VFS_TRUE;
 
 LB_ERROR:
 	VFS_SAFE_FCLOSE(fp);
-	return 0;
+	return VFS_FALSE;
 
 }
 
 
-int dir_pack( const char *path,const char* output ) 
+VFS_BOOL dir_pack( const char *path,const char* output ) 
 {
-	int i;
+	var32 i;
 
 	pak_iteminfo* iteminfo = NULL;
 
@@ -308,13 +308,13 @@ int dir_pack( const char *path,const char* output )
 
 	void* buf = NULL ;
 
-	int	compress_buf_size = 0 ;
+	uvar64	compress_buf_size = 0 ;
 	void* compress_buf = NULL ;
 
-	int compress_result = 0;
-	int combinefile_result = 0;
+	uvar64 compress_result = 0;
+	VFS_BOOL combinefile_result = VFS_FALSE;
 
-	int tmp = 0;
+	var32 tmp = 0;
 
 
 	char filetemp[VFS_MAX_FILENAME+1];
@@ -344,7 +344,7 @@ int dir_pack( const char *path,const char* output )
 	if( !fp_head )
 	{
 		printf("error:dir_pack create pak_header.tmp failed\n");
-		return 0;
+		return VFS_FALSE;
 	}
 
 	fp_iteminfo = sfopen(file_iteminfo,"wb+");
@@ -393,24 +393,24 @@ int dir_pack( const char *path,const char* output )
 		}
 		else
 		{
-			buf = malloc(iteminfo->_M_size);
-			tmp = fread(buf,1,iteminfo->_M_size,fp);
+			buf = (void*)malloc(iteminfo->_M_size);
+			tmp = fread(buf,1,(size_t)iteminfo->_M_size,fp);
 			if( tmp != iteminfo->_M_size)
 			{
 				printf("error:dir_pack read file %s size=%d readsize=%d fpos=%d failed\n",
 						iteminfo->_M_filename,
 						iteminfo->_M_size,
 						tmp,
-						(int)ftell(fp));
+						(var32)ftell(fp));
 				goto LBL_DP_ERROR;
 			}
 
 			VFS_SAFE_FCLOSE(fp);
 
-			iteminfo->_M_crc32 = vfs_util_calc_crc32(buf,iteminfo->_M_size);
+			iteminfo->_M_crc32 = vfs_util_calc_crc32(buf,(var32)iteminfo->_M_size);
 
-			compress_buf_size = vfs_util_compress_bound(VFS_COMPRESS_BZIP2,iteminfo->_M_size);
-			compress_buf = malloc(compress_buf_size);
+			compress_buf_size = vfs_util_compress_bound(VFS_COMPRESS_BZIP2,(var32)iteminfo->_M_size);
+			compress_buf = (void*)malloc(compress_buf_size);
 
 			compress_result = vfs_util_compress(VFS_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,compress_buf_size);
 			if(compress_result == 0 || compress_result >= iteminfo->_M_size)
@@ -434,7 +434,7 @@ int dir_pack( const char *path,const char* output )
 			{
 				iteminfo->_M_compress_type = VFS_COMPRESS_BZIP2;
 				iteminfo->_M_compress_size = compress_result;
-				iteminfo->_M_compress_crc32 = vfs_util_calc_crc32(compress_buf,compress_result);
+				iteminfo->_M_compress_crc32 = vfs_util_calc_crc32(compress_buf,(var32)compress_result);
 
 				VFS_SAFE_FREE(buf);
 
@@ -467,7 +467,7 @@ int dir_pack( const char *path,const char* output )
 		goto LBL_DP_ERROR;
 	}
 
-	g_pak->_M_header._M_offset = ftell(fp_iteminfo)+sizeof(pak_header);
+	g_pak->_M_header._M_offset = ftell(fp_iteminfo)+pak_header_size;
 	if( 0 == fwrite_header(fp_head) )
 	{
 		printf("error:dir_pack fwrite_header failed\n");
@@ -491,7 +491,7 @@ LBL_DP_ERROR:
 	VFS_SAFE_FCLOSE(fp_iteminfo);
 	VFS_SAFE_FCLOSE(fp_head);
 
-	return 0;
+	return VFS_FALSE;
 }
 
 void pak_end( const char *path )
@@ -521,7 +521,7 @@ void pak_end( const char *path )
 
 
 
-int main( int argc,char *argv[] )
+var32 main( var32 argc,char *argv[] )
 {
 	char path[VFS_MAX_FILENAME+1] = {0};
 	char outfile[VFS_MAX_FILENAME+1] = {0};
@@ -548,20 +548,20 @@ int main( int argc,char *argv[] )
 	strcpy(g_dir,path);
 	g_dirlen = strlen(g_dir);
 
-	if( 0 == pak_begin(path) )
+	if( VFS_FALSE == pak_begin(path) )
 	{
 		printf("error:pak_begin failed\n ");
 		goto LB_ERROR;
 	}
 	
-	if( 0 == dir_collect_fileinfo(path))
+	if( VFS_FALSE == dir_collect_fileinfo(path))
 	{
 		printf("error:dir_collect_fileinfo failed \n");
 		goto LB_ERROR;
 	}
 
 
-	if( 0 == dir_pack(path,outfile) )
+	if( VFS_FALSE == dir_pack(path,outfile) )
 	{
 		printf("error:dir_pack failed\n");
 		goto LB_ERROR;

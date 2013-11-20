@@ -5,7 +5,28 @@
 
 static vfs * g_vfs = NULL;
 
-int vfs_pak_sort_cmp(const void*a,const void*b)
+static FILE* sfopen(const char* filename,const char* mode)
+{
+#ifndef _WIN32
+	return fopen(filename,mode);
+#else
+	FILE* fp = NULL;
+	var32 err;
+
+	err = fopen_s(&fp,filename,mode);
+	if( err == 0 )
+	{
+		return fp;
+	}
+	else
+	{
+		return NULL;
+	}
+#endif
+}
+
+
+var32 vfs_pak_sort_cmp(const void*a,const void*b)
 {
 
 	pak* _a;
@@ -17,7 +38,7 @@ int vfs_pak_sort_cmp(const void*a,const void*b)
 	return stricmp(_a->_M_filename,_b->_M_filename);
 }
 
-int vfs_pak_search_cmp(const void*key,const void*item)
+var32 vfs_pak_search_cmp(const void*key,const void*item)
 {
 
 	char*_key;
@@ -33,9 +54,9 @@ void vfs_pak_sort()
 	qsort((void*)g_vfs->_M_paks,g_vfs->_M_count,sizeof(pak*),vfs_pak_sort_cmp);
 }
 
-int vfs_pak_search(const char* pakfile)
+var32 vfs_pak_search(const char* pakfile)
 {
-	int ret = -1;
+	var32 ret = -1;
 	pak** p=NULL;
 
 	if( !g_vfs || !pakfile)
@@ -66,7 +87,7 @@ VFS_BOOL vfs_create()
 
 void vfs_destroy()
 {
-	int i;
+	var32 i;
 
 	if( !g_vfs )
 		return ;
@@ -133,7 +154,7 @@ VFS_BOOL vfs_pak_add(const char* pakfile )
 VFS_BOOL vfs_pak_del(const char* pakfile )
 {
 
-	int index;
+	var32 index;
 
 	if( !g_vfs )
 		return VFS_FALSE;
@@ -145,7 +166,7 @@ VFS_BOOL vfs_pak_del(const char* pakfile )
 	if( index < 0 || index >= g_vfs->_M_count )
 		return VFS_FALSE;
 
-	pak_close(g_vfs->_M_paks[index]);\
+	pak_close(g_vfs->_M_paks[index]);
 	g_vfs->_M_paks[index]= g_vfs->_M_paks[g_vfs->_M_count -1];
 	--g_vfs->_M_count;
 
@@ -154,14 +175,14 @@ VFS_BOOL vfs_pak_del(const char* pakfile )
 }
 
 
-int vfs_pak_get_count()
+var32 vfs_pak_get_count()
 {
 	if( g_vfs )
 		return g_vfs->_M_count;
 	return 0;
 }
 
-pak* vfs_pak_get_index(int idx )
+pak* vfs_pak_get_index(var32 idx )
 {
 	if( g_vfs && idx >= 0 && idx <= g_vfs->_M_count )
 		return g_vfs->_M_paks[idx];
@@ -172,7 +193,7 @@ pak* vfs_pak_get_index(int idx )
 pak* vfs_pak_get_name(const char* pakfile)
 {	
 	pak* p;
-	int index;
+	var32 index;
 
 	index = vfs_pak_search(pakfile);
 	if( index < 0 || index >= g_vfs->_M_count )
@@ -182,7 +203,7 @@ pak* vfs_pak_get_name(const char* pakfile)
 	return p;
 }
 
-vfs_file* vfs_fcreate(void*buf,size_t size)
+vfs_file* vfs_fcreate(void*buf,uvar64 size)
 {
 	vfs_file* vff;
 
@@ -193,7 +214,7 @@ vfs_file* vfs_fcreate(void*buf,size_t size)
 		return NULL;
 	}
 
-	if( !buf || !size)
+	if( !size)
 	{
 		vff->_M_buffer = 0;
 		vff->_M_size = 0;
@@ -210,7 +231,8 @@ vfs_file* vfs_fcreate(void*buf,size_t size)
 		vff->_M_position = 0;
 		vff->_M_size = size;
 
-		memcpy(vff->_M_buffer,buf,size);
+		if( buf )
+			memcpy(vff->_M_buffer,buf,(size_t)size);
 	}
 	
 	return vff;
@@ -218,8 +240,8 @@ vfs_file* vfs_fcreate(void*buf,size_t size)
 
 vfs_file* vfs_fopen(const char* file,const char* mode )
 {
-	int i,index ;
-	int size;
+	var32 i,index ;
+	uvar64 size;
 	void* buf;
 	pak_iteminfo* iteminfo;
 	vfs_file* vff;
@@ -282,15 +304,15 @@ VFS_BOOL vfs_feof(vfs_file* file )
 		return VFS_FALSE;
 }
 
-int vfs_ftell(vfs_file* file)
+uvar64 vfs_ftell(vfs_file* file)
 {
 	if( file )
 		return file->_M_position;
 
-	return -1;
+	return 0;
 }
 
-int vfs_fsize( vfs_file* file )
+uvar64 vfs_fsize( vfs_file* file )
 {
 	if( !file )
 		return 0;
@@ -298,9 +320,9 @@ int vfs_fsize( vfs_file* file )
 	return file->_M_size;
 }
 
-int vfs_fseek(vfs_file* file,int pos, int mod )
+uvar64 vfs_fseek(vfs_file* file,var64 pos, var32 mod )
 {
-	int _pos;
+	uvar64 _pos;
 	if( !file )
 		return -1;
 
@@ -318,18 +340,18 @@ int vfs_fseek(vfs_file* file,int pos, int mod )
 	}
 	else
 	{
-		if( pos >= 0 && pos < file->_M_size  )
+		if( pos >= 0 && pos < (var64)file->_M_size  )
 			file->_M_position = pos;
 	}
 
 	return vfs_ftell(file);
 }
 
-size_t vfs_fread( void* buf , size_t size , size_t count , vfs_file*fp )
+uvar64 vfs_fread( void* buf , uvar64 size , uvar64 count , vfs_file*fp )
 {
 
-	size_t i;
-	int realread;
+	uvar64 i;
+	uvar64 realread;
 	char* p;
 
 	if(!fp)
@@ -349,9 +371,9 @@ size_t vfs_fread( void* buf , size_t size , size_t count , vfs_file*fp )
 		if( vfs_feof(fp) )
 			break;
 
-		if( (fp->_M_size - fp->_M_position - 1 ) >= (int)size )
+		if( (fp->_M_size - fp->_M_position - 1 ) >= size )
 		{
-			memcpy(p,&((char*)fp->_M_buffer)[fp->_M_position],size);
+			memcpy(p,&((char*)fp->_M_buffer)[fp->_M_position],(size_t)size);
 			fp->_M_position += size;
 			p += size;
 			++realread;
@@ -361,10 +383,10 @@ size_t vfs_fread( void* buf , size_t size , size_t count , vfs_file*fp )
 	return realread;
 }
 
-size_t vfs_fwrite(void* buf , size_t size , size_t count , vfs_file*fp )
+uvar64 vfs_fwrite(void* buf , uvar64 size , uvar64 count , vfs_file*fp )
 {
-	size_t i;
-	int realwrite;
+	uvar64 i;
+	uvar64 realwrite;
 	char* p;
 	
 	void* tmp;
@@ -379,9 +401,10 @@ size_t vfs_fwrite(void* buf , size_t size , size_t count , vfs_file*fp )
 		return 0;
 
 	p = (char*)buf;
+	realwrite = 0;
 	for( i = 0; i<count; ++i )
 	{
-		if( (fp->_M_size - fp->_M_position - 1 ) < (int)size )
+		if( (fp->_M_size - fp->_M_position - 1 ) < size )
 		{
 			tmp = (void*)realloc(fp->_M_buffer,fp->_M_size + size );
 			if( !tmp )
@@ -391,7 +414,7 @@ size_t vfs_fwrite(void* buf , size_t size , size_t count , vfs_file*fp )
 			fp->_M_size += size;
 		}
 
-		memcpy(&((char*)fp->_M_buffer)[fp->_M_position],p,size);
+		memcpy(&((char*)fp->_M_buffer)[fp->_M_position],p,(size_t)size);
 		fp->_M_position += size;
 		p += size;
 		++realwrite;
@@ -406,15 +429,15 @@ VFS_BOOL vfs_fflush(vfs_file* file,const char* saveas)
 {
 
 	FILE* fp;
-	int offset;
+	uvar64 offset;
 
-	size_t realsize ;
+	uvar64 realsize ;
 	char buf[512+1];
 
 	if( !file || !saveas  )
 		return VFS_FALSE;
 	
-	fp = fopen(saveas,"wb+");
+	fp = sfopen(saveas,"wb+");
 	if( !fp )
 		return VFS_FALSE;
 
@@ -425,7 +448,7 @@ VFS_BOOL vfs_fflush(vfs_file* file,const char* saveas)
 		if( realsize > 0 )
 		{
 			buf[realsize] = 0;
-			if( fwrite(buf,1,realsize,fp) != realsize )
+			if( fwrite(buf,1,(size_t)realsize,fp) != realsize )
 			{
 				VFS_SAFE_FCLOSE(fp);
 				vfs_fseek(file,offset,SEEK_SET);

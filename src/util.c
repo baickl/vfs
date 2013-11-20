@@ -79,7 +79,8 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 
 	int rt;
 
-	strcpy(find_full,path);
+	if( !vfs_util_path_combine(find_full,path))
+		return 0;
 	
 	dir = opendir(path);
 	if( NULL == dir )
@@ -96,9 +97,8 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 				continue;
 
 			memset(path_temp,0,sizeof(path_temp));
-			strcpy(path_temp,path);
-			strcat(path_temp,"/");
-			strcat(path_temp,entry->d_name);
+			if( !vfs_util_path_combine(path_temp,path,entry->d_name) )
+				goto LB_ERROR;
 
 			rt = proc(path_temp,1);
 			switch(rt)
@@ -119,9 +119,8 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 		else
 		{
 			memset(path_temp,0,sizeof(path_temp));
-			strcpy(path_temp,path);
-			strcat(path_temp,"/");
-			strcat(path_temp,entry->d_name);
+			if( !vfs_util_path_combine(path_temp,path,entry->d_name) )
+				goto LB_ERROR;
 
 			rt = proc(path_temp,0);
 			switch(rt)
@@ -151,32 +150,24 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 
 	int rt;
 
-	/*文件句柄  */
 	long hFile=0;  
-
-	/*文件信息  */
 	struct _finddata_t fileinfo; 
 
-	strcpy(find_full,path);
-	strcat(find_full,"\\");
-	strcat(find_full,"*");
+	if( !vfs_util_path_combine(find_full,path,"*") )
+		return 0;
 
 	if((hFile=_findfirst(find_full,&fileinfo)) != -1)
-	{  
-
+	{
 		do
 		{
-			/*如果是目录,迭代之*/
-			/*如果不是,加入列表*/
 			if((fileinfo.attrib &_A_SUBDIR)) 
-			{  
+			{
 				if(strcmp(fileinfo.name,".")!= 0 && strcmp(fileinfo.name,"..") != 0 ) 
 				{
 					memset(path_temp,0,sizeof(path_temp));
-					strcpy(path_temp,path);
-					strcat(path_temp,"\\");
-					strcat(path_temp,fileinfo.name);
-					
+					if( !vfs_util_path_combine(path_temp,path,fileinfo.name) )
+						goto LB_ERROR;
+
 					rt = proc(path_temp,1);
 					switch(rt)
 					{
@@ -197,9 +188,8 @@ int vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 			else
 			{
 				memset(path_temp,0,sizeof(path_temp));
-				strcpy(path_temp,path);
-				strcat(path_temp,"\\");
-				strcat(path_temp,fileinfo.name);
+				if( !vfs_util_path_combine(path_temp,path,fileinfo.name) )
+					goto LB_ERROR;
 
 				rt = proc(path_temp,0);
 				switch(rt)
@@ -227,30 +217,115 @@ LB_ERROR:
 #endif
 
 
-
-char* vfs_util_path_assign(char* path )
+char* vfs_util_path_checkfix(char* path )
 {
+	char*p;
+	if( !path )
+		return path;
+
+	p = path;
+	while( p && *p != 0 )
+	{
+		if( *p == '\\' )
+			*p = '/';
+
+		++p;
+	}
+
 	return path;
+}
+
+
+char* vfs_util_path_clone(char*out_path,const char*path )
+{
+	if( !out_path || !path )
+		return NULL;
+	if( strlen(path) <= 0 )
+		return NULL;
+
+	strcpy(out_path,path);
+	return vfs_util_path_checkfix(out_path);
 }
 
 char* vfs_util_path_append(char* path ,char* append )
 {
+	char *p ;
+	if( !path || !append)
+		return NULL;
+
+	p = append;
+	while( p && *p != 0 )
+	{
+		if(*p != '\\' || *p != '/' )
+			break;
+
+		++p;
+	}
+
+	if( !p || *p == 0 )
+		return NULL;
+
+	vfs_util_path_add_backslash( path );
+	
+	strcat(path,p);
 	return path;
+}
+
+char* vfs_util_path_join(char* path ,char* join )
+{
+	char *p ;
+	if( !path || !join)
+		return NULL;
+	strcat(path,join);
+	return vfs_util_path_checkfix(path);
 }
 
 char* vfs_util_path_combine(char* path ,const char* dir ,const char* append )
 {
-	return path;
+	if( !path || !dir || !append )
+		return NULL;
+
+	if( !vfs_util_path_clone(path,dir) )
+		return NULL;
+
+	return vfs_util_path_append( path,append );
 }
 
 char* vfs_util_path_add_backslash(char* path )
 {
+	int len;
+	if( !path )
+		return NULL;
+
+	vfs_util_path_remove_backslash(path);
+
+	len = strlen(path);
+	if( len <= 0 )
+		return path;
+
+	strcat(path,"/");
 	return path;
+
 }
 
 char* vfs_util_path_remove_backslash(char* path )
 {
+	int len;
+	if( !path )
+		return path;
+
+	len = strlen(path);
+	if( len <= 0 )
+		return path;
+
+	while( len > 0 && (path[len-1] == '/' || path[len-1] == '\\' )  )
+	{
+		path[len-1] = 0;
+		--len;
+	}
+
 	return path;
+
 }
 
 char* vfs_util_path_remove_filename(char* path )
@@ -260,5 +335,5 @@ char* vfs_util_path_remove_filename(char* path )
 
 char* vfs_util_path_remove_extension(char* path )
 {
-
+	return path;
 }

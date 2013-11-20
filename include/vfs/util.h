@@ -17,11 +17,10 @@ VFS_EXTERN int				vfs_util_decompress( int, const void*, int,void*, int );
 
 VFS_EXTERN int				vfs_util_dir_foreach(const char*,dir_foreach_item_proc);
 
-VFS_EXTERN int				vfs_util_str_trim_left(char*,char*);
-VFS_EXTERN int				vfs_util_str_trim_right(char*,char*);
-
-VFS_EXTERN char*			vfs_util_path_assign(char*);
+VFS_EXTERN char*			vfs_util_path_checkfix(char*);
+VFS_EXTERN char*			vfs_util_path_clone(char*,const char*);
 VFS_EXTERN char*			vfs_util_path_append(char*,char*);
+VFS_EXTERN char*			vfs_util_path_join(char*,char*);
 VFS_EXTERN char*			vfs_util_path_combine(char*,const char*,const char*);
 VFS_EXTERN char*			vfs_util_path_add_backslash(char*);
 VFS_EXTERN char*			vfs_util_path_remove_backslash(char*);

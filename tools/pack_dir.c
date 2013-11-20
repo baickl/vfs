@@ -15,6 +15,7 @@
 static pak *g_pak = NULL;
 static int  g_maxcount = 0;
 static char g_dir[VFS_MAX_FILENAME+1];
+static int  g_dirlen = 0;
 
 FILE* sfopen(const char* filename,const char* mode)
 {
@@ -98,23 +99,26 @@ int pak_additeminfo( const char* filepath )
 
 	memset(iteminfo,0,sizeof(pak_iteminfo));
 	strcpy(iteminfo->_M_filename,filepath);
-
-
-	printf("add file:%s\n",iteminfo->_M_filename);
+	vfs_util_path_checkfix(iteminfo->_M_filename);
 	return 1;
 
 }
 
 int dir_collect_fileinfo_proc(const char*fullpath,int dir)
 {
+	const char* strfile;
+
+	strfile = fullpath + g_dirlen + 1;
 	if( !dir )
 	{
-		printf("find file:%s\n",fullpath);
-		pak_additeminfo(fullpath);
+		strfile = fullpath + g_dirlen + 1;
+		pak_additeminfo(strfile);
+
+		printf("\tfind file:%s\n",strfile);
 	}
 	else
 	{
-		printf("enter dir:%s\n",fullpath);
+		printf("\nenter dir:%s\n",strfile);
 	}
 
 	return DIR_FOREACH_CONTINUE;
@@ -123,7 +127,7 @@ int dir_collect_fileinfo_proc(const char*fullpath,int dir)
 
 int dir_collect_fileinfo( const char *_path )
 {
-	vfs_util_dir_foreach(_path,dir_collect_fileinfo_proc);
+	return vfs_util_dir_foreach(_path,dir_collect_fileinfo_proc);
 }
 
 
@@ -312,6 +316,8 @@ int dir_pack( const char *path,const char* output )
 
 	int tmp = 0;
 
+
+	char filetemp[VFS_MAX_FILENAME+1];
 	
 
 	char file_header[VFS_MAX_FILENAME+1]={0};
@@ -326,6 +332,8 @@ int dir_pack( const char *path,const char* output )
 
 	strcpy(file_data,g_dir);
 	strcat(file_data,".pak_data.tmp");
+
+
 	
 	
  	remove(file_header);
@@ -357,7 +365,11 @@ int dir_pack( const char *path,const char* output )
 	{
 		iteminfo = &g_pak->_M_iteminfos[i];
 
-		fp = sfopen(iteminfo->_M_filename,"rb");
+
+		memset(filetemp,0,sizeof(filetemp));
+		vfs_util_path_combine(filetemp,g_dir,iteminfo->_M_filename);
+
+		fp = sfopen(filetemp,"rb");
 		if( !fp )
 		{
 			printf("error:dir_pack open file %s failed\n",iteminfo->_M_filename);
@@ -451,7 +463,6 @@ int dir_pack( const char *path,const char* output )
 
 	if( 0 == fwrite_iteminfos(fp_iteminfo) )
 	{
-
 		printf("error:dir_pack fwrite_iteminfos failed\n");
 		goto LBL_DP_ERROR;
 	}
@@ -459,7 +470,6 @@ int dir_pack( const char *path,const char* output )
 	g_pak->_M_header._M_offset = ftell(fp_iteminfo)+sizeof(pak_header);
 	if( 0 == fwrite_header(fp_head) )
 	{
-		
 		printf("error:dir_pack fwrite_header failed\n");
 		goto LBL_DP_ERROR;
 	}
@@ -522,15 +532,21 @@ int main( int argc,char *argv[] )
 		return -1;
 	}
 
-	strcpy(path, argv[1]);
-	strcpy(outfile , path);
-	strcat(outfile , ".pak");
-	
+	if( !vfs_util_path_clone(path,argv[1]) )
+		return -1;
+
+	if( !vfs_util_path_clone(outfile,path) )
+		return -1;
+
+	if( !vfs_util_path_join(outfile,".pak"))
+		return -1;
+
 	remove(outfile);
 	printf("pack_dir %s %s\n",path,outfile);
 
 	memset(g_dir,0,sizeof(g_dir));
 	strcpy(g_dir,path);
+	g_dirlen = strlen(g_dir);
 
 	if( 0 == pak_begin(path) )
 	{

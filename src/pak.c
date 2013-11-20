@@ -168,6 +168,7 @@ int  pak_item_locate(pak*_pak,const char* _file)
 	if( !_pak || !_file)
 		return -1;
 
+	vfs_util_path_checkfix(_file);
 	iteminfo = (pak_iteminfo*)bsearch(_file,_pak->_M_iteminfos,_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_search_cmp);
 	if( !iteminfo )
 		return -1;

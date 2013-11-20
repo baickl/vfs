@@ -30,7 +30,6 @@ int main(int argc,char* argv[] )
 	}
 
 	vfs_fclose(vf);
-
 	vfs_destroy();
 	return 0;
 

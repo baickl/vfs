@@ -1,6 +1,7 @@
 #include "vfs/vfs.h"
 #include "vfs/common.h"
 #include <stdio.h>
+#include <string.h>
 
 static vfs * g_vfs = NULL;
 
@@ -187,6 +188,7 @@ vfs_file* vfs_fopen(const char* file,const char* mode )
 	int size;
 	void* buf;
 	pak_iteminfo* iteminfo;
+	vfs_file* vff;
 
 	if( !g_vfs || !file )
 		return NULL;
@@ -212,7 +214,12 @@ vfs_file* vfs_fopen(const char* file,const char* mode )
 			return NULL;
 		}
 		
-		vfs_file* vff = malloc(sizeof(vfs_file));
+		vff = malloc(sizeof(vfs_file));
+		if( !vff )
+		{
+			VFS_SAFE_FREE(buf);
+			return NULL;
+		}
 		vff->_M_buffer = buf;
 		vff->_M_size = size;
 		vff->_M_position = 0;
@@ -302,7 +309,7 @@ size_t vfs_fread( void* buf , size_t size , size_t count , vfs_file*fp )
 
 		if( (fp->_M_size - fp->_M_position - 1 ) >= size )
 		{
-			memcpy(p,&fp->_M_buffer[fp->_M_position],size);
+			memcpy(p,&((char*)fp->_M_buffer)[fp->_M_position],size);
 			fp->_M_position += size;
 			p += size;
 			++realread;

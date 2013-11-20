@@ -182,6 +182,8 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 	FILE* fp = NULL;
 	void* compress_buf = NULL;
 
+	unsigned int crc32;
+
 	if( !_pak || !_buf )
 		return VFS_FALSE;
 
@@ -213,7 +215,7 @@ int pak_item_unpack_index( pak* _pak,int _index,void *_buf,int _bufsize)
 		/*
 		 * 校验数据是否正确
 		 * */
-		unsigned int crc32 = vfs_util_calc_crc32(_buf,iteminfo->_M_size);
+		crc32 = vfs_util_calc_crc32(_buf,iteminfo->_M_size);
 		if( crc32 != iteminfo->_M_crc32 )
 			goto ERROR;
 

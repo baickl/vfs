@@ -98,7 +98,7 @@ pak* pak_open(const char* _pakfile)
 	if( fread(&header._M_flag,1,sizeof(header._M_flag),fp) != sizeof(header._M_flag))
 		goto ERROR;
 
-	if( header._M_flag != 'pakx')
+	if( header._M_flag != MAKE_CC_ID('p','a','k','x'))
 		goto ERROR;
 
 	if( fread(&header._M_version,1,sizeof(header._M_version),fp) != sizeof(header._M_version))

@@ -61,11 +61,5 @@
 #define VFS_TRUE				(1)
 #define VFS_FALSE				(0)
 
-#ifndef _WIN32
-
-#endif 
-
-
-
 
 #endif/*_VFS_COMMON_H_*/

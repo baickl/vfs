@@ -3,7 +3,7 @@ CC = gcc
 AR =ar
 INCLUDE = ./../include
 
-WARN= -Wall -fPIC -W 
+WARN= -Wall -fPIC -W -ansi -pedantic
 INCS=-I$(INCLUDE)
 BIGFILES=-D_FILE_OFFSET_BITS=64
 CFLAGS = $(WARN) $(INCS) $(BIGFILES) 

@@ -127,7 +127,7 @@ VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc)
 
 	while( (entry=readdir(dir)) != NULL )
 	{
-		if( entry->d_type & DT_DIR )
+		if( entry->d_type & 4 )
 		{
 			if( strcmp(entry->d_name,".")  == 0 || strcmp(entry->d_name,"..") == 0 )
 				continue;

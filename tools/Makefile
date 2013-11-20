@@ -3,10 +3,10 @@ CC = gcc
 AR =ar
 INCLUDE = ./../include
 
-WARN=-O2 -Wall -fPIC -W 
+WARN=-O2 -Wall -fPIC -W -ansi -pedantic
 INCS=-I$(INCLUDE)
-BIGFILES=-D_FILE_OFFSET_BITS=64
-CFLAGS = $(WARN) $(INCS) $(BIGFILES) 
+DEFINES=-D_FILE_OFFSET_BITS=64
+CFLAGS = $(WARN) $(INCS) $(DEFINES) 
 LIB_OPTION=-shared
 
 OBJS_TOOLS=pack_dir.o 

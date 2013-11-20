@@ -95,7 +95,7 @@ VFS_BOOL pak_begin( const char *path )
 	memset(_pak,0,sizeof(pak));
 
 	g_pak = _pak;
-	g_pak->_M_header._M_flag = 'pakx';
+	g_pak->_M_header._M_flag = MAKE_CC_ID('p','a','k','x');
 	g_pak->_M_header._M_version = VFS_VERSION;
 	g_pak->_M_header._M_count = 0;
 	g_pak->_M_iteminfos = NULL;
@@ -281,7 +281,7 @@ VFS_BOOL pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const ch
 	VFS_FSEEK(fp_iteminfo,0,SEEK_SET);
 	VFS_FSEEK(fp_data,0,SEEK_SET);
 
-	printf("info:pakfile_combine begin pak header size="I64FMTD"\n",file_getlen(fp_header));
+	printf("info:pakfile_combine begin pak header size=" I64FMTD "\n",file_getlen(fp_header));
 	fp_temp = fp_header;
 	while(!feof(fp_temp))
 	{
@@ -293,7 +293,7 @@ VFS_BOOL pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const ch
 		}
 	}
 
-	printf("info:pakfile_combine begin pak iteminfo size="I64FMTD"\n",file_getlen(fp_iteminfo));
+	printf("info:pakfile_combine begin pak iteminfo size=" I64FMTD "\n",file_getlen(fp_iteminfo));
 	fp_temp = fp_iteminfo;
 	while(!feof(fp_temp))
 	{
@@ -347,7 +347,7 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 	uvar64 compress_result = 0;
 	VFS_BOOL combinefile_result = VFS_FALSE;
 
-	var32 tmp = 0;
+	uvar64 tmp = 0;
 
 
 	char filetemp[VFS_MAX_FILENAME+1];
@@ -416,7 +416,7 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 			tmp = fread(buf,1,(size_t)iteminfo->_M_size,fp);
 			if( tmp != iteminfo->_M_size)
 			{
-				printf("error:dir_pack read file %s size=%d readsize=%d fpos=" I64FMTD " failed\n",
+				printf("error:dir_pack read file %s size=" I64FMTD " readsize=" I64FMTD " fpos=" I64FMTD " failed\n",
 						iteminfo->_M_filename,
 						iteminfo->_M_size,
 						tmp,
@@ -547,6 +547,8 @@ int main( int argc,char *argv[] )
 
 	if( !vfs_util_path_clone(outfile,path) )
 		return -1;
+
+	vfs_util_path_remove_backslash(outfile);
 
 	if( !vfs_util_path_join(outfile,".pak"))
 		return -1;

@@ -44,7 +44,7 @@ int main(int argc,char* argv[] )
 	if( VFS_TRUE != vfs_pak_add("../media/test.pak"))
 		goto ERROR;
 
-	vf = vfs_fopen("bzip2/randtable.c","rb");
+	vf = vfs_fopen("src/bzip2/randtable.c","rb");
 	if( !vf )
 		goto ERROR;
 

@@ -46,6 +46,12 @@ static var32  g_maxcount = 0;
 static char g_dir[VFS_MAX_FILENAME+1];
 static var32  g_dirlen = 0;
 
+char g_file_header[VFS_MAX_FILENAME+1]={0};
+char g_file_iteminfo[VFS_MAX_FILENAME+1]={0};
+char g_file_data[VFS_MAX_FILENAME+1]={0};
+
+
+
 static FILE* sfopen(const char* filename,const char* mode)
 {
 #ifndef _WIN32
@@ -345,43 +351,26 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 
 
 	char filetemp[VFS_MAX_FILENAME+1];
-	
 
-	char file_header[VFS_MAX_FILENAME+1]={0};
-	char file_iteminfo[VFS_MAX_FILENAME+1]={0};
-	char file_data[VFS_MAX_FILENAME+1]={0};
+ 	remove(g_file_header);
+ 	remove(g_file_iteminfo);
+ 	remove(g_file_data);
 
-	strcpy(file_header,g_dir);
-	strcat(file_header,".pak_header.tmp");
-
-	strcpy(file_iteminfo,g_dir);
-	strcat(file_iteminfo,".pak_iteminfo.tmp");
-
-	strcpy(file_data,g_dir);
-	strcat(file_data,".pak_data.tmp");
-
-
-	
-	
- 	remove(file_header);
- 	remove(file_iteminfo);
- 	remove(file_data);
-
-	fp_head = sfopen(file_header,"wb+");
+	fp_head = sfopen(g_file_header,"wb+");
 	if( !fp_head )
 	{
 		printf("error:dir_pack create pak_header.tmp failed\n");
 		return VFS_FALSE;
 	}
 
-	fp_iteminfo = sfopen(file_iteminfo,"wb+");
+	fp_iteminfo = sfopen(g_file_iteminfo,"wb+");
 	if( !fp_iteminfo )
 	{
 		printf("error:dir_pack create pak_iteminfo.tmp failed\n");
 		goto LBL_DP_ERROR;
 	}
 
-	fp_data = sfopen(file_data,"wb+");
+	fp_data = sfopen(g_file_data,"wb+");
 	if( !fp_data )
 	{
 		printf("error:dir_pack create pak_data.tmp failed\n");
@@ -526,22 +515,6 @@ LBL_DP_ERROR:
 
 void pak_end( const char *path )
 {
-	char file_header[VFS_MAX_FILENAME+1]={0};
-	char file_iteminfo[VFS_MAX_FILENAME+1]={0};
-	char file_data[VFS_MAX_FILENAME+1]={0};
-	strcpy(file_header,g_dir);
-	strcat(file_header,".pak_header.tmp");
-
-	strcpy(file_iteminfo,g_dir);
-	strcat(file_iteminfo,".pak_iteminfo.tmp");
-
-	strcpy(file_data,g_dir);
-	strcat(file_data,".pak_data.tmp");
-
-	remove(file_header);
-	remove(file_iteminfo);
-	remove(file_data);
-
 	if( g_pak )
 	{
 		VFS_SAFE_FREE(g_pak->_M_iteminfos);
@@ -574,12 +547,30 @@ int main( int argc,char *argv[] )
 	if( !vfs_util_path_join(outfile,".pak"))
 		return -1;
 
-	remove(outfile);
+	
+	
 	printf("pack_dir %s %s\n",path,outfile);
 
 	memset(g_dir,0,sizeof(g_dir));
 	vfs_util_path_clone(g_dir,path);
 	vfs_util_path_remove_backslash(g_dir);
+
+
+	vfs_util_path_clone(g_file_header,g_dir);
+	vfs_util_path_join(g_file_header,".pak_header.tmp");
+
+	vfs_util_path_clone(g_file_iteminfo,g_dir);
+	vfs_util_path_join(g_file_iteminfo,".pak_iteminfo.tmp");
+
+	vfs_util_path_clone(g_file_data,g_dir);
+	vfs_util_path_join(g_file_data,".pak_data.tmp");
+
+
+	remove(g_file_header);
+	remove(g_file_iteminfo);
+	remove(g_file_data);
+	remove(outfile);
+
 	
 	index = 0;
 	g_dirlen = strlen(g_dir);

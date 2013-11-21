@@ -32,7 +32,11 @@
 
 #include "typedef.h"
 
+#ifndef __cplusplus
 #define VFS_EXTERN extern
+#else
+#define VFS_EXTERN extern "C"
+#endif
 
 #define VFS_SAFE_FCLOSE(x)		if(x){fclose(x);x=NULL;}
 #define VFS_SAFE_FREE(x)		if(x){free((void*)x);x=NULL;}

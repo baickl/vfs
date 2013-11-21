@@ -29,7 +29,7 @@
 ***********************************************************************************/
 #include <vfs/pak.h>
 #include <vfs/util.h>
-#include <vfs/common.h>
+#include <vfs/base.h>
 #include <stdio.h>
 #include <memory.h>
 

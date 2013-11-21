@@ -45,4 +45,7 @@ public:
 	bool PackDirThread();
 
 	mylib::CThread m_Thread;
+    afx_msg void OnBnClickedButtonSelectA();
+    afx_msg void OnBnClickedButtonSelectR();
+    afx_msg void OnBnClickedButtonCleanup();
 };

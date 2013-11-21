@@ -31,11 +31,6 @@
 #define _VFS_BASE_H_
 
 /************************************************************************/
-/* 版本定义                                                    */
-/************************************************************************/
-#define VFS_VERSION				(1)
-
-/************************************************************************/
 /* 函数导出定义                                                */
 /************************************************************************/
 #ifndef __cplusplus
@@ -44,6 +39,25 @@
 #define VFS_EXTERN extern "C"
 #endif
 
+/************************************************************************/
+/* 版本定义                                                    */
+/************************************************************************/
+#define VFS_VERSION				(1)
+#define VFS_MAX_FILENAME		(512)
+
+/************************************************************************/
+/* 压缩类型定义                                                */
+/************************************************************************/
+#define VFS_COMPRESS_NONE		(0x0000)
+#define VFS_COMPRESS_BZIP2		(0x0001)
+
+
+/************************************************************************/
+/* BOOL值模拟                                                   */
+/************************************************************************/
+#define VFS_BOOL				int
+#define VFS_TRUE				(1)
+#define VFS_FALSE				(0)
 
 /************************************************************************/
 /* 常用整型定义                                                */
@@ -101,10 +115,19 @@ typedef unsigned int                                uvar32;
 
 #endif
 
+
 /************************************************************************/
 /* 宽字符相关定义                                              */
 /************************************************************************/
 #include <wchar.h>
+
+#ifdef _MSC_VER
+    #ifndef _WCHAR_T_DEFINED
+        #define _WCHAR_T_DEFINED
+        typedef uvar16 	wchar_t;
+    #endif 
+#endif
+
 #if defined(_MSC_VER) && _MSC_VER > 1310 && !defined (_WIN32_WCE)
 	#define swprintf swprintf_s
 	#define snprintf sprintf_s
@@ -113,19 +136,13 @@ typedef unsigned int                                uvar32;
 	#define snprintf _snprintf
 #endif
 
-#ifdef _MSC_VER
-	#ifndef _WCHAR_T_DEFINED
-		#define _WCHAR_T_DEFINED
-		typedef uvar16 	wchar_t;
-	#endif 
-#endif
 
 
 /************************************************************************/
 /* MAKE_CC                                                              */
 /************************************************************************/
-#define MAKE_CC_ID(c0, c1, c2, c3) \
-		((uvar32)(uvar8)(c0) | ((uvar32)(uvar8)(c1) << 8) | \
+#define MAKE_CC_ID(c0, c1, c2, c3)                                      \
+		((uvar32)(uvar8)(c0) | ((uvar32)(uvar8)(c1) << 8) |             \
 		((uvar32)(uvar8)(c2) << 16) | ((uvar32)(uvar8)(c3) << 24 ))
 
 
@@ -139,28 +156,12 @@ typedef unsigned int                                uvar32;
 #define VFS_CHECK_FWRITE(f,b,l) (f ? (fwrite((const void*)b,1,(size_t)l,f) != l ? 0 : 1) : 0 )
 
 #ifndef _WIN32 
-	#define VFS_FSEEK	fseeko
-	#define VFS_FTELL	ftello
-	#define stricmp		strcasecmp
+	#define VFS_FSEEK	        fseeko
+	#define VFS_FTELL	        ftello
+	#define stricmp		        strcasecmp
 #else
-	#define VFS_FSEEK	_fseeki64
-	#define VFS_FTELL	_ftelli64
+	#define VFS_FSEEK	        _fseeki64
+	#define VFS_FTELL	        _ftelli64
 #endif 
-
-#define VFS_MAX_FILENAME		(512)
-
-/************************************************************************/
-/* 压缩类型定义                                                */
-/************************************************************************/
-#define VFS_COMPRESS_NONE		(0x0000)
-#define VFS_COMPRESS_BZIP2		(0x0001)
-
-/************************************************************************/
-/* BOOL值模拟                                                   */
-/************************************************************************/
-#define VFS_BOOL				int
-#define VFS_TRUE				(1)
-#define VFS_FALSE				(0)
-
 
 #endif/*_VFS_BASE_H_*/

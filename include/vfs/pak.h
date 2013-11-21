@@ -30,7 +30,7 @@
 #ifndef _VFS_PAK_H_
 #define _VFS_PAK_H_
 
-#include "common.h"
+#include "base.h"
 
 /*
  * header DEFINE

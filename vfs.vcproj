@@ -49,6 +49,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -112,6 +113,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -169,15 +171,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\include\vfs\common.h"
+				RelativePath=".\include\vfs\base.h"
 				>
 			</File>
 			<File
 				RelativePath=".\include\vfs\pak.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\vfs\typedef.h"
 				>
 			</File>
 			<File

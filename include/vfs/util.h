@@ -30,7 +30,7 @@
 #ifndef _VFS_UITL_H_
 #define _VFS_UTIL_H_
 
-#include "common.h"
+#include "base.h"
 
 #define DIR_FOREACH_IGNORE		0	/* 返回FOREACH，本次结果不处理，如果是遇到目录返回，则表示不进入目录继续FOREACH */
 #define DIR_FOREACH_CONTINUE	1   /* 继续FOREACH，主要用于处理目录进入*/

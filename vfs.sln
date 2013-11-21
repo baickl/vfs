@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test2", "examples\test2.vcp
 		{3737BAE9-E89E-43C7-842E-5C24296DDB9B} = {3737BAE9-E89E-43C7-842E-5C24296DDB9B}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PakageFile", "win32\PakageFile\PakageFile\PakageFile.vcproj", "{5E4C3471-362E-485C-A8A2-3EB48D0F498F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -43,6 +45,10 @@ Global
 		{D2768B2E-6FB7-48B9-8B11-300F6507C63E}.Debug|Win32.Build.0 = Debug|Win32
 		{D2768B2E-6FB7-48B9-8B11-300F6507C63E}.Release|Win32.ActiveCfg = Release|Win32
 		{D2768B2E-6FB7-48B9-8B11-300F6507C63E}.Release|Win32.Build.0 = Release|Win32
+		{5E4C3471-362E-485C-A8A2-3EB48D0F498F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5E4C3471-362E-485C-A8A2-3EB48D0F498F}.Debug|Win32.Build.0 = Debug|Win32
+		{5E4C3471-362E-485C-A8A2-3EB48D0F498F}.Release|Win32.ActiveCfg = Release|Win32
+		{5E4C3471-362E-485C-A8A2-3EB48D0F498F}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

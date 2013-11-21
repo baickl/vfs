@@ -27,12 +27,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
-#include "vfs/pak.h"
-#include "vfs/util.h"
+#include <vfs/pak.h>
+#include <vfs/util.h>
 #include <stdio.h>
 
 #include <string.h>
-
 #include <sys/types.h>
 #ifndef _WIN32
 #include <dirent.h>
@@ -281,7 +280,7 @@ VFS_BOOL pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const ch
 	VFS_FSEEK(fp_iteminfo,0,SEEK_SET);
 	VFS_FSEEK(fp_data,0,SEEK_SET);
 
-	printf("info:pakfile_combine begin pak header size=" I64FMTD "\n",file_getlen(fp_header));
+	printf("info:pakfile_combine begin pak header size=" I64FMTU "\n",file_getlen(fp_header));
 	fp_temp = fp_header;
 	while(!feof(fp_temp))
 	{
@@ -293,7 +292,7 @@ VFS_BOOL pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const ch
 		}
 	}
 
-	printf("info:pakfile_combine begin pak iteminfo size=" I64FMTD "\n",file_getlen(fp_iteminfo));
+	printf("info:pakfile_combine begin pak iteminfo size=" I64FMTU "\n",file_getlen(fp_iteminfo));
 	fp_temp = fp_iteminfo;
 	while(!feof(fp_temp))
 	{
@@ -305,7 +304,7 @@ VFS_BOOL pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const ch
 		}
 	}
 
-	printf("info:pakfile_combine begin pak data size="I64FMTD"\n",file_getlen(fp_data));
+	printf("info:pakfile_combine begin pak data size="I64FMTU"\n",file_getlen(fp_data));
 	fp_temp = fp_data;
 	while(!feof(fp_temp))
 	{
@@ -416,7 +415,7 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 			tmp = fread(buf,1,(size_t)iteminfo->_M_size,fp);
 			if( tmp != iteminfo->_M_size)
 			{
-				printf("error:dir_pack read file %s size=" I64FMTD " readsize=" I64FMTD " fpos=" I64FMTD " failed\n",
+				printf("error:dir_pack read file %s size=" I64FMTU " readsize=" I64FMTU " fpos=" I64FMTU " failed\n",
 						iteminfo->_M_filename,
 						iteminfo->_M_size,
 						tmp,
@@ -471,12 +470,12 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 
 		printf("\nsuccessed:dir_pack pack file %s OK\n",iteminfo->_M_filename);
 		printf("\tfile=%s\n",iteminfo->_M_filename);
-		printf("\tsize="I64FMTD"\n",iteminfo->_M_size);
+		printf("\tsize=" I64FMTU "\n",iteminfo->_M_size);
 		printf("\tcrc32=%d\n",iteminfo->_M_crc32);
 		printf("\tcompress_type=%d\n",iteminfo->_M_compress_type);
-		printf("\tcompress_size="I64FMTD"\n",iteminfo->_M_compress_size);
+		printf("\tcompress_size=" I64FMTU "\n",iteminfo->_M_compress_size);
 		printf("\tcompress_crc32=%d\n",iteminfo->_M_compress_crc32);
-		printf("\toffset="I64FMTD"\n\n",iteminfo->_M_offset);
+		printf("\toffset=" I64FMTU "\n\n",iteminfo->_M_offset);
 
 	}
 

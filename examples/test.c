@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
-#include "vfs/pak.h"
+#include <vfs/pak.h>
 #include <stdio.h>
 
 const char* media = "../media/test.pak";
@@ -93,7 +93,7 @@ int main(int argc,char* argv[])
 	for( i = 0; i<itemcount; ++i )
 	{
 		iteminfo = pak_item_getinfo(_pak,i);
-		printf("pak[%d]:\nname=%s\noffset="I64FMTD"\nsize="I64FMTD"\ncrc32=%d\nct=%d\ncs="I64FMTD"\ncc=%d\n\n",
+		printf("pak[%d]:\nname=%s\noffset=" I64FMTU "\nsize=" I64FMTU "\ncrc32=%d\nct=%d\ncs=" I64FMTU "\ncc=%d\n\n",
 				i,
 				iteminfo->_M_filename,
 				iteminfo->_M_offset,

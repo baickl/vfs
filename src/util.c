@@ -27,9 +27,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
-#include "vfs/util.h"
-#include "crc32/crc32.h"
+#include <vfs/util.h>
 
+#include "crc32/crc32.h"
 #define BZ_NO_STDIO
 #include "bzip2/bzlib.h"
 #include <stdio.h>

@@ -69,6 +69,9 @@ BEGIN_MESSAGE_MAP(CPakageFileDlg, CDialog)
 	ON_BN_CLICKED(IDOK, &CPakageFileDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDCANCEL, &CPakageFileDlg::OnBnClickedCancel)
 	ON_WM_DROPFILES()
+    ON_BN_CLICKED(IDC_BUTTON_SELECT_A, &CPakageFileDlg::OnBnClickedButtonSelectA)
+    ON_BN_CLICKED(IDC_BUTTON_SELECT_R, &CPakageFileDlg::OnBnClickedButtonSelectR)
+    ON_BN_CLICKED(IDC_BUTTON_CLEANUP, &CPakageFileDlg::OnBnClickedButtonCleanup)
 END_MESSAGE_MAP()
 
 
@@ -224,17 +227,32 @@ void CPakageFileDlg::OnDropFiles(HDROP hDropInfo)
 	count = DragQueryFile(hDropInfo, 0xFFFFFFFF, NULL, 0);
 	if(count)
 	{
-		m_FileList.clear();
-		m_lcList.DeleteAllItems();
-
 		for( UINT i = 0; i<count; ++i )
 		{
 			DragQueryFile(hDropInfo, i, filePath, sizeof(filePath));
 			if( PathFileExists(filePath) && PathIsDirectory(filePath) )
 			{
+
+                //检查目录是否已经存在
+                BOOL bExist = FALSE;
+                std::vector<std::wstring>::iterator it = m_FileList.begin();
+                for(;it != m_FileList.end(); ++it )
+                {
+                    std::wstring strDir = *it;
+                    if( strDir == filePath )
+                    {
+                        bExist = TRUE;
+                        break;
+                    }
+                }
+
+                if( bExist )
+                    continue;
+
 				m_FileList.push_back(filePath);
 				int nRow = m_lcList.InsertItem(m_lcList.GetItemCount(),filePath);
 				m_lcList.SetItemText(nRow, 1,L"末打包");
+                m_lcList.SetCheck(nRow,TRUE);
 				InvalidateRect(NULL);
 			}
 		}
@@ -260,8 +278,10 @@ bool CPakageFileDlg::PackDirThread()
 	{
 		strDir = (*it).c_str();
 
-		m_lcList.SetItemText(nIndex, 1,L"正在打包");
+        if( !m_lcList.GetCheck(nIndex))
+            continue;
 
+		m_lcList.SetItemText(nIndex, 1,L"正在打包");
 		if( PackDir(strApp,strDir,strDebug) )
 		{
 			m_lcList.SetItemText(nIndex, 1,L"打包成功");
@@ -272,7 +292,6 @@ bool CPakageFileDlg::PackDirThread()
 		}
 
 		m_editOutput.SetWindowText(strDebug);
-		m_editOutput.ScrollWindow(0,0); //滚动到插入点 (滚动条始终在底部，不闪动)
 
 		int nLength=m_editOutput.SendMessage(WM_GETTEXTLENGTH);   
 		m_editOutput.SetSel(nLength,   nLength);         //将光标置于最后   
@@ -281,4 +300,48 @@ bool CPakageFileDlg::PackDirThread()
 	}
 
 	return false;
+}
+void CPakageFileDlg::OnBnClickedButtonSelectA()
+{
+    // TODO: Add your control notification handler code here
+
+    std::vector<std::wstring>::iterator it = m_FileList.begin();
+    int nIndex = 0 ;
+    CString strDebug;
+    for(;it != m_FileList.end(); ++it )
+    {
+        m_lcList.SetCheck(nIndex,TRUE);
+        ++nIndex;
+    }
+
+    InvalidateRect(NULL);
+}
+
+void CPakageFileDlg::OnBnClickedButtonSelectR()
+{
+    // TODO: Add your control notification handler code here
+
+    std::vector<std::wstring>::iterator it = m_FileList.begin();
+    int nIndex = 0 ;
+    CString strDebug;
+    for(;it != m_FileList.end(); ++it )
+    {
+        m_lcList.SetCheck(nIndex,!m_lcList.GetCheck(nIndex));
+        ++nIndex;
+    }
+
+    InvalidateRect(NULL);
+}
+
+void CPakageFileDlg::OnBnClickedButtonCleanup()
+{
+    // TODO: Add your control notification handler code here
+    m_FileList.clear();
+    m_lcList.DeleteAllItems();
+
+    m_editOutput.SetWindowText(L"");
+    int nLength=m_editOutput.SendMessage(WM_GETTEXTLENGTH);   
+    m_editOutput.SetSel(nLength,   nLength);         //将光标置于最后   
+
+    InvalidateRect(NULL);
 }

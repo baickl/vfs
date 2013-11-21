@@ -33,7 +33,7 @@
 int main(int argc,char* argv[] )
 {
 
-	vfs_file *vf;
+	VSF_FILE *vf;
 
 	uvar64 realsize ;
 	char buf[VFS_MAX_FILENAME+1];
@@ -44,7 +44,7 @@ int main(int argc,char* argv[] )
 	if( VFS_TRUE != vfs_pak_add("../media/test.pak"))
 		goto ERROR;
 
-	vf = vfs_fopen("src/bzip2/randtable.c","rb");
+	vf = vfs_fopen("src/bzip2/randtable.c");
 	if( !vf )
 		goto ERROR;
 

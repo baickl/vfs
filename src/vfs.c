@@ -384,7 +384,7 @@ void vfs_fclose(VSF_FILE* file)
 
 VFS_BOOL vfs_feof(VSF_FILE* file )
 {
-	if( file && file->_M_position == file->_M_size -1 )
+	if( file && file->_M_position >= file->_M_size )
 		return VFS_TRUE;
 	else
 		return VFS_FALSE;
@@ -457,12 +457,12 @@ uvar64 vfs_fread( void* buf , uvar64 size , uvar64 count , VSF_FILE*fp )
 		if( vfs_feof(fp) )
 			break;
 
-		if( (fp->_M_size - fp->_M_position - 1 ) >= size )
+		if( (fp->_M_size - fp->_M_position ) >= size )
 		{
 			memcpy(p,&((char*)fp->_M_buffer)[fp->_M_position],(size_t)size);
 			fp->_M_position += size;
 			p += size;
-			++realread;
+			realread += size;
 		}
 	}
 
@@ -490,7 +490,7 @@ uvar64 vfs_fwrite(void* buf , uvar64 size , uvar64 count , VSF_FILE*fp )
 	realwrite = 0;
 	for( i = 0; i<count; ++i )
 	{
-		if( (fp->_M_size - fp->_M_position - 1 ) < size )
+		if( (fp->_M_size - fp->_M_position ) < size )
 		{
 			tmp = (void*)realloc(fp->_M_buffer,fp->_M_size + size );
 			if( !tmp )
@@ -503,7 +503,7 @@ uvar64 vfs_fwrite(void* buf , uvar64 size , uvar64 count , VSF_FILE*fp )
 		memcpy(&((char*)fp->_M_buffer)[fp->_M_position],p,(size_t)size);
 		fp->_M_position += size;
 		p += size;
-		++realwrite;
+		realwrite += size;
 
 	}
 

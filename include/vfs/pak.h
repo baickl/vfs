@@ -85,8 +85,8 @@ VFS_EXTERN void				pak_close( pak* );
 VFS_EXTERN var32			pak_item_sort_cmp(const void*,const void*);
 VFS_EXTERN var32			pak_item_search_cmp(const void*,const void*);
 
-VFS_EXTERN var32			pak_item_getcount( pak* );
-VFS_EXTERN pak_iteminfo*	pak_item_getinfo( pak*, var32 );
+VFS_EXTERN var32			pak_item_get_count( pak* );
+VFS_EXTERN pak_iteminfo*	pak_item_get_info( pak*, var32 );
 
 VFS_EXTERN var32			pak_item_locate( pak*, const char*);
 VFS_EXTERN VFS_BOOL			pak_item_unpack_index( pak*, var32, void*, uvar64);

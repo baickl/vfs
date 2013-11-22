@@ -219,7 +219,7 @@ void pak_close(pak* _pak)
 
 
 
-var32 pak_item_getcount(pak* _pak)
+var32 pak_item_get_count(pak* _pak)
 {
 	if( !_pak)
 		return 0;
@@ -227,7 +227,7 @@ var32 pak_item_getcount(pak* _pak)
 	return _pak->_M_header._M_count;
 }
 
-pak_iteminfo* pak_item_getinfo(pak*_pak,var32 _index )
+pak_iteminfo* pak_item_get_info(pak*_pak,var32 _index )
 {
 	if( !_pak)
 		return NULL;
@@ -266,7 +266,7 @@ var32 pak_item_unpack_index( pak* _pak,var32 _index,void *_buf,uvar64 _bufsize)
 	if( !_pak || !_buf )
 		return VFS_FALSE;
 
-	iteminfo = pak_item_getinfo(_pak,_index);
+	iteminfo = pak_item_get_info(_pak,_index);
 	if( !iteminfo )
 		return VFS_FALSE;
 

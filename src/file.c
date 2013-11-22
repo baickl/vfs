@@ -160,7 +160,7 @@ vfs_file* vfs_file_open(const char* file )
 			if(index < 0 )
 				continue;
 
-			iteminfo = pak_item_getinfo(g_vfs->_M_paks[i],index);
+			iteminfo = pak_item_get_info(g_vfs->_M_paks[i],index);
 			if( !iteminfo )
 				continue;
 

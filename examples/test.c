@@ -44,7 +44,7 @@ int pak_item_saveas(pak* _pak,const char *_file,const char *_saveas)
 	if( index < 0 )
 		goto ERROR;
 
-	item = pak_item_getinfo(_pak,index);
+	item = pak_item_get_info(_pak,index);
 	if( !item)
 		goto ERROR;
 
@@ -89,10 +89,10 @@ int main(int argc,char* argv[])
 	if( !_pak )
 		return -1;
 
-	itemcount = pak_item_getcount(_pak);
+	itemcount = pak_item_get_count(_pak);
 	for( i = 0; i<itemcount; ++i )
 	{
-		iteminfo = pak_item_getinfo(_pak,i);
+		iteminfo = pak_item_get_info(_pak,i);
 		printf("pak[%d]:\nname=%s\noffset=" I64FMTU "\nsize=" I64FMTU "\ncrc32=%d\nct=%d\ncs=" I64FMTU "\ncc=%d\n\n",
 				i,
 				iteminfo->_M_filename,

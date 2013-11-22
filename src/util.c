@@ -280,7 +280,8 @@ char* vfs_util_path_clone(char*out_path,char*path )
 		return NULL;
 
 	strcpy(out_path,path);
-	return vfs_util_path_checkfix(out_path);
+	vfs_util_path_checkfix(out_path);
+    return out_path;
 }
 
 char* vfs_util_path_append(char* path ,char* append )
@@ -304,7 +305,10 @@ char* vfs_util_path_append(char* path ,char* append )
 	vfs_util_path_add_backslash( path );
 	
 	strcat(path,p);
-	return path;
+
+    vfs_util_path_checkfix(path);
+	
+    return path;
 }
 
 char* vfs_util_path_join(char* path ,char* join )
@@ -313,6 +317,9 @@ char* vfs_util_path_join(char* path ,char* join )
 		return NULL;
 
 	strcat(path,join);
+    
+    vfs_util_path_checkfix(path);
+
 	return vfs_util_path_checkfix(path);
 }
 

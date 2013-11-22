@@ -136,12 +136,17 @@ vfs_file* vfs_file_create(void*buf,uvar64 size)
 vfs_file* vfs_file_open(const char* file )
 {
 	var32 i,index ;
-	uvar64 size;
+	var64 size;
 	void* buf;
 	pak_iteminfo* iteminfo;
 	vfs_file* vff;
 
 	FILE* fp;
+
+    char*filefullpath;
+    char filepath[VFS_MAX_FILENAME+1];
+
+    int l;
 
 	if( !file )
 		return NULL;
@@ -185,8 +190,16 @@ vfs_file* vfs_file_open(const char* file )
 	}
 
 
+    memset(filepath,0,sizeof(filepath));
+    filefullpath = file;
+    if( vfs_util_path_combine(filepath,g_vfs->_M_workpath,file) )
+    {
+        filefullpath = filepath;
+    }
+
+
 	/* 包里读取不出来，在本地读取 */
-	fp = sfopen(file,"rb");
+	fp = sfopen(filefullpath,"rb");
 	if( fp )
 	{
 		VFS_FSEEK(fp,0,SEEK_END);
@@ -203,7 +216,7 @@ vfs_file* vfs_file_open(const char* file )
 				return NULL;
 			}
 
-			if( !VFS_CHECK_FWRITE(fp,buf,size) )
+			if( !VFS_CHECK_FREAD(fp,buf,size) )
 			{
 				VFS_SAFE_FCLOSE(fp);
 				VFS_SAFE_FREE(buf);

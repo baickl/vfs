@@ -30,7 +30,7 @@
 #include <vfs/pak.h>
 #include <stdio.h>
 
-const char* media = "../media/test.pak";
+const char* media = "../media/src.pak";
 
 int pak_item_saveas(pak* _pak,const char *_file,const char *_saveas)
 {

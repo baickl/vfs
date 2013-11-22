@@ -5,12 +5,6 @@
 #include "file.h"
 
 
-class VFS_File
-{
-public:
-
-};
-
 class VFS
 {
     VFS(){}

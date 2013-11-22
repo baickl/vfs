@@ -142,6 +142,7 @@ VFS_BOOL vfs_add_pak( char* pakfile )
 
     char* prefix = NULL;
     char _filepath[VFS_MAX_FILENAME+1];
+    char _fullpath[VFS_MAX_FILENAME+1];
 
     if( !g_vfs || !pakfile )
         return VFS_FALSE;
@@ -155,11 +156,12 @@ VFS_BOOL vfs_add_pak( char* pakfile )
     }
 
     vfs_util_path_remove_filename(prefix);
+    vfs_util_path_combine(_fullpath,g_vfs->_M_workpath,pakfile);
 
-	if(vfs_pak_search(pakfile) >= 0 )
+	if(vfs_pak_search(_fullpath) >= 0 )
 		return VFS_TRUE;
 
-	p = pak_open(pakfile,prefix);
+	p = pak_open(_fullpath,prefix);
 	if( !p )
 		return VFS_FALSE;
 

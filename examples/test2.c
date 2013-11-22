@@ -42,7 +42,7 @@ int main(int argc,char* argv[] )
 	if( VFS_TRUE != vfs_create(".."))
 		goto ERROR;
 
-	if( VFS_TRUE != vfs_add_pak("media/test.pak"))
+	if( VFS_TRUE != vfs_add_pak("media/src.pak"))
 		goto ERROR;
 
 	vf = vfs_file_open("media/src/bzip2/randtable.c");

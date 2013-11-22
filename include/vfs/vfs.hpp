@@ -2,6 +2,14 @@
 #define _VFS_HPP_
 
 #include "vfs.h"
+#include "file.h"
+
+
+class VFS_File
+{
+public:
+
+};
 
 class VFS
 {
@@ -22,9 +30,9 @@ public:
 
 public:
 
-    bool Create()
+    bool Create(const char*workpath)
     {
-        if(VFS_TRUE == vfs_create())
+        if(VFS_TRUE == vfs_create(workpath))
             return true;
         else
             return false;
@@ -37,7 +45,7 @@ public:
 
     bool AddPath(const char* path )
     {
-        if( VFS_TRUE == vfs_pak_add(path) )
+        if( VFS_TRUE == vfs_add_pak(path) )
             return true;
         else
             return false;
@@ -48,10 +56,10 @@ public:
         if( !file)
             return false;
 
-        int count = vfs_pak_get_count();
+        int count = vfs_get_pak_count();
         for( int i = 0; i<count; ++i )
         {
-            pak* _pak = vfs_pak_get_index(i);
+            pak* _pak = vfs_get_pak_index(i);
             if( _pak && pak_item_locate(_pak,file) >= 0  )
                 return true;
         }

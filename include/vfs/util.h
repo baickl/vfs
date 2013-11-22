@@ -47,7 +47,7 @@ VFS_EXTERN uvar64			vfs_util_decompress( var32, const void*, uvar64,void*, uvar6
 VFS_EXTERN VFS_BOOL			vfs_util_dir_foreach(const char*,dir_foreach_item_proc);
 
 VFS_EXTERN char*			vfs_util_path_checkfix(char*);
-VFS_EXTERN char*			vfs_util_path_clone(char*,const char*);
+VFS_EXTERN char*			vfs_util_path_clone(char*,char*);
 VFS_EXTERN char*			vfs_util_path_append(char*,char*);
 VFS_EXTERN char*			vfs_util_path_join(char*,char*);
 VFS_EXTERN char*			vfs_util_path_combine(char*,const char*,const char*);

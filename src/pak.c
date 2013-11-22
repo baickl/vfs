@@ -76,7 +76,7 @@ var32 pak_item_search_cmp(const void*key,const void*item)
 	return stricmp(_key,_item->_M_filename);
 }
 
-pak* pak_open(const char* _pakfile)
+pak* pak_open(const char* _pakfile,const char* _prefix)
 {
 	var32 i;
 	pak *_pak = NULL;
@@ -84,6 +84,7 @@ pak* pak_open(const char* _pakfile)
 	pak_header header;
 	pak_iteminfo*iteminfos = NULL;
 	uvar16 filenamelen;
+    char filename[VFS_MAX_FILENAME+1];
 
 	/*
 	 * 打开文件
@@ -157,9 +158,24 @@ pak* pak_open(const char* _pakfile)
 		if( filenamelen <= 0 || filenamelen >= VFS_MAX_FILENAME )
 			goto ERROR;
 
-		memset(iteminfos[i]._M_filename,0,sizeof(iteminfos[i]._M_filename));
-		if( fread(iteminfos[i]._M_filename,1,filenamelen,fp) != filenamelen )
-			goto ERROR;
+		
+        memset(filename,0,sizeof(filename));
+        if( _prefix && _prefix[0] != 0  )
+        {
+            if( fread(filename,1,filenamelen,fp) != filenamelen )
+                goto ERROR;
+
+            memset(iteminfos[i]._M_filename,0,sizeof(iteminfos[i]._M_filename));
+            if( !vfs_util_path_combine(iteminfos[i]._M_filename,_prefix,filename))
+                goto ERROR;
+        }
+        else
+        {
+            memset(iteminfos[i]._M_filename,0,sizeof(iteminfos[i]._M_filename));
+            if( fread(iteminfos[i]._M_filename,1,filenamelen,fp) != filenamelen )
+                goto ERROR;
+        }
+		
 	}
 
 	VFS_SAFE_FCLOSE(fp);

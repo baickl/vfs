@@ -30,50 +30,24 @@
 #ifndef _VFS_VFS_H_
 #define _VFS_VFS_H_
 
-#include "pak.h"
+#include "base.h"
 
-/************************************************************************/
-/* VFS文件结构                                                  */
-/************************************************************************/
-typedef struct vfs_file_t
-{
-	uvar64		_M_size;
-	uvar64		_M_position;
-	void*		_M_buffer;
-}VSF_FILE;
+struct pak;
 
 /************************************************************************/
 /* VFS系统构建与销毁                                            */
 /************************************************************************/
-VFS_EXTERN VFS_BOOL			vfs_create();
+VFS_EXTERN VFS_BOOL			vfs_create( const char* );
 VFS_EXTERN void				vfs_destroy();
-
 
 /************************************************************************/
 /* VFS系统对PAK文件的操作                                       */
 /************************************************************************/
-VFS_EXTERN VFS_BOOL			vfs_pak_add(const char*);
-VFS_EXTERN VFS_BOOL			vfs_pak_del(const char*);
-VFS_EXTERN var32			vfs_pak_get_count();
-VFS_EXTERN pak*				vfs_pak_get_index(var32);
-VFS_EXTERN pak*				vfs_pak_get_name(const char*);
+VFS_EXTERN VFS_BOOL			vfs_add_pak( const char* );
+VFS_EXTERN VFS_BOOL			vfs_remove_pak( const char* );
 
-/************************************************************************/
-/* VFS系统中，文件的读写                                        */
-/************************************************************************/
-VFS_EXTERN VSF_FILE*		vfs_fcreate( void*buf, uvar64 size) ;
-VFS_EXTERN VSF_FILE*		vfs_fopen( const char* );
-VFS_EXTERN void				vfs_fclose( VSF_FILE* );
-
-VFS_EXTERN VFS_BOOL			vfs_feof( VSF_FILE* );
-
-VFS_EXTERN uvar64			vfs_ftell(VSF_FILE*);
-VFS_EXTERN uvar64			vfs_fseek(VSF_FILE*,var64,var32);
-VFS_EXTERN uvar64			vfs_fsize(VSF_FILE*);
-
-VFS_EXTERN uvar64			vfs_fread(void*,uvar64,uvar64,VSF_FILE*);
-VFS_EXTERN uvar64			vfs_fwrite(void*,uvar64,uvar64,VSF_FILE*);
-
-VFS_EXTERN VFS_BOOL			vfs_fsave(VSF_FILE*,const char*);
+VFS_EXTERN var32			vfs_get_pak_count( );
+VFS_EXTERN struct pak*		vfs_get_pak_index( var32 );
+VFS_EXTERN struct pak*		vfs_get_pak_name( const char* );
 
 #endif

@@ -46,20 +46,6 @@
 #define VFS_MAX_FILENAME		(512)
 
 /************************************************************************/
-/* 压缩类型定义                                                */
-/************************************************************************/
-#define VFS_COMPRESS_NONE		(0x0000)
-#define VFS_COMPRESS_BZIP2		(0x0001)
-
-
-/************************************************************************/
-/* BOOL值模拟                                                   */
-/************************************************************************/
-#define VFS_BOOL				int
-#define VFS_TRUE				(1)
-#define VFS_FALSE				(0)
-
-/************************************************************************/
 /* 常用整型定义                                                */
 /************************************************************************/
 #if defined(_MSC_VER) || ((__BORLANDC__ >= 0x530) && !defined(__STRICT_ANSI__))
@@ -134,9 +120,29 @@ typedef unsigned int                                uvar32;
 #else
 	#define swprintf _snwprintf
 	#define snprintf _snprintf
+    #define stricmp  strcasecmp
 #endif
 
+/************************************************************************/
+/* 压缩类型定义                                                */
+/************************************************************************/
+#define VFS_COMPRESS_NONE   (0x0000)
+#define VFS_COMPRESS_BZIP2  (0x0001)
 
+/************************************************************************/
+/* BOOL值模拟                                                   */
+/************************************************************************/
+typedef var32 VFS_BOOL;
+
+#define VFS_TRUE  (1)
+#define VFS_FALSE (0)
+
+/************************************************************************/
+/* 检查文件存在的结果                                          */
+/************************************************************************/
+#define VFS_FILE_NOT_EXISTS	        (0)
+#define VFS_FILE_EXISTS_IN_PAK		(1)
+#define VFS_FILE_EXISTS_IN_DIR		(2)
 
 /************************************************************************/
 /* MAKE_CC                                                              */
@@ -158,7 +164,6 @@ typedef unsigned int                                uvar32;
 #ifndef _WIN32 
 	#define VFS_FSEEK	        fseeko
 	#define VFS_FTELL	        ftello
-	#define stricmp		        strcasecmp
 #else
 	#define VFS_FSEEK	        _fseeki64
 	#define VFS_FTELL	        _ftelli64

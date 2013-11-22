@@ -272,7 +272,7 @@ char* vfs_util_path_checkfix(char* path )
 }
 
 
-char* vfs_util_path_clone(char*out_path,const char*path )
+char* vfs_util_path_clone(char*out_path,char*path )
 {
 	if( !out_path || !path )
 		return NULL;
@@ -366,10 +366,48 @@ char* vfs_util_path_remove_backslash(char* path )
 
 char* vfs_util_path_remove_filename(char* path )
 {
+    var32 len;
+    if( !path )
+        return path;
+
+    len = strlen(path);
+    if( len <= 0 )
+        return path;
+
+    while( len > 0   )
+    {
+        --len;
+        if( path[len] == '/' || path[len] == '\\' )
+            break;
+
+        path[len] = 0;
+    }
+
 	return path;
 }
 
 char* vfs_util_path_remove_extension(char* path )
 {
+    var32 len;
+    if( !path )
+        return path;
+
+    len = strlen(path);
+    if( len <= 0 )
+        return path;
+
+    while( len > 0   )
+    {
+        --len;
+        if( path[len] == '/' || path[len] == '\\' )
+            break;
+
+        if( path[len] == '.' )
+        {
+            path[len] = 0;
+            break;
+        }
+    }
+
 	return path;
 }

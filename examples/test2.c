@@ -28,29 +28,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
 #include <vfs/vfs.h>
-
+#include <vfs/file.h>
+#include <stdio.h>
 
 int main(int argc,char* argv[] )
 {
 
-	VSF_FILE *vf;
+	vfs_file *vf;
 
-	uvar64 realsize ;
+	size_t realsize ;
 	char buf[VFS_MAX_FILENAME+1];
 
-	if( VFS_TRUE != vfs_create())
+	if( VFS_TRUE != vfs_create(".."))
 		goto ERROR;
 
-	if( VFS_TRUE != vfs_pak_add("../media/test.pak"))
+	if( VFS_TRUE != vfs_add_pak("media/test.pak"))
 		goto ERROR;
 
-	vf = vfs_fopen("src/bzip2/randtable.c");
+	vf = vfs_file_open("src/bzip2/randtable.c");
 	if( !vf )
 		goto ERROR;
 
-	while( !vfs_feof(vf) )
+	while( !vfs_file_eof(vf) )
 	{
-		realsize = vfs_fread(buf,1,(size_t)VFS_MAX_FILENAME,vf);
+		realsize = vfs_file_read(buf,1,(size_t)VFS_MAX_FILENAME,vf);
 		if( realsize > 0 )
 		{
 			buf[realsize] = 0;
@@ -58,7 +59,7 @@ int main(int argc,char* argv[] )
 		}
 	}
 
-	vfs_fclose(vf);
+	vfs_file_close(vf);
 	vfs_destroy();
 	return 0;
 

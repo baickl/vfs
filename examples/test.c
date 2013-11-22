@@ -85,7 +85,7 @@ int main(int argc,char* argv[])
 
 	char filename[VFS_MAX_FILENAME];
 
-	_pak = pak_open(media);
+	_pak = pak_open(media,NULL);
 	if( !_pak )
 		return -1;
 

@@ -32,22 +32,17 @@
 
 #include "base.h"
 
-struct pak;
-
 /************************************************************************/
-/* VFS系统构建与销毁                                            */
+/* VFS系统构建与销毁                                                    */
 /************************************************************************/
 VFS_EXTERN VFS_BOOL			vfs_create( const char* );
 VFS_EXTERN void				vfs_destroy();
 
 /************************************************************************/
-/* VFS系统对PAK文件的操作                                       */
+/* VFS系统对PAK文件的操作                                               */
 /************************************************************************/
 VFS_EXTERN VFS_BOOL			vfs_add_pak( const char* );
 VFS_EXTERN VFS_BOOL			vfs_remove_pak( const char* );
 
-VFS_EXTERN var32			vfs_get_pak_count( );
-VFS_EXTERN struct pak*		vfs_get_pak_index( var32 );
-VFS_EXTERN struct pak*		vfs_get_pak_name( const char* );
 
 #endif

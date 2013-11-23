@@ -28,10 +28,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
 #include <vfs/vfs.h>
-#include <vfs/pak.h>
+#include "vfs_private.h"
+#include "pak.h"
 #include <stdio.h>
 #include <string.h>
-#include "vfs_private.h"
+
 
 vfs *g_vfs = NULL;
 
@@ -135,7 +136,7 @@ void vfs_destroy()
 	VFS_SAFE_FREE(g_vfs);
 }
 
-VFS_BOOL vfs_add_pak( char* pakfile )
+VFS_BOOL vfs_add_pak( const char* pakfile )
 {
 	pak* p;
 	pak** _paks;
@@ -234,7 +235,7 @@ var32 vfs_get_pak_count()
 	return 0;
 }
 
-struct pak* vfs_get_pak_index(var32 idx )
+pak* vfs_get_pak_index(var32 idx )
 {
 	if( g_vfs && idx >= 0 && idx <= g_vfs->_M_count )
 		return g_vfs->_M_paks[idx];
@@ -242,7 +243,7 @@ struct pak* vfs_get_pak_index(var32 idx )
 	return NULL;
 }
 
-struct pak* vfs_get_pak_name(const char* pakfile)
+pak* vfs_get_pak_name(const char* pakfile)
 {	
 	pak* p;
 	var32 index;

@@ -29,10 +29,10 @@
 ***********************************************************************************/
 #include <vfs/file.h>
 #include <vfs/vfs.h>
-#include <vfs/pak.h>
+#include "pak.h"
+#include "vfs_private.h"
 #include <stdio.h>
 #include <string.h>
-#include "vfs_private.h"
 
 static FILE* sfopen(const char* filename,const char* mode)
 {

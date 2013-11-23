@@ -1,10 +1,9 @@
 
 CC = gcc
 AR =ar
-INCLUDE = ./../include
 
 WARN=-O2 -Wall -fPIC -W -ansi -pedantic
-INCS=-I$(INCLUDE)
+INCS=-I./../include -I./../src
 DEFINES=-D_FILE_OFFSET_BITS=64
 CFLAGS = $(WARN) $(INCS) $(DEFINES) 
 LIB_OPTION=-shared

@@ -76,6 +76,46 @@ var32 pak_item_search_cmp(const void*key,const void*item)
 	return stricmp(_key,_item->_M_filename);
 }
 
+
+static unsigned int pak_item_hashcode(void *k)  
+{  
+    const unsigned char *name = (const unsigned char *)k;  
+    unsigned long h = 0, g;  
+    int i; 
+    int len;
+
+    len = strlen((char*)k);
+  
+    for(i=0;i<len;i++)  
+    {  
+        h = (h << 4) + (unsigned long)(name[i]); 
+        if ((g = (h & 0xF0000000UL))!=0)       
+            h ^= (g >> 24);  
+        h &= ~g;  
+    }  
+
+
+    printf("hash=%u,key=%s \n",h,name);
+
+    return (unsigned int)h;  
+}
+
+static int pak_item_equalkeys(void *k1, void *k2)
+{
+    char  *_k1,*_k2;
+
+    _k1 = (char*)k1;
+    _k2 = (char*)k2;
+
+    printf("compare keys k1:%s,k2:%s\n",_k1,_k2);
+    return (0 == stricmp(_k1,_k2));
+}
+
+DEFINE_HASHTABLE_INSERT(pak_item_insert, char, pak_iteminfo);
+DEFINE_HASHTABLE_SEARCH(pak_item_search, char, pak_iteminfo);
+DEFINE_HASHTABLE_REMOVE(pak_item_remove, char, pak_iteminfo);
+
+
 pak* pak_open(const char* _pakfile,const char* _prefix)
 {
 	var32 i;
@@ -85,6 +125,11 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	pak_iteminfo*iteminfos = NULL;
 	uvar16 filenamelen;
     char filename[VFS_MAX_FILENAME+1];
+
+    int keylen = 0;
+    char* key = NULL;
+
+    struct hashtable *ht_iteminfos = NULL;
 
 	/*
 	 * 打开文件
@@ -127,6 +172,11 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	iteminfos = (pak_iteminfo*)malloc(header._M_count*sizeof(pak_iteminfo));
 	if( !iteminfos )
 		goto ERROR;	
+
+    ht_iteminfos = create_hashtable(header._M_count,pak_item_hashcode,pak_item_equalkeys);
+    if( !ht_iteminfos )
+        goto ERROR;    
+
 
 	for( i = 0; i<header._M_count; ++i )
 	{
@@ -175,7 +225,17 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
             if( fread(iteminfos[i]._M_filename,1,filenamelen,fp) != filenamelen )
                 goto ERROR;
         }
-		
+
+        keylen = strlen(iteminfos[i]._M_filename);
+        key = malloc(keylen+1);
+        if( !key )
+            goto ERROR;
+
+        strcpy(key,iteminfos[i]._M_filename);
+
+        pak_item_insert(ht_iteminfos,key,&iteminfos[i]);
+        key = NULL;
+        keylen = 0;
 	}
 
 	VFS_SAFE_FCLOSE(fp);
@@ -193,16 +253,22 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	strcpy(_pak->_M_filename,_pakfile);
 	memcpy(&_pak->_M_header,&header,sizeof(header));
 	_pak->_M_iteminfos = iteminfos;
+    _pak->_M_ht_iteminfos = ht_iteminfos;
 
 	/*
 	 * 排序
 	 * */
-	qsort((void*)_pak->_M_iteminfos,_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_sort_cmp);
+	/*qsort((void*)_pak->_M_iteminfos,_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_sort_cmp);*/
 	return _pak;
 
 ERROR:
 	VFS_SAFE_FCLOSE(fp);
 	VFS_SAFE_FREE(iteminfos);
+    if( ht_iteminfos )
+    {
+        hashtable_destroy(ht_iteminfos,0);
+    }
+
 	return NULL;
 }
 
@@ -213,6 +279,17 @@ void pak_close(pak* _pak)
 
 	if( _pak->_M_iteminfos)
 		VFS_SAFE_FREE(_pak->_M_iteminfos);
+
+
+    printf("pak_close 1\n");
+
+    if( _pak->_M_ht_iteminfos )
+    {
+        hashtable_destroy(_pak->_M_ht_iteminfos,0);
+        _pak->_M_ht_iteminfos = NULL;
+    }
+
+    printf("pak_close 2\n");
 
 	VFS_SAFE_FREE(_pak);
 }
@@ -247,7 +324,8 @@ var32  pak_item_locate(pak*_pak,const char* _file)
 		return -1;
 
 	vfs_util_path_checkfix(_file);
-	iteminfo = (pak_iteminfo*)bsearch(_file,_pak->_M_iteminfos,_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_search_cmp);
+/*	iteminfo = (pak_iteminfo*)bsearch(_file,_pak->_M_iteminfos,_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_search_cmp); */
+    iteminfo = pak_item_search( _pak->_M_ht_iteminfos,_file);
 	if( !iteminfo )
 		return -1;
 

@@ -71,10 +71,10 @@ typedef struct pak_iteminfo_s
  * */
 typedef struct pak
 {
-	char			_M_filename[VFS_MAX_FILENAME+1];
-	pak_header		_M_header;
-	pak_iteminfo*	_M_iteminfos;
+	char			    _M_filename[VFS_MAX_FILENAME+1];
+	pak_header		    _M_header;
+	pak_iteminfo       *_M_iteminfos;
+    struct hashtable   *_M_ht_iteminfos;
 }pak;
-
 
 #endif/*_VFS_PAK_PRIVATE_H_*/

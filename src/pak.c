@@ -95,8 +95,6 @@ static unsigned int pak_item_hashcode(void *k)
     }  
 
 
-    printf("hash=%u,key=%s \n",h,name);
-
     return (unsigned int)h;  
 }
 
@@ -107,7 +105,6 @@ static int pak_item_equalkeys(void *k1, void *k2)
     _k1 = (char*)k1;
     _k2 = (char*)k2;
 
-    printf("compare keys k1:%s,k2:%s\n",_k1,_k2);
     return (0 == stricmp(_k1,_k2));
 }
 
@@ -280,16 +277,11 @@ void pak_close(pak* _pak)
 	if( _pak->_M_iteminfos)
 		VFS_SAFE_FREE(_pak->_M_iteminfos);
 
-
-    printf("pak_close 1\n");
-
     if( _pak->_M_ht_iteminfos )
     {
         hashtable_destroy(_pak->_M_ht_iteminfos,0);
         _pak->_M_ht_iteminfos = NULL;
     }
-
-    printf("pak_close 2\n");
 
 	VFS_SAFE_FREE(_pak);
 }

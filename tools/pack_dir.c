@@ -98,7 +98,7 @@ VFS_BOOL pak_begin( const char *path )
 	g_pak->_M_header._M_version = VFS_VERSION;
 	g_pak->_M_header._M_count = 0;
 	g_pak->_M_iteminfos = NULL;
-
+    g_pak->_M_ht_iteminfos = NULL;
 	g_maxcount = 0;
 
 	return VFS_TRUE;
@@ -191,8 +191,6 @@ VFS_BOOL fwrite_iteminfos(FILE* fp)
 
 	if( g_pak->_M_header._M_count <= 0 )
 		goto LBL_FI_ERROR;
-
-	qsort(g_pak->_M_iteminfos,g_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_sort_cmp);
 
 	for( i = 0; i<g_pak->_M_header._M_count; ++i )
 	{

@@ -32,6 +32,8 @@
 
 #include "pak_private.h"
 
+typedef var32 (*pak_item_foreach_proc)(pak*,pak_iteminfo*,int,void*);
+
 VFS_EXTERN pak*				pak_open( const char*,const char* prefix );
 VFS_EXTERN void				pak_close( pak* );
 
@@ -39,10 +41,9 @@ VFS_EXTERN var32			pak_item_sort_cmp(const void*,const void*);
 VFS_EXTERN var32			pak_item_search_cmp(const void*,const void*);
 
 VFS_EXTERN var32			pak_item_get_count( pak* );
-VFS_EXTERN pak_iteminfo*	pak_item_get_info( pak*, var32 );
+VFS_EXTERN VFS_BOOL         pak_item_foreach( pak*,pak_item_foreach_proc,void*p);
 
-VFS_EXTERN var32			pak_item_locate( pak*, const char*);
-VFS_EXTERN VFS_BOOL			pak_item_unpack_index( pak*, var32, void*, uvar64);
+VFS_EXTERN pak_iteminfo    *pak_item_locate( pak*, const char*);
 VFS_EXTERN VFS_BOOL			pak_item_unpack_filename( pak*, const char*, void*, uvar64) ;
 
 #endif/*_VFS_PAK_H_*/

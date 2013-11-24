@@ -156,20 +156,14 @@ vfs_file* vfs_file_open(const char* file )
 	{
 		for( i = 0; i<g_vfs->_M_count; ++i )
 		{
-			index = pak_item_locate(g_vfs->_M_paks[i],file);
-			if(index < 0 )
-				continue;
-
-			iteminfo = pak_item_get_info(g_vfs->_M_paks[i],index);
-			if( !iteminfo )
-				continue;
+			iteminfo = pak_item_locate(g_vfs->_M_paks[i],file);
 
 			size = iteminfo->_M_size;
 			buf = (void*)malloc(size);
 			if( !buf )
 				return NULL;
 
-			if( VFS_TRUE != pak_item_unpack_index(g_vfs->_M_paks[i],index,buf,size) ) 
+			if( VFS_TRUE != pak_item_unpack_filename(g_vfs->_M_paks[i],file,buf,size) ) 
 			{
 				VFS_SAFE_FREE(buf);
 				return NULL;

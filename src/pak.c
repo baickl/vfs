@@ -77,40 +77,6 @@ var32 pak_item_search_cmp(const void*key,const void*item)
 }
 
 
-static unsigned int pak_item_hashcode(void *k)  
-{  
-    const unsigned char *name = (const unsigned char *)k;  
-    unsigned long h = 0, g;  
-    int i; 
-    int len;
-
-    len = strlen((char*)k);
-  
-    for(i=0;i<len;i++)  
-    {  
-        h = (h << 4) + (unsigned long)(name[i]); 
-        if ((g = (h & 0xF0000000UL))!=0)       
-            h ^= (g >> 24);  
-        h &= ~g;  
-    }  
-
-
-    return (unsigned int)h;  
-}
-
-static int pak_item_equalkeys(void *k1, void *k2)
-{
-    char  *_k1,*_k2;
-
-    _k1 = (char*)k1;
-    _k2 = (char*)k2;
-
-    return (0 == stricmp(_k1,_k2));
-}
-
-DEFINE_HASHTABLE_INSERT(pak_item_insert, char, pak_iteminfo);
-DEFINE_HASHTABLE_SEARCH(pak_item_search, char, pak_iteminfo);
-DEFINE_HASHTABLE_REMOVE(pak_item_remove, char, pak_iteminfo);
 
 
 pak* pak_open(const char* _pakfile,const char* _prefix)
@@ -123,10 +89,14 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	uvar16 filenamelen;
     char filename[VFS_MAX_FILENAME+1];
 
-    int keylen = 0;
+    var32 prefixlen  = 0;
+    var32 keylen = 0;
     char* key = NULL;
 
     struct hashtable *ht_iteminfos = NULL;
+
+    if( _prefix )
+        prefixlen = strlen(_prefix);
 
 	/*
 	 * 打开文件
@@ -165,11 +135,6 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	/* 
 	 * 提取文件信息
 	 * */
-
-	iteminfos = (pak_iteminfo*)malloc(header._M_count*sizeof(pak_iteminfo));
-	if( !iteminfos )
-		goto ERROR;	
-
     ht_iteminfos = create_hashtable(header._M_count,pak_item_hashcode,pak_item_equalkeys);
     if( !ht_iteminfos )
         goto ERROR;    
@@ -178,24 +143,28 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	for( i = 0; i<header._M_count; ++i )
 	{
 
-		if( fread(&iteminfos[i]._M_offset,1,sizeof(iteminfos[i]._M_offset),fp) != sizeof(iteminfos[i]._M_offset))
+        iteminfos = (pak_iteminfo*)malloc(sizeof(pak_iteminfo));
+        if( !iteminfos )
+            goto ERROR;
+
+		if( fread(&iteminfos->_M_offset,1,sizeof(iteminfos->_M_offset),fp) != sizeof(iteminfos->_M_offset))
 			goto ERROR;
 
-		iteminfos[i]._M_offset += header._M_offset; 
+		iteminfos->_M_offset += header._M_offset; 
 		
-		if( fread(&iteminfos[i]._M_size,1,sizeof(iteminfos[i]._M_size),fp) != sizeof(iteminfos[i]._M_size))
+		if( fread(&iteminfos->_M_size,1,sizeof(iteminfos->_M_size),fp) != sizeof(iteminfos->_M_size))
 			goto ERROR;
 
-		if( fread(&iteminfos[i]._M_crc32,1,sizeof(iteminfos[i]._M_crc32),fp) != sizeof(iteminfos[i]._M_crc32))
+		if( fread(&iteminfos->_M_crc32,1,sizeof(iteminfos->_M_crc32),fp) != sizeof(iteminfos->_M_crc32))
 			goto ERROR;	
 
-		if( fread(&iteminfos[i]._M_compress_type,1,sizeof(iteminfos[i]._M_compress_type),fp) != sizeof(iteminfos[i]._M_compress_type))
+		if( fread(&iteminfos->_M_compress_type,1,sizeof(iteminfos->_M_compress_type),fp) != sizeof(iteminfos->_M_compress_type))
 			goto ERROR;
 
-		if( fread(&iteminfos[i]._M_compress_size,1,sizeof(iteminfos[i]._M_compress_size),fp) != sizeof(iteminfos[i]._M_compress_size))
+		if( fread(&iteminfos->_M_compress_size,1,sizeof(iteminfos->_M_compress_size),fp) != sizeof(iteminfos->_M_compress_size))
 			goto ERROR;	
 
-		if( fread(&iteminfos[i]._M_compress_crc32,1,sizeof(iteminfos[i]._M_compress_crc32),fp) != sizeof(iteminfos[i]._M_compress_crc32))
+		if( fread(&iteminfos->_M_compress_crc32,1,sizeof(iteminfos->_M_compress_crc32),fp) != sizeof(iteminfos->_M_compress_crc32))
 			goto ERROR;
 
 		filenamelen = 0;
@@ -205,32 +174,36 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 		if( filenamelen <= 0 || filenamelen >= VFS_MAX_FILENAME )
 			goto ERROR;
 
-		
         memset(filename,0,sizeof(filename));
-        if( _prefix && _prefix[0] != 0  )
-        {
-            if( fread(filename,1,filenamelen,fp) != filenamelen )
-                goto ERROR;
+        if( fread(filename,1,filenamelen,fp) != filenamelen )
+            goto ERROR;
 
-            memset(iteminfos[i]._M_filename,0,sizeof(iteminfos[i]._M_filename));
-            if( !vfs_util_path_combine(iteminfos[i]._M_filename,_prefix,filename))
+        keylen = filenamelen + prefixlen;
+        key = malloc(keylen+1);
+        if( !key )
+            goto ERROR;
+		
+        memset(key,0,keylen);
+        if( prefixlen > 0  )
+        {            
+            if( !vfs_util_path_combine(key,_prefix,filename))
                 goto ERROR;
         }
         else
         {
-            memset(iteminfos[i]._M_filename,0,sizeof(iteminfos[i]._M_filename));
-            if( fread(iteminfos[i]._M_filename,1,filenamelen,fp) != filenamelen )
+            if( !vfs_util_path_clone(key,filename) )
                 goto ERROR;
         }
 
-        keylen = strlen(iteminfos[i]._M_filename);
-        key = malloc(keylen+1);
-        if( !key )
+        if( !pak_item_insert(ht_iteminfos,key,iteminfos))
+        {
+            VFS_SAFE_FREE(key);
             goto ERROR;
+        }
 
-        strcpy(key,iteminfos[i]._M_filename);
-
-        pak_item_insert(ht_iteminfos,key,&iteminfos[i]);
+        iteminfos->_M_filename = key;
+        
+        /* 清数据 */
         key = NULL;
         keylen = 0;
 	}
@@ -249,13 +222,8 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	memset(&_pak->_M_header,0,sizeof(_pak->_M_header));
 	strcpy(_pak->_M_filename,_pakfile);
 	memcpy(&_pak->_M_header,&header,sizeof(header));
-	_pak->_M_iteminfos = iteminfos;
     _pak->_M_ht_iteminfos = ht_iteminfos;
 
-	/*
-	 * 排序
-	 * */
-	/*qsort((void*)_pak->_M_iteminfos,_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_sort_cmp);*/
 	return _pak;
 
 ERROR:
@@ -274,18 +242,13 @@ void pak_close(pak* _pak)
 	if( !_pak )
 		return;
 
-	if( _pak->_M_iteminfos)
-		VFS_SAFE_FREE(_pak->_M_iteminfos);
-
     if( _pak->_M_ht_iteminfos )
     {
-        hashtable_destroy(_pak->_M_ht_iteminfos,0);
+        hashtable_destroy(_pak->_M_ht_iteminfos,1);
         _pak->_M_ht_iteminfos = NULL;
     }
-
 	VFS_SAFE_FREE(_pak);
 }
-
 
 
 var32 pak_item_get_count(pak* _pak)
@@ -296,36 +259,65 @@ var32 pak_item_get_count(pak* _pak)
 	return _pak->_M_header._M_count;
 }
 
-pak_iteminfo* pak_item_get_info(pak*_pak,var32 _index )
+
+VFS_BOOL pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p )
 {
-	if( !_pak)
-		return NULL;
+    var32 ret;
+    int index;
+    struct hashtable_itr *itr;
+    pak_iteminfo * iteminfo;
+    if( !_pak || !_pak->_M_ht_iteminfos )
+        return VFS_FALSE;
 
-	if( _index < 0 || _index >= _pak->_M_header._M_count )
-		return NULL;
+    if( !proc )
+        return VFS_FALSE;
 
-	return &_pak->_M_iteminfos[_index];
+    index = 0;
+    itr = hashtable_iterator(_pak->_M_ht_iteminfos);
+    if( !itr )
+        return VFS_FALSE;
+
+    if (hashtable_count(_pak->_M_ht_iteminfos) > 0)
+    {
+        do {
+            
+            iteminfo =(pak_iteminfo*) hashtable_iterator_value(itr);
+            ret = proc(_pak,iteminfo,index++,p);
+            switch(ret)
+            {
+                case FOREACH_BREAK:
+                    {
+                        free(itr);
+                        return VFS_TRUE;
+                    }
+                case FOREACH_CONTINUE:
+                case FOREACH_IGNORE:
+                default:
+                    break; 
+            }
+
+        } while (hashtable_iterator_advance(itr));
+    }
+
+    free(itr);
+    return VFS_TRUE;
+
 }
 
-var32  pak_item_locate(pak*_pak,const char* _file)
+pak_iteminfo *pak_item_locate(pak*_pak,const char* _file)
 {
-	var32 ret = -1;
 	pak_iteminfo* iteminfo=NULL;
 
 	if( !_pak || !_file)
-		return -1;
+		return NULL;
 
 	vfs_util_path_checkfix(_file);
-/*	iteminfo = (pak_iteminfo*)bsearch(_file,_pak->_M_iteminfos,_pak->_M_header._M_count,sizeof(pak_iteminfo),pak_item_search_cmp); */
     iteminfo = pak_item_search( _pak->_M_ht_iteminfos,_file);
-	if( !iteminfo )
-		return -1;
-
-	return (iteminfo-_pak->_M_iteminfos);
+    return iteminfo;
 
 }
 
-var32 pak_item_unpack_index( pak* _pak,var32 _index,void *_buf,uvar64 _bufsize)
+VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bufsize)
 {
 	pak_iteminfo* iteminfo = NULL;
 	FILE* fp = NULL;
@@ -333,10 +325,10 @@ var32 pak_item_unpack_index( pak* _pak,var32 _index,void *_buf,uvar64 _bufsize)
 
 	uvar32 crc32;
 
-	if( !_pak || !_buf )
+	if( !_pak || !_buf || !_file)
 		return VFS_FALSE;
 
-	iteminfo = pak_item_get_info(_pak,_index);
+	iteminfo = pak_item_locate(_pak,_file);
 	if( !iteminfo )
 		return VFS_FALSE;
 
@@ -402,14 +394,4 @@ ERROR:
 	VFS_SAFE_FCLOSE(fp);
 
 	return VFS_FALSE;
-}
-
-VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bufsize)
-{
-	var32 index;
-	index = pak_item_locate(_pak,_file);
-	if( index < 0 )
-		return VFS_FALSE;
-
-	return pak_item_unpack_index(_pak,index,_buf,_bufsize);
 }

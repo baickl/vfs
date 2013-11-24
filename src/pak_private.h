@@ -32,10 +32,8 @@
 
 #include <vfs/base.h>
 #include "hashtable/hashtable.h"
+#include "hashtable/hashtable_itr.h"
 
-/*
- * header DEFINE
- * */
 typedef struct pak_header_s
 {
 	var32			_M_flag;
@@ -49,9 +47,6 @@ static const var32 pak_header_size = sizeof(var32)+
 									 sizeof(var32)+
 									 sizeof(uvar64);
 
-/* 
- * iteminfo DEFINE
- * */
 typedef struct pak_iteminfo_s
 {
 	uvar64			_M_offset;
@@ -63,18 +58,50 @@ typedef struct pak_iteminfo_s
 	uvar64			_M_compress_size;
 	uvar32			_M_compress_crc32;
 
-	char			_M_filename[VFS_MAX_FILENAME+1];
+	char		   *_M_filename;
 }pak_iteminfo;
 
-/* 
- * pak DEFINE
- * */
 typedef struct pak
 {
 	char			    _M_filename[VFS_MAX_FILENAME+1];
 	pak_header		    _M_header;
-	pak_iteminfo       *_M_iteminfos;
     struct hashtable   *_M_ht_iteminfos;
 }pak;
+
+static unsigned int pak_item_hashcode(void *k)  
+{  
+    const unsigned char *name = (const unsigned char *)k;  
+    unsigned long h = 0, g;  
+    int i; 
+    int len;
+
+    len = strlen((char*)k);
+  
+    for(i=0;i<len;i++)  
+    {  
+        h = (h << 4) + (unsigned long)(name[i]); 
+        if ((g = (h & 0xF0000000UL))!=0)       
+            h ^= (g >> 24);  
+        h &= ~g;  
+    }  
+
+
+    return (unsigned int)h;  
+}
+
+static int pak_item_equalkeys(void *k1, void *k2)
+{
+    char  *_k1,*_k2;
+
+    _k1 = (char*)k1;
+    _k2 = (char*)k2;
+
+    return (0 == stricmp(_k1,_k2));
+}
+
+DEFINE_HASHTABLE_INSERT(pak_item_insert, char, pak_iteminfo);
+DEFINE_HASHTABLE_SEARCH(pak_item_search, char, pak_iteminfo);
+DEFINE_HASHTABLE_REMOVE(pak_item_remove, char, pak_iteminfo);
+DEFINE_HASHTABLE_ITERATOR_SEARCH(pak_item_iter_search, char);
 
 #endif/*_VFS_PAK_PRIVATE_H_*/

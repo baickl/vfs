@@ -32,6 +32,29 @@
 
 const char* media = "../media/src.pak";
 
+int pak_item_saveas(pak* _pak,const char *_file,const char *_saveas);
+
+var32 pak_item_foreach_for_save(pak* _pak,pak_iteminfo* iteminfo,int index,void*p )
+{
+    char filename[VFS_MAX_FILENAME];
+    printf("pak[%d]:\nname=%s\noffset=" I64FMTU "\nsize=" I64FMTU "\ncrc32=%d\nct=%d\ncs=" I64FMTU "\ncc=%d\n\n",
+            index,
+            iteminfo->_M_filename,
+            iteminfo->_M_offset,
+            iteminfo->_M_size,
+            iteminfo->_M_crc32,
+            iteminfo->_M_compress_type,
+            iteminfo->_M_compress_size,
+            iteminfo->_M_compress_crc32);
+
+    sprintf(filename,"file_%d",index);
+    if(pak_item_saveas(_pak,iteminfo->_M_filename,filename))
+        printf("pak save file:%s to %s\n",iteminfo->_M_filename,filename);
+
+    return FOREACH_CONTINUE;
+}
+
+
 int pak_item_saveas(pak* _pak,const char *_file,const char *_saveas)
 {
 	pak_iteminfo* item;
@@ -40,11 +63,7 @@ int pak_item_saveas(pak* _pak,const char *_file,const char *_saveas)
 	void* buf = NULL;
 	FILE* fp = NULL;
 
-	index  = pak_item_locate(_pak,_file);
-	if( index < 0 )
-		goto ERROR;
-
-	item = pak_item_get_info(_pak,index);
+	item  = pak_item_locate(_pak,_file);
 	if( !item)
 		goto ERROR;
 
@@ -76,38 +95,21 @@ ERROR:
 
 int main(int argc,char* argv[])
 {
-
-	int i;
 	pak *_pak;
 
 	int itemcount;
 	pak_iteminfo *iteminfo;
 
-	char filename[VFS_MAX_FILENAME];
 
 	_pak = pak_open(media,NULL);
 	if( !_pak )
 		return -1;
 
 	itemcount = pak_item_get_count(_pak);
-	for( i = 0; i<itemcount; ++i )
-	{
-		iteminfo = pak_item_get_info(_pak,i);
-		printf("pak[%d]:\nname=%s\noffset=" I64FMTU "\nsize=" I64FMTU "\ncrc32=%d\nct=%d\ncs=" I64FMTU "\ncc=%d\n\n",
-				i,
-				iteminfo->_M_filename,
-				iteminfo->_M_offset,
-				iteminfo->_M_size,
-				iteminfo->_M_crc32,
-				iteminfo->_M_compress_type,
-				iteminfo->_M_compress_size,
-				iteminfo->_M_compress_crc32);
-
-		sprintf(filename,"file_%d",i);
-		if(pak_item_saveas(_pak,iteminfo->_M_filename,filename))
-			printf("pak save file:%s to %s\n",iteminfo->_M_filename,filename);
-	}
-	pak_close(_pak);
+	if( itemcount > 0 )
+        pak_item_foreach(_pak,pak_item_foreach_for_save,NULL);
+	
+    pak_close(_pak);
 }
 
 

@@ -97,41 +97,49 @@ VFS_BOOL pak_begin( const char *path )
 	g_pak->_M_header._M_flag = MAKE_CC_ID('p','a','k','x');
 	g_pak->_M_header._M_version = VFS_VERSION;
 	g_pak->_M_header._M_count = 0;
-	g_pak->_M_iteminfos = NULL;
-    g_pak->_M_ht_iteminfos = NULL;
-	g_maxcount = 0;
+    g_pak->_M_ht_iteminfos = create_hashtable(256,pak_item_hashcode,pak_item_equalkeys);
+    if( !g_pak->_M_ht_iteminfos )
+        return VFS_FALSE;
 
 	return VFS_TRUE;
 }
 
 VFS_BOOL pak_additeminfo( const char* filepath )
 {
+
+    var32 filenamelen;
 	pak_iteminfo* iteminfo;
+    
+    if( !g_pak || !g_pak->_M_ht_iteminfos  )
+        return VFS_FALSE;
 
-	if( g_pak->_M_header._M_count >= g_maxcount )
-	{
-		if( g_pak->_M_header._M_count == 0 )
-		{
-			g_maxcount = 256;
-			g_pak->_M_iteminfos = (pak_iteminfo*)malloc(g_maxcount*sizeof(pak_iteminfo));
-			
-		}
-		else
-		{
-			g_maxcount += g_maxcount;
-			g_pak->_M_iteminfos = (pak_iteminfo*)realloc(g_pak->_M_iteminfos,g_maxcount*sizeof(pak_iteminfo));
-		}
-
-		
-		if( !g_pak->_M_iteminfos )
-			return VFS_FALSE;
-	}
-
-	iteminfo = &g_pak->_M_iteminfos[g_pak->_M_header._M_count++];
-
+    iteminfo = (pak_iteminfo*)malloc(sizeof(pak_iteminfo));
+    if( !iteminfo )return VFS_FALSE;
 	memset(iteminfo,0,sizeof(pak_iteminfo));
-	strcpy(iteminfo->_M_filename,filepath);
-	vfs_util_path_checkfix(iteminfo->_M_filename);
+    
+    filenamelen = strlen(filepath);
+    iteminfo->_M_filename = (char*)malloc(filenamelen+1);
+    if( iteminfo->_M_filename == NULL )
+    {
+        VFS_SAFE_FREE(iteminfo);
+        return VFS_FALSE;
+    }
+
+    memset(iteminfo->_M_filename,0,filenamelen+1);
+    strcpy(iteminfo->_M_filename,filepath);
+    vfs_util_path_checkfix(iteminfo->_M_filename);
+
+    if( ! pak_item_insert(g_pak->_M_ht_iteminfos,
+                          iteminfo->_M_filename,
+                          iteminfo ))
+    {
+        VFS_SAFE_FREE(iteminfo->_M_filename);
+        VFS_SAFE_FREE(iteminfo);
+        return VFS_FALSE;
+    }
+
+    g_pak->_M_header._M_count ++;
+
 	return VFS_TRUE;
 
 }
@@ -159,7 +167,10 @@ var32 dir_collect_fileinfo_proc(const char*fullpath,var32 dir)
 
 VFS_BOOL dir_collect_fileinfo( const char *_path )
 {
-	return vfs_util_dir_foreach(_path,dir_collect_fileinfo_proc);
+	if( vfs_util_dir_foreach(_path,dir_collect_fileinfo_proc) )
+        return VFS_TRUE;
+    else
+        return VFS_FALSE;
 }
 
 
@@ -177,6 +188,43 @@ VFS_BOOL fwrite_data(FILE*fp,void*buf,var32 bufsize)
 	return VFS_TRUE;
 }
 
+var32 pak_item_foreach_for_write(pak* _pak,pak_iteminfo* iteminfo,int index,void*p )
+{
+    FILE*fp;
+    int len;
+
+    fp = (FILE*)p;
+    if( !fp )
+        return FOREACH_PROC_ERROR;
+    
+    if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_offset,sizeof(iteminfo->_M_offset)))
+        return FOREACH_PROC_ERROR;
+
+    if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_size,sizeof(iteminfo->_M_size)))
+        return FOREACH_PROC_ERROR;
+
+    if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_crc32,sizeof(iteminfo->_M_crc32)))
+        return FOREACH_PROC_ERROR;
+
+    if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_type,sizeof(iteminfo->_M_compress_type)))
+        return FOREACH_PROC_ERROR;
+
+    if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_size,sizeof(iteminfo->_M_compress_size)))
+        return FOREACH_PROC_ERROR;
+
+    if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_crc32,sizeof(iteminfo->_M_compress_crc32)))
+        return FOREACH_PROC_ERROR;
+
+    len = strlen(iteminfo->_M_filename);
+    if( !VFS_CHECK_FWRITE(fp,&len,sizeof(len)))
+        return FOREACH_PROC_ERROR;
+
+    if( !VFS_CHECK_FWRITE(fp,iteminfo->_M_filename,len))
+        return FOREACH_PROC_ERROR;
+
+    return FOREACH_CONTINUE;
+}
+
 VFS_BOOL fwrite_iteminfos(FILE* fp)
 {
 	var32 i;
@@ -191,36 +239,10 @@ VFS_BOOL fwrite_iteminfos(FILE* fp)
 
 	if( g_pak->_M_header._M_count <= 0 )
 		goto LBL_FI_ERROR;
-
-	for( i = 0; i<g_pak->_M_header._M_count; ++i )
-	{
-		iteminfo = &g_pak->_M_iteminfos[i];
-
-		if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_offset,sizeof(iteminfo->_M_offset)))
-			goto LBL_FI_ERROR; 
-
-		if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_size,sizeof(iteminfo->_M_size)))
-			goto LBL_FI_ERROR; 
-
-		if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_crc32,sizeof(iteminfo->_M_crc32)))
-			goto LBL_FI_ERROR; 
-
-		if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_type,sizeof(iteminfo->_M_compress_type)))
-			goto LBL_FI_ERROR; 
-
-		if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_size,sizeof(iteminfo->_M_compress_size)))
-			goto LBL_FI_ERROR; 
-
-		if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_crc32,sizeof(iteminfo->_M_compress_crc32)))
-			goto LBL_FI_ERROR; 
-
-		len = strlen(iteminfo->_M_filename);
-		if( !VFS_CHECK_FWRITE(fp,&len,sizeof(len)))
-			goto LBL_FI_ERROR; 
-
-		if( !VFS_CHECK_FWRITE(fp,iteminfo->_M_filename,len))
-			goto LBL_FI_ERROR; 
-	}
+    
+    if( VFS_TRUE != pak_item_foreach(g_pak,pak_item_foreach_for_write,(void*)fp))
+        goto LBL_FI_ERROR;
+	
 
 	return VFS_TRUE;
 
@@ -323,31 +345,134 @@ LB_ERROR:
 
 }
 
+var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int index,void*p )
+{
+    FILE*fp;
+    void* buf = NULL ;
+	uvar64	compress_buf_size = 0 ;
+	void* compress_buf = NULL ;
+	uvar64 compress_result = 0;
+	uvar64 tmp = 0;
+    char filetemp[VFS_MAX_FILENAME+1];
+
+    FILE* fp_data = (FILE*)p;
+    if( !fp_data )
+        return FOREACH_PROC_ERROR;
+
+    memset(filetemp,0,sizeof(filetemp));
+    if( g_dirlen > 0 )
+        vfs_util_path_combine(filetemp,g_dir,iteminfo->_M_filename);
+    else
+        vfs_util_path_clone(filetemp,iteminfo->_M_filename);
+
+    fp = sfopen(filetemp,"rb");
+    if( !fp )
+    {
+        printf("error:dir_pack open file %s failed\n",iteminfo->_M_filename);
+        goto LBL_DP_ERROR;
+    }
+
+    iteminfo->_M_size = file_getlen(fp);
+    iteminfo->_M_offset = VFS_FTELL(fp_data);
+
+    if( iteminfo->_M_size <= 0 )
+    {
+        VFS_SAFE_FCLOSE(fp);
+        iteminfo->_M_size = 0;
+        iteminfo->_M_crc32 = 0;
+
+        iteminfo->_M_compress_type = VFS_COMPRESS_NONE;
+        iteminfo->_M_compress_size = 0;
+        iteminfo->_M_compress_crc32 = 0;
+
+        printf("warning:dir_pack empty file %s\n",iteminfo->_M_filename);
+    }
+    else
+    {
+        buf = (void*)malloc(iteminfo->_M_size);
+        tmp = fread(buf,1,(size_t)iteminfo->_M_size,fp);
+        if( tmp != iteminfo->_M_size)
+        {
+            printf("error:dir_pack read file %s size=" I64FMTU " readsize=" I64FMTU " fpos=" I64FMTU " failed\n",
+                    iteminfo->_M_filename,
+                    iteminfo->_M_size,
+                    tmp,
+                    VFS_FTELL(fp));
+            goto LBL_DP_ERROR;
+        }
+
+        VFS_SAFE_FCLOSE(fp);
+
+        iteminfo->_M_crc32 = vfs_util_calc_crc32(buf,(var32)iteminfo->_M_size);
+
+        compress_buf_size = vfs_util_compress_bound(VFS_COMPRESS_BZIP2,(var32)iteminfo->_M_size);
+        compress_buf = (void*)malloc(compress_buf_size);
+
+        compress_result = vfs_util_compress(VFS_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,compress_buf_size);
+        if(compress_result == 0 || compress_result >= iteminfo->_M_size)
+        {
+            iteminfo->_M_compress_type = VFS_COMPRESS_NONE;
+            iteminfo->_M_compress_size = 0;
+            iteminfo->_M_compress_crc32 = 0;
+
+            VFS_SAFE_FREE(compress_buf);
+            compress_buf_size = 0;
+
+            if( !VFS_CHECK_FWRITE(fp_data,buf,iteminfo->_M_size))
+            {
+                printf("error:dir_pack pack file[no compress] %s failed\n",iteminfo->_M_filename);
+                goto LBL_DP_ERROR;
+            }
+
+            VFS_SAFE_FREE(buf);
+        }
+        else
+        {
+            iteminfo->_M_compress_type = VFS_COMPRESS_BZIP2;
+            iteminfo->_M_compress_size = compress_result;
+            iteminfo->_M_compress_crc32 = vfs_util_calc_crc32(compress_buf,(var32)compress_result);
+
+            VFS_SAFE_FREE(buf);
+
+            if( !VFS_CHECK_FWRITE(fp_data,compress_buf,compress_result))
+            {
+                printf("error:dir_pack pack file[compress] %s failed\n",iteminfo->_M_filename);
+                goto LBL_DP_ERROR;
+            }
+
+            VFS_SAFE_FREE(compress_buf);
+            compress_buf_size = 0;
+        }
+    }
+
+
+    printf("\nsuccessed:dir_pack pack file %s OK\n",iteminfo->_M_filename);
+    printf("\tfile=%s\n",iteminfo->_M_filename);
+    printf("\tsize=" I64FMTU "\n",iteminfo->_M_size);
+    printf("\tcrc32=%d\n",iteminfo->_M_crc32);
+    printf("\tcompress_type=%d\n",iteminfo->_M_compress_type);
+    printf("\tcompress_size=" I64FMTU "\n",iteminfo->_M_compress_size);
+    printf("\tcompress_crc32=%d\n",iteminfo->_M_compress_crc32);
+    printf("\toffset=" I64FMTU "\n\n",iteminfo->_M_offset);
+
+    return FOREACH_CONTINUE;
+
+LBL_DP_ERROR:
+	VFS_SAFE_FREE(buf);
+	VFS_SAFE_FREE(compress_buf);
+	VFS_SAFE_FCLOSE(fp);
+
+	return FOREACH_PROC_ERROR;
+}
+
 
 VFS_BOOL dir_pack( const char *path,const char* output ) 
 {
-	var32 i;
-
-	pak_iteminfo* iteminfo = NULL;
-
-	FILE* fp = NULL;
+	VFS_BOOL combinefile_result = VFS_FALSE;
 
 	FILE* fp_head = NULL;
 	FILE* fp_iteminfo = NULL;
 	FILE* fp_data = NULL;
-
-	void* buf = NULL ;
-
-	uvar64	compress_buf_size = 0 ;
-	void* compress_buf = NULL ;
-
-	uvar64 compress_result = 0;
-	VFS_BOOL combinefile_result = VFS_FALSE;
-
-	uvar64 tmp = 0;
-
-
-	char filetemp[VFS_MAX_FILENAME+1];
 
  	remove(g_file_header);
  	remove(g_file_iteminfo);
@@ -374,108 +499,11 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 		goto LBL_DP_ERROR;
 	}
 
-	for( i = 0; i<g_pak->_M_header._M_count; ++i )
-	{
-		iteminfo = &g_pak->_M_iteminfos[i];
-
-
-		memset(filetemp,0,sizeof(filetemp));
-		if( g_dirlen > 0 )
-			vfs_util_path_combine(filetemp,g_dir,iteminfo->_M_filename);
-		else
-			vfs_util_path_clone(filetemp,iteminfo->_M_filename);
-
-		fp = sfopen(filetemp,"rb");
-		if( !fp )
-		{
-			printf("error:dir_pack open file %s failed\n",iteminfo->_M_filename);
-			goto LBL_DP_ERROR;
-		}
-
-		iteminfo->_M_size = file_getlen(fp);
-		iteminfo->_M_offset = VFS_FTELL(fp_data);
-
-		if( iteminfo->_M_size <= 0 )
-		{
-			VFS_SAFE_FCLOSE(fp);
-			iteminfo->_M_size = 0;
-			iteminfo->_M_crc32 = 0;
-
-			iteminfo->_M_compress_type = VFS_COMPRESS_NONE;
-			iteminfo->_M_compress_size = 0;
-			iteminfo->_M_compress_crc32 = 0;
-
-			printf("warning:dir_pack empty file %s\n",iteminfo->_M_filename);
-		}
-		else
-		{
-			buf = (void*)malloc(iteminfo->_M_size);
-			tmp = fread(buf,1,(size_t)iteminfo->_M_size,fp);
-			if( tmp != iteminfo->_M_size)
-			{
-				printf("error:dir_pack read file %s size=" I64FMTU " readsize=" I64FMTU " fpos=" I64FMTU " failed\n",
-						iteminfo->_M_filename,
-						iteminfo->_M_size,
-						tmp,
-						VFS_FTELL(fp));
-				goto LBL_DP_ERROR;
-			}
-
-			VFS_SAFE_FCLOSE(fp);
-
-			iteminfo->_M_crc32 = vfs_util_calc_crc32(buf,(var32)iteminfo->_M_size);
-
-			compress_buf_size = vfs_util_compress_bound(VFS_COMPRESS_BZIP2,(var32)iteminfo->_M_size);
-			compress_buf = (void*)malloc(compress_buf_size);
-
-			compress_result = vfs_util_compress(VFS_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,compress_buf_size);
-			if(compress_result == 0 || compress_result >= iteminfo->_M_size)
-			{
-				iteminfo->_M_compress_type = VFS_COMPRESS_NONE;
-				iteminfo->_M_compress_size = 0;
-				iteminfo->_M_compress_crc32 = 0;
-
-				VFS_SAFE_FREE(compress_buf);
-				compress_buf_size = 0;
-
-				if( !VFS_CHECK_FWRITE(fp_data,buf,iteminfo->_M_size))
-				{
-					printf("error:dir_pack pack file[no compress] %s failed\n",iteminfo->_M_filename);
-					goto LBL_DP_ERROR;
-				}
-
-				VFS_SAFE_FREE(buf);
-			}
-			else
-			{
-				iteminfo->_M_compress_type = VFS_COMPRESS_BZIP2;
-				iteminfo->_M_compress_size = compress_result;
-				iteminfo->_M_compress_crc32 = vfs_util_calc_crc32(compress_buf,(var32)compress_result);
-
-				VFS_SAFE_FREE(buf);
-
-				if( !VFS_CHECK_FWRITE(fp_data,compress_buf,compress_result))
-				{
-					printf("error:dir_pack pack file[compress] %s failed\n",iteminfo->_M_filename);
-					goto LBL_DP_ERROR;
-				}
-
-				VFS_SAFE_FREE(compress_buf);
-				compress_buf_size = 0;
-			}
-		}
-
-
-		printf("\nsuccessed:dir_pack pack file %s OK\n",iteminfo->_M_filename);
-		printf("\tfile=%s\n",iteminfo->_M_filename);
-		printf("\tsize=" I64FMTU "\n",iteminfo->_M_size);
-		printf("\tcrc32=%d\n",iteminfo->_M_crc32);
-		printf("\tcompress_type=%d\n",iteminfo->_M_compress_type);
-		printf("\tcompress_size=" I64FMTU "\n",iteminfo->_M_compress_size);
-		printf("\tcompress_crc32=%d\n",iteminfo->_M_compress_crc32);
-		printf("\toffset=" I64FMTU "\n\n",iteminfo->_M_offset);
-
-	}
+    if( VFS_FALSE == pak_item_foreach(g_pak,pak_item_foreach_for_pack,fp_data))
+    {
+		printf("error:dir_pack pack_iteminfos failed\n");
+        goto LBL_DP_ERROR;
+    }
 
 	if( VFS_FALSE == fwrite_iteminfos(fp_iteminfo) )
 	{
@@ -500,9 +528,6 @@ VFS_BOOL dir_pack( const char *path,const char* output )
 	return combinefile_result;
 
 LBL_DP_ERROR:
-	VFS_SAFE_FREE(buf);
-	VFS_SAFE_FREE(compress_buf);
-	VFS_SAFE_FCLOSE(fp);
 	VFS_SAFE_FCLOSE(fp_data);
 	VFS_SAFE_FCLOSE(fp_iteminfo);
 	VFS_SAFE_FCLOSE(fp_head);
@@ -518,7 +543,14 @@ void pak_end( const char *path )
 
 	if( g_pak )
 	{
-		VFS_SAFE_FREE(g_pak->_M_iteminfos);
+        if( g_pak->_M_ht_iteminfos )
+        {
+            printf("free hashtable beg \n");
+            hashtable_destroy(g_pak->_M_ht_iteminfos,0);
+            g_pak->_M_ht_iteminfos = NULL;
+            printf("free hashtable end \n");
+        }
+
 		VFS_SAFE_FREE(g_pak);
 	}
 }

@@ -144,7 +144,7 @@ VFS_BOOL pak_additeminfo( const char* filepath )
 
 }
 
-var32 dir_collect_fileinfo_proc(const char*fullpath,var32 dir)
+var32 dir_collect_fileinfo_proc(const char*fullpath,var32 dir,void* p)
 {
 	const char* strfile;
 
@@ -161,13 +161,13 @@ var32 dir_collect_fileinfo_proc(const char*fullpath,var32 dir)
 		printf("\nenter dir:%s\n",strfile);
 	}
 
-	return DIR_FOREACH_CONTINUE;
+	return FOREACH_CONTINUE;
 }
 
 
 VFS_BOOL dir_collect_fileinfo( const char *_path )
 {
-	if( vfs_util_dir_foreach(_path,dir_collect_fileinfo_proc) )
+	if( vfs_util_dir_foreach(_path,dir_collect_fileinfo_proc,NULL) )
         return VFS_TRUE;
     else
         return VFS_FALSE;
@@ -191,7 +191,7 @@ VFS_BOOL fwrite_data(FILE*fp,void*buf,var32 bufsize)
 var32 pak_item_foreach_for_write(pak* _pak,pak_iteminfo* iteminfo,int index,void*p )
 {
     FILE*fp;
-    int len;
+    uvar16 len;
 
     fp = (FILE*)p;
     if( !fp )
@@ -227,10 +227,6 @@ var32 pak_item_foreach_for_write(pak* _pak,pak_iteminfo* iteminfo,int index,void
 
 VFS_BOOL fwrite_iteminfos(FILE* fp)
 {
-	var32 i;
-	uvar16 len;
-	pak_iteminfo * iteminfo;
-
 	if( !fp )
 		goto LBL_FI_ERROR;
 

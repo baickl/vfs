@@ -179,7 +179,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
             goto ERROR;
 
         keylen = filenamelen + prefixlen;
-        key = malloc(keylen+1);
+        key = (char*)malloc(keylen+1);
         if( !key )
             goto ERROR;
 		

@@ -263,6 +263,39 @@ LB_ERROR:
 
 #endif
 
+char* vfs_util_str_toupper(char* str)
+{
+    char* p;
+
+    if( !str )
+        return NULL;
+
+    p = str;
+    while( p && *p != 0 )
+    {
+        *p = toupper(*p);
+        ++p;
+    }
+
+    return str;
+}
+
+char* vfs_util_str_tolower(char* str )
+{
+    char* p;
+
+    if( !str )
+        return NULL;
+
+    p = str;
+    while( p && *p != 0 )
+    {
+        *p = tolower(*p);
+        ++p;
+    }
+
+    return str;
+}
 
 char* vfs_util_path_checkfix(char* path )
 {

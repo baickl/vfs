@@ -307,12 +307,16 @@ VFS_BOOL pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p )
 pak_iteminfo *pak_item_locate(pak*_pak,const char* _file)
 {
 	pak_iteminfo* iteminfo=NULL;
+    char file[VFS_MAX_FILENAME+1];
 
 	if( !_pak || !_file)
 		return NULL;
 
-	vfs_util_path_checkfix(_file);
-    iteminfo = pak_item_search( _pak->_M_ht_iteminfos,_file);
+    vfs_util_path_clone(file,_file);
+	vfs_util_path_checkfix(file);
+    vfs_util_str_tolower(file);
+    
+    iteminfo = pak_item_search( _pak->_M_ht_iteminfos,file);
     return iteminfo;
 
 }

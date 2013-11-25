@@ -128,6 +128,7 @@ VFS_BOOL pak_additeminfo( const char* filepath )
     memset(iteminfo->_M_filename,0,filenamelen+1);
     strcpy(iteminfo->_M_filename,filepath);
     vfs_util_path_checkfix(iteminfo->_M_filename);
+    vfs_util_str_tolower(iteminfo->_M_filename);
 
     if( ! pak_item_insert(g_pak->_M_ht_iteminfos,
                           iteminfo->_M_filename,

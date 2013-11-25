@@ -48,7 +48,7 @@ int main(int argc,char* argv[] )
 		goto ERROR;
     }
 
-	vf = vfs_file_open("media/src/bzip2/randtable.c");
+	vf = vfs_file_open("mediA/src/bzip2/randtable.c");
 	if( !vf )
     {
         printf("vfs_file_open failed\n");

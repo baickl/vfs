@@ -96,7 +96,7 @@ static int pak_item_equalkeys(void *k1, void *k2)
     _k1 = (char*)k1;
     _k2 = (char*)k2;
 
-    return (0 == stricmp(_k1,_k2));
+    return (0 == strcmp(_k1,_k2));
 }
 
 DEFINE_HASHTABLE_INSERT(pak_item_insert, char, pak_iteminfo);

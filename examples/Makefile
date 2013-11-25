@@ -2,7 +2,7 @@
 CC = gcc
 AR =ar
 
-WARN= -Wall -fPIC -W -ansi -pedantic
+WARN=-g -Wall -fPIC -W -ansi -pedantic
 INCS=-I./../include -I./../src
 LIBS=-lpak -lm
 BIGFILES=-D_FILE_OFFSET_BITS=64

@@ -3,7 +3,7 @@ CC = gcc
 AR =ar
 INCLUDE = include
 
-WARN=-o2 -Wall -fPIC -W -ansi -pedantic 
+WARN=-g -Wall -fPIC -W -ansi -pedantic 
 INCS=-I$(INCLUDE)
 DEFINES=-D_FILE_OFFSET_BITS=64 -DBZ_NO_STDIO
 CFLAGS = $(WARN) $(INCS) $(DEFINES) 

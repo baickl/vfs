@@ -43,11 +43,17 @@ int main(int argc,char* argv[] )
 		goto ERROR;
 
 	if( VFS_TRUE != vfs_add_pak("media/src.pak"))
+    {
+        printf("open pak error \n");
 		goto ERROR;
+    }
 
 	vf = vfs_file_open("media/src/bzip2/randtable.c");
 	if( !vf )
+    {
+        printf("vfs_file_open failed\n");
 		goto ERROR;
+    }
 
 	while( !vfs_file_eof(vf) )
 	{

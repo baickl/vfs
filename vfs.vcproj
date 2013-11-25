@@ -258,6 +258,38 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="hashtable"
+				>
+				<File
+					RelativePath=".\src\hashtable\hashtable.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\hashtable\hashtable.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\hashtable\hashtable_itr.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\hashtable\hashtable_itr.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\hashtable\hashtable_private.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\hashtable\hashtable_utility.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\hashtable\hashtable_utility.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"

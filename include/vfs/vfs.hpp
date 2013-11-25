@@ -76,17 +76,8 @@ public:
 
     bool FileExists(const char* file )
     {
-        if( !file)
-            return false;
-
-        int count = vfs_get_pak_count();
-        for( int i = 0; i<count; ++i )
-        {
-            pak* _pak = vfs_get_pak_index(i);
-            if( _pak && pak_item_locate(_pak,file) >= 0  )
-                return true;
-        }
-
+        if( VFS_FILE_NOT_EXISTS != vfs_file_exists(file) )
+            return true;
         return false;
     }
 };

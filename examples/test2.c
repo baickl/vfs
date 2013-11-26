@@ -35,6 +35,7 @@ int main(int argc,char* argv[] )
 {
 
 	vfs_file *vf;
+    vfs_file *out;
 
 	size_t realsize ;
 	char buf[VFS_MAX_FILENAME+1];
@@ -55,6 +56,8 @@ int main(int argc,char* argv[] )
 		goto ERROR;
     }
 
+    out = vfs_file_create(0,0);
+
 	while( !vfs_file_eof(vf) )
 	{
 		realsize = vfs_file_read(buf,1,(size_t)VFS_MAX_FILENAME,vf);
@@ -62,8 +65,17 @@ int main(int argc,char* argv[] )
 		{
 			buf[realsize] = 0;
 			printf(buf);
+
+            if( vfs_file_write(buf,1,realsize,out) != realsize )
+            {
+                printf("Write Error!\n");
+            }
 		}
 	}
+
+    /* ±£´æÒ»ÏÂ */
+    vfs_file_save(out,"./randtable.c");
+    vfs_file_close(out);
 
 	vfs_file_close(vf);
 	vfs_destroy();

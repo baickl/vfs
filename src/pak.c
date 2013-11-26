@@ -195,6 +195,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
                 goto ERROR;
         }
 
+        vfs_util_str_tolower(key);
         if( !pak_item_insert(ht_iteminfos,key,iteminfos))
         {
             VFS_SAFE_FREE(key);

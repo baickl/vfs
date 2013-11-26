@@ -74,7 +74,7 @@ var32 vfs_file_exists( const char* file  )
     for( i = 0; i<count; ++i )
     {
         _pak = vfs_get_pak_index(i);
-        if( _pak && pak_item_locate(_pak,file) >= 0  )
+        if( _pak && pak_item_locate(_pak,file) !=NULL  )
             return VFS_FILE_EXISTS_IN_PAK;
     }
 
@@ -157,6 +157,8 @@ vfs_file* vfs_file_open(const char* file )
 		for( i = 0; i<g_vfs->_M_count; ++i )
 		{
 			iteminfo = pak_item_locate(g_vfs->_M_paks[i],file);
+            if( iteminfo == NULL )
+                continue;
 
 			size = iteminfo->_M_size;
 			buf = (void*)malloc(size);

@@ -34,6 +34,122 @@
 #include "file.h"
 
 
+///////////////////////////////////////////////////////////////////////////////
+// 文件的简单封装
+///////////////////////////////////////////////////////////////////////////////
+class VFSFile
+{
+    VFSFile(const VFS&);
+    VFSFile& operator=(const VFS&);
+
+public:
+
+    VFSFile()
+        :_M_file(NULL)
+    {
+    }
+
+    VFSFile( void*buf,size_t bufsize )
+        :_M_file(NULL)
+    {
+        Create(buf,bufsize);
+    }
+
+    VFSFile( const char*file )
+        :_M_file(NULL)
+    {
+        Open(file);
+    }
+
+    ~VFSFile()
+    {
+        Close();
+    }
+
+public:
+
+    bool Create(void*buf,uvar64 bufsize)
+    {
+        Close();
+
+        _M_file == vfs_file_create(buf,bufsize);
+        if( _M_file )
+            return true;
+        else
+            return false;
+    }
+
+    bool Open(const char* file )
+    {
+        Close();
+
+        _M_file = vfs_file_open(file);
+        if( _M_file )
+            return true;
+        else
+            return false;
+    }
+
+    void Close()
+    {
+        if( _M_file )
+        {
+            vfs_file_close(_M_file);
+            _M_file = NULL;
+        }
+    }
+
+    bool Save(const char* file )
+    {
+        return vfs_file_save(file);
+    }
+
+public:
+
+    bool Eof()const 
+    {
+        return vfs_file_eof(_M_file);
+    }
+
+    uvar64 Tell()const 
+    {
+        return vfs_file_tell(_M_file);
+    }
+
+    uvar64 Seek(uvar64 pos,int mod = SEEK_SET)
+    {
+        return vfs_file_seek(_M_file,pos,SEEK_SET);
+    }
+
+    uvar64 Size()const 
+    {
+        return vfs_file_size(_M_file);
+    }
+
+    const void* Data()const
+    {
+        return vfs_file_data(_M_file);
+    }
+
+    size_t Read(void*buf,size_t size,size_t count )
+    {
+        return vfs_file_read(buf,size,count,_M_file);
+    }
+
+    size_t Write(void*buf,size_t size,size_t count )
+    {
+        return vfs_file_write(buf,size,count,_M_file);
+    }
+
+private:
+
+    vfs_file *_M_file;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// vfs wrapper
+///////////////////////////////////////////////////////////////////////////////
 class VFS
 {
     VFS(){}
@@ -82,6 +198,9 @@ public:
     }
 };
 
+
+///////////////////////////////////////////////////////////////////////////////
+// 简化宏的使用
 #define sglVFS VFS::GetInstance()
 
 #endif//_VFS_HPP_

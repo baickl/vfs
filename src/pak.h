@@ -32,16 +32,126 @@
 
 #include "pak_private.h"
 
-typedef var32 (*pak_item_foreach_proc)(pak*,pak_iteminfo*,int,void*);
+/*****************************************************************************
+ * pak_item_foreach_proc
+   
+ * @name                pak_item_foreach_proc
+ * @param   _pak        当前正在遍历的pak对象指针
+ * @param   iteminfo    当前遍历到的文件信息 
+ * @param   index       当前遍历的文件索引
+ * @param   p           遍历操作传入的参数，可以是一个结构指针，也可以是一个函数，用在函数里处理你的逻辑
+ * @return              -FOREACH_IGNORE         返回FOREACH，本次结果不处理，如果是遇到目录返回，则表示不进入目录继续FOREACH
+ *                      -FOREACH_CONTINUE       继续FOREACH，主要用于处理目录进入
+ *                      -FOREACH_BREAK          中断FOREACH，一般是找到想要的文件夹或是文件后，不需要继续FOREACH
+ *                      -FOREACH_PROC_ERROR      处理函数返回错误，要求中断FOREACH行为
+ */
 
-VFS_EXTERN pak*				pak_open( const char*,const char* prefix );
-VFS_EXTERN void				pak_close( pak* );
+typedef var32 (*pak_item_foreach_proc)(pak*_pak , pak_iteminfo *iteminfo , int index , void *p );
 
-VFS_EXTERN var32			pak_item_sort_cmp(const void*,const void*);
-VFS_EXTERN var32			pak_item_search_cmp(const void*,const void*);
+/*****************************************************************************
+ * pak_open
+   
+ * @name                pak_open
+ * @param   pakfile     当前要打开的PAK文件
+ * @param   prefix      给文件包里的文件加上前缀，此参数主要目的是配合相对路径来处理 
+ * @return              打开pak成功，返回其结构实例，失败返回空指针
+ * 
+ * 解释一下本函数的第二个参数，假如我们开发模式下，以相对路径读取目录下的文件，
+ * 文件路径如下：
+ *      a/b/scene/scene0.sce
+ *
+ * 现在需要打包发行，但是我们希望将scene单独打包，b目录下的其他文件也单独打包，先来解决一下
+ * scene目录打包的问题。
+ *
+ * 我们将scene目录打包以后，scene.pak的文件列表如下：
+ * scene/scene0.sce
+ * scene/scene1.sce
+ * .
+ * .
+ * scenesceneN.sce
+ *
+ * 我们程序中用的是相对路径来读取，那如果我们将scene.pak直接读取不加任何前置路径来修正的话，
+ * 我们的代码里所有
+ * a/b/scene/sceneX.sce的都要修改成scene/sceneX.sce
+ *
+ * 这样违背了我们的初衷，我们希望打包以后，还能和以前一样做文件索引，所以我们在打开pak的时候，
+ * 加上预留接口，可以控制文件索引按照我们希望的方式组合。
+ *
+ * 我们加上prefix参数，我们可以用这个参数来控制文件索引的建立，而不用再担心pak的位置。
+ * 所以这个时候我们可以放心的加载,只需要在加载的时候告诉接口，我需要相对路径为a/b就OK了
+ *
+ * 然后我们建立文件索引的时候，我们会就在scene/sceneX.sce前面加上a/b/ 形成一个相对路径
+ * 而且我们之前写过的代码不用做任何调整，就能生效，这样岂不是很方便？
+ *
+ */
+VFS_EXTERN pak*				pak_open( const char *pakfile,const char *prefix );
 
-VFS_EXTERN var32			pak_item_get_count( pak* );
-VFS_EXTERN VFS_BOOL         pak_item_foreach( pak*,pak_item_foreach_proc,void*p);
+
+
+/*****************************************************************************
+ * pak_close
+   
+ * @name                pak_close
+ * @param   _pak        要关闭的pak对象
+ * @return              无
+ *
+ */
+VFS_EXTERN void				pak_close( pak* _pak );
+
+/*****************************************************************************
+ * pak_item_sort_cmp
+   
+ * @name                pak_item_sort_cmp
+ * @param   a           参与比较的元素a
+ * @param   b           参与比较的元素
+ * @return              < 0 结果为a <  b
+ *                      ==0 结果为a == b
+ *                      > 0 结果为a >  b
+ *
+ *  此函数是提供给qsort的比较函数，为早期不支持hashtable的时候，排序数组时使用的比较函数
+ *  现在已经不使用此函数了
+ *
+ */
+VFS_EXTERN var32			pak_item_sort_cmp(const void*a,const void*b);
+
+/*****************************************************************************
+ * pak_item_search_cmp
+   
+ * @name                pak_item_sort_cmp
+ * @param   a           要找查的元素a,a在这里表示路径
+ * @param   b           待比较的元素
+ * @return              < 0 结果为a !=  b
+ *                      ==0 结果为a == b
+ *                      > 0 结果为a !=  b
+ *
+ *  此函数是提供给bsearch的比较函数，为早期不支持hashtable的时候，已过从已排好序的数组里索引时使用的比较函数
+ *  现在已经不使用此函数了
+ *
+ */
+VFS_EXTERN var32			pak_item_search_cmp(const void*a,const void*b);
+
+/*****************************************************************************
+ * pak_item_get_count
+   
+ * @name                pak_item_get_count
+ * @param   _pak        从哪个PAK对象中获取元素个数
+ * @return              返回要获取的PAK对象中，元素个数 
+ *
+ */
+VFS_EXTERN var32			pak_item_get_count( pak*_pak );
+
+/*****************************************************************************
+ * pak_item_foreach
+   
+ * @name                pak_item_foreach
+ * @param   _pak        待遍历的PAK对象
+ * @param   proc        遍历到元素时的回调函数
+ * @param   p           传递给回调函数的参数
+ * @return              -VFS_TRUE 遍历成功完成
+ *                      -VFS_FALSE 遍历被中断或是遍历失败，如果回调函数返回FOREACH_PROC_ERROR那么也返回VFS_FALSE
+ *
+ */
+VFS_EXTERN VFS_BOOL         pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p);
 
 VFS_EXTERN pak_iteminfo    *pak_item_locate( pak*, const char*);
 VFS_EXTERN VFS_BOOL			pak_item_unpack_filename( pak*, const char*, void*, uvar64) ;

@@ -86,8 +86,6 @@ typedef var32 (*pak_item_foreach_proc)(pak*_pak , pak_iteminfo *iteminfo , int i
  */
 VFS_EXTERN pak*				pak_open( const char *pakfile,const char *prefix );
 
-
-
 /*****************************************************************************
  * pak_close
    
@@ -130,6 +128,7 @@ VFS_EXTERN var32			pak_item_sort_cmp(const void*a,const void*b);
  */
 VFS_EXTERN var32			pak_item_search_cmp(const void*a,const void*b);
 
+
 /*****************************************************************************
  * pak_item_get_count
    
@@ -139,6 +138,7 @@ VFS_EXTERN var32			pak_item_search_cmp(const void*a,const void*b);
  *
  */
 VFS_EXTERN var32			pak_item_get_count( pak*_pak );
+
 
 /*****************************************************************************
  * pak_item_foreach
@@ -153,7 +153,33 @@ VFS_EXTERN var32			pak_item_get_count( pak*_pak );
  */
 VFS_EXTERN VFS_BOOL         pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p);
 
-VFS_EXTERN pak_iteminfo    *pak_item_locate( pak*, const char*);
+
+/*****************************************************************************
+ * pak_item_locate
+   
+ * @name                pak_item_locate
+ * @param   _pak        目标_pak,将从这个pak里定位
+ * @param   file        要定位的文件
+ * @return              -pak_iteminfo* 如果定位成功，返回包含文件信息的结构
+ *                      -NULL  如果没有定位到，返回空
+ *
+ */
+VFS_EXTERN pak_iteminfo    *pak_item_locate( pak* _pak, const char *file);
+
+
+/*****************************************************************************
+ * pak_item_unpack_filename
+   
+ * @name                pak_item_unpack_filename
+ * @param   _pak        目标_pak,将从这个pak里解包文件
+ * @param   file        要解出来的文件
+ * @param   buf         输出BUF
+ * @param   bufsize     输出BUF的大小
+ * @return              -VFS_TRUE   解压文件成功
+ *                      -VFS_FALSE  解压文件失败 
+ *
+ */
 VFS_EXTERN VFS_BOOL			pak_item_unpack_filename( pak*, const char*, void*, uvar64) ;
+
 
 #endif/*_VFS_PAK_H_*/

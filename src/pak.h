@@ -49,7 +49,7 @@
 typedef var32 (*pak_item_foreach_proc)(pak*_pak , pak_iteminfo *iteminfo , int index , void *p );
 
 /*****************************************************************************
- * pak_open
+ * 打开PAK文件包
    
  * @name                pak_open
  * @param   pakfile     当前要打开的PAK文件
@@ -87,7 +87,7 @@ typedef var32 (*pak_item_foreach_proc)(pak*_pak , pak_iteminfo *iteminfo , int i
 VFS_EXTERN pak*				pak_open( const char *pakfile,const char *prefix );
 
 /*****************************************************************************
- * pak_close
+ * 关闭PAK文件包
    
  * @name                pak_close
  * @param   _pak        要关闭的pak对象
@@ -97,7 +97,7 @@ VFS_EXTERN pak*				pak_open( const char *pakfile,const char *prefix );
 VFS_EXTERN void				pak_close( pak* _pak );
 
 /*****************************************************************************
- * pak_item_sort_cmp
+ * PAK文件中的元素的顺序比较函数
    
  * @name                pak_item_sort_cmp
  * @param   a           参与比较的元素a
@@ -113,7 +113,7 @@ VFS_EXTERN void				pak_close( pak* _pak );
 VFS_EXTERN var32			pak_item_sort_cmp(const void*a,const void*b);
 
 /*****************************************************************************
- * pak_item_search_cmp
+ * 在PAK中查找元素的查找比较函数
    
  * @name                pak_item_sort_cmp
  * @param   a           要找查的元素a,a在这里表示路径
@@ -130,7 +130,7 @@ VFS_EXTERN var32			pak_item_search_cmp(const void*a,const void*b);
 
 
 /*****************************************************************************
- * pak_item_get_count
+ * 取得PAK中元素的个数
    
  * @name                pak_item_get_count
  * @param   _pak        从哪个PAK对象中获取元素个数
@@ -141,7 +141,7 @@ VFS_EXTERN var32			pak_item_get_count( pak*_pak );
 
 
 /*****************************************************************************
- * pak_item_foreach
+ * 遍历PAK中的元素
    
  * @name                pak_item_foreach
  * @param   _pak        待遍历的PAK对象
@@ -155,7 +155,7 @@ VFS_EXTERN VFS_BOOL         pak_item_foreach( pak* _pak,pak_item_foreach_proc pr
 
 
 /*****************************************************************************
- * pak_item_locate
+ * 在PAK中定位元素
    
  * @name                pak_item_locate
  * @param   _pak        目标_pak,将从这个pak里定位
@@ -168,7 +168,7 @@ VFS_EXTERN pak_iteminfo    *pak_item_locate( pak* _pak, const char *file);
 
 
 /*****************************************************************************
- * pak_item_unpack_filename
+ * 在PAK中解压指定的文件到内存中
    
  * @name                pak_item_unpack_filename
  * @param   _pak        目标_pak,将从这个pak里解包文件

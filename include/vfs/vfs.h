@@ -32,18 +32,14 @@
 
 #include "base.h"
 
-/************************************************************************/
-/* VFS系统构建与销毁                                                    */
-/************************************************************************/
-
 
 /*****************************************************************************
  * vfs系统创建
    
  * @name                vfs_create
  * @param   workpath    程序的工作目录
- * @return              -VFS_TRUE   创建VFS系统成功
- *                      -VFS_FALSE  创建VFS系统失败
+ * @return  VFS_BOOL    返回VFS_TRUE   创建VFS系统成功
+ *                      返回VFS_FALSE  创建VFS系统失败
  *
  * 此函数是创建vfsh虚拟文件系统的，需要在创建的时候，指定资源路径或是程序运行路径
  * 指定一个工作路径的目标是为了方便的文件加载模块可以通过相对路径来读取文件
@@ -67,20 +63,20 @@
  * 
  *
  */
-VFS_EXTERN VFS_BOOL			vfs_create( const char*workpath );
+VFS_EXTERN VFS_BOOL     vfs_create( const char*workpath );
 
 /*****************************************************************************
  * vfs系统销毁
    
  * @name                vfs_destroy
- * @return              无 
+ * @return    void      无返回值
  *                      
  *
  * 销毁VFS系统，此函数不返回任何值，调用即销毁了，
  * 注意，销毁以后，之前通过vfs_add_pak加载的pak，将全部被清除
  * 此函数的调用时期，一般是程序要结束的时候，释放资源的时候调用
  */
-VFS_EXTERN void				vfs_destroy();
+VFS_EXTERN void         vfs_destroy();
 
 /************************************************************************/
 /* VFS系统对PAK文件的操作                                               */
@@ -91,22 +87,22 @@ VFS_EXTERN void				vfs_destroy();
    
  * @name                vfs_add_pak
  * @param   pakfile     待添加的PAK文件
- * @return              -VFS_TRUE   添加pakfile成功
- *                      _VFS_FALSE  添加pakfile失败
+ * @return  VFS_BOOL    返回VFS_TRUE   添加pakfile成功
+ *                      返回VFS_FALSE  添加pakfile失败
  *
  */
-VFS_EXTERN VFS_BOOL			vfs_add_pak( const char* pakfile );
+VFS_EXTERN VFS_BOOL     vfs_add_pak( const char* pakfile );
 
 /*****************************************************************************
  * 从VFS系统中移除pak文件
    
  * @name                vfs_remove_pak
  * @param   pakfile     待移除的PAK文件
- * @return              -VFS_TRUE   移除pakfile成功
- *                      _VFS_FALSE  移除pakfile失败
+ * @return  VFS_BOOL    返回VFS_TRUE   移除pakfile成功
+ *                      返回VFS_FALSE  移除pakfile失败
  *
  */
-VFS_EXTERN VFS_BOOL			vfs_remove_pak( const char* );
+VFS_EXTERN VFS_BOOL		vfs_remove_pak( const char* );
 
 
 #endif

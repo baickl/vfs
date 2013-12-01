@@ -290,13 +290,13 @@ VFS_BOOL pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p )
             ret = proc(_pak,iteminfo,index++,p);
             switch(ret)
             {
-                case FOREACH_BREAK:
+                case VFS_FOREACH_BREAK:
                     {
                         free(itr);
                         return VFS_TRUE;
                     }
-                case FOREACH_CONTINUE:
-                case FOREACH_IGNORE:
+                case VFS_FOREACH_CONTINUE:
+                case VFS_FOREACH_IGNORE:
                 default:
                     break; 
             }

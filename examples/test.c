@@ -51,7 +51,7 @@ var32 pak_item_foreach_for_save(pak* _pak,pak_iteminfo* iteminfo,int index,void*
     if(pak_item_saveas(_pak,iteminfo->_M_filename,filename))
         printf("pak save file:%s to %s\n",iteminfo->_M_filename,filename);
 
-    return FOREACH_CONTINUE;
+    return VFS_FOREACH_CONTINUE;
 }
 
 

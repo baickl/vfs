@@ -139,13 +139,13 @@ VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc,void*p
 			rt = proc(path_temp,1,p);
 			switch(rt)
 			{
-			case FOREACH_IGNORE:
+			case VFS_FOREACH_IGNORE:
 				break;
-			case FOREACH_BREAK:
+			case VFS_FOREACH_BREAK:
 				goto FIND_BREAK;
-            case FOREACH_PROC_ERROR:
+            case VFS_FOREACH_PROC_ERROR:
                 goto LB_ERROR;
-			case FOREACH_CONTINUE:
+			case VFS_FOREACH_CONTINUE:
 			default:
 				{
 					if( 0 == vfs_util_dir_foreach(path_temp,proc,p) )
@@ -163,9 +163,9 @@ VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc,void*p
 			rt = proc(path_temp,0,p);
 			switch(rt)
 			{
-			case FOREACH_BREAK:
+			case VFS_FOREACH_BREAK:
 				goto FIND_BREAK;
-            case FOREACH_PROC_ERROR:
+            case VFS_FOREACH_PROC_ERROR:
                 goto LB_ERROR;
 			}		
 		}
@@ -214,13 +214,13 @@ VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc,void*p
 					rt = proc(path_temp,1,p);
 					switch(rt)
 					{
-					case FOREACH_IGNORE:
+					case VFS_FOREACH_IGNORE:
 						break;
-					case FOREACH_BREAK:
+					case VFS_FOREACH_BREAK:
 						goto FIND_BREAK;
-                    case FOREACH_PROC_ERROR:
+                    case VFS_FOREACH_PROC_ERROR:
                         goto LB_ERROR;
-					case FOREACH_CONTINUE:
+					case VFS_FOREACH_CONTINUE:
 					default:
 						{
 							if( 0 == vfs_util_dir_foreach(path_temp,proc,p) )
@@ -239,9 +239,9 @@ VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc,void*p
 				rt = proc(path_temp,0,p);
 				switch(rt)
 				{
-				case FOREACH_BREAK:
+				case VFS_FOREACH_BREAK:
 					goto FIND_BREAK;
-                case FOREACH_PROC_ERROR:
+                case VFS_FOREACH_PROC_ERROR:
                     goto LB_ERROR;
 				}		
 

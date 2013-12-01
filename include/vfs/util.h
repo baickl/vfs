@@ -39,10 +39,10 @@
  * @param     fullpath  当前遍历时找到的文件或目录
  * @param     dir       如果dir==1,表示当前项目是目录，否则表示当前项目文件
  * @param     p         上层传递进来的参数，可以借此做一些扩展处理
- * @return    uvar32    返回FOREACH_IGNOR,通过遍历函数，不递归当前的目录遍历，不会对遍历其他目录的处理有影响
- *                      返回FOREACH_CONTINUE,通知遍历函数，继续遍历
- *                      返回FOREACH_BREAK,通知遍历函数，中断遍历
- *                      返回FOREACH_PROC_ERROR,通知遍历函数，处理函数处理时有错误，中断遍历
+ * @return    uvar32    返回VFS_FOREACH_IGNOR,通过遍历函数，不递归当前的目录遍历，不会对遍历其他目录的处理有影响
+ *                      返回VFS_FOREACH_CONTINUE,通知遍历函数，继续遍历
+ *                      返回VFS_FOREACH_BREAK,通知遍历函数，中断遍历
+ *                      返回VFS_FOREACH_PROC_ERROR,通知遍历函数，处理函数处理时有错误，中断遍历
  *                      
  */
 typedef var32           (*dir_foreach_item_proc)(const char*fullpath,var32 dir,void*p);

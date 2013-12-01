@@ -156,40 +156,38 @@ vfs_file* vfs_file_open(const char* file )
 		return NULL;
 
 	/* 先尝试从包里读取 */
-	if( g_vfs )
-	{
-		for( i = 0; i<g_vfs->_M_count; ++i )
-		{
-			iteminfo = pak_item_locate(g_vfs->_M_paks[i],file);
-            if( iteminfo == NULL )
-                continue;
+    for( i = 0; i<g_vfs->_M_count; ++i )
+    {
+        iteminfo = pak_item_locate(g_vfs->_M_paks[i],file);
+        if( iteminfo == NULL )
+            continue;
 
-			size = iteminfo->_M_size;
-			buf = (void*)malloc(size);
-			if( !buf )
-				return NULL;
+        size = iteminfo->_M_size;
+        buf = (void*)malloc(size);
+        if( !buf )
+            return NULL;
 
-			if( VFS_TRUE != pak_item_unpack_filename(g_vfs->_M_paks[i],file,buf,size) ) 
-			{
-				VFS_SAFE_FREE(buf);
-				return NULL;
-			}
+        if( VFS_TRUE != pak_item_unpack_filename(g_vfs->_M_paks[i],file,buf,size) ) 
+        {
+            VFS_SAFE_FREE(buf);
+            return NULL;
+        }
 
-			vff = vfs_file_create(0,0);
-			if( !vff )
-			{
-				VFS_SAFE_FREE(buf);
-				return NULL;
-			}
-			vff->_M_buffer = buf;
-			vff->_M_size = size;
-			vff->_M_position = 0;
+        vff = vfs_file_create(0,0);
+        if( !vff )
+        {
+            VFS_SAFE_FREE(buf);
+            return NULL;
+        }
+        vff->_M_buffer = buf;
+        vff->_M_size = size;
+        vff->_M_position = 0;
 
-			return vff;
-		}
-	}
+        return vff;
+    }
 
 
+	/* 包里读取不出来，在本地读取 */
     memset(filepath,0,sizeof(filepath));
     filefullpath = file;
     if( vfs_util_path_combine(filepath,g_vfs->_M_workpath,file) )
@@ -198,7 +196,6 @@ vfs_file* vfs_file_open(const char* file )
     }
 
 
-	/* 包里读取不出来，在本地读取 */
 	fp = sfopen(filefullpath,"rb");
 	if( fp )
 	{

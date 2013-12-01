@@ -162,7 +162,7 @@ var32 dir_collect_fileinfo_proc(const char*fullpath,var32 dir,void* p)
 		printf("\nenter dir:%s\n",strfile);
 	}
 
-	return FOREACH_CONTINUE;
+	return VFS_FOREACH_CONTINUE;
 }
 
 
@@ -196,34 +196,34 @@ var32 pak_item_foreach_for_write(pak* _pak,pak_iteminfo* iteminfo,int index,void
 
     fp = (FILE*)p;
     if( !fp )
-        return FOREACH_PROC_ERROR;
+        return VFS_FOREACH_PROC_ERROR;
     
     if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_offset,sizeof(iteminfo->_M_offset)))
-        return FOREACH_PROC_ERROR;
+        return VFS_FOREACH_PROC_ERROR;
 
     if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_size,sizeof(iteminfo->_M_size)))
-        return FOREACH_PROC_ERROR;
+        return VFS_FOREACH_PROC_ERROR;
 
     if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_crc32,sizeof(iteminfo->_M_crc32)))
-        return FOREACH_PROC_ERROR;
+        return VFS_FOREACH_PROC_ERROR;
 
     if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_type,sizeof(iteminfo->_M_compress_type)))
-        return FOREACH_PROC_ERROR;
+        return VFS_FOREACH_PROC_ERROR;
 
     if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_size,sizeof(iteminfo->_M_compress_size)))
-        return FOREACH_PROC_ERROR;
+        return VFS_FOREACH_PROC_ERROR;
 
     if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_crc32,sizeof(iteminfo->_M_compress_crc32)))
-        return FOREACH_PROC_ERROR;
+        return VFS_FOREACH_PROC_ERROR;
 
     len = strlen(iteminfo->_M_filename);
     if( !VFS_CHECK_FWRITE(fp,&len,sizeof(len)))
-        return FOREACH_PROC_ERROR;
+        return VFS_FOREACH_PROC_ERROR;
 
     if( !VFS_CHECK_FWRITE(fp,iteminfo->_M_filename,len))
-        return FOREACH_PROC_ERROR;
+        return VFS_FOREACH_PROC_ERROR;
 
-    return FOREACH_CONTINUE;
+    return VFS_FOREACH_CONTINUE;
 }
 
 VFS_BOOL fwrite_iteminfos(FILE* fp)
@@ -342,7 +342,7 @@ LB_ERROR:
 
 }
 
-var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int index,void*p )
+var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int dir,void*p )
 {
     FILE*fp;
     void* buf = NULL ;
@@ -354,7 +354,7 @@ var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int index,void*
 
     FILE* fp_data = (FILE*)p;
     if( !fp_data )
-        return FOREACH_PROC_ERROR;
+        return VFS_FOREACH_PROC_ERROR;
 
     memset(filetemp,0,sizeof(filetemp));
     if( g_dirlen > 0 )
@@ -452,14 +452,14 @@ var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int index,void*
     printf("\tcompress_crc32=%d\n",iteminfo->_M_compress_crc32);
     printf("\toffset=" I64FMTU "\n\n",iteminfo->_M_offset);
 
-    return FOREACH_CONTINUE;
+    return VFS_FOREACH_CONTINUE;
 
 LBL_DP_ERROR:
 	VFS_SAFE_FREE(buf);
 	VFS_SAFE_FREE(compress_buf);
 	VFS_SAFE_FCLOSE(fp);
 
-	return FOREACH_PROC_ERROR;
+	return VFS_FOREACH_PROC_ERROR;
 }
 
 

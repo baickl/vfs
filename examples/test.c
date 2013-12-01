@@ -116,6 +116,8 @@ int main(int argc,char* argv[])
 
 
     vfs_destroy();
+
+    return -1;
 }
 
 

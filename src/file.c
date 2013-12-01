@@ -98,9 +98,12 @@ var32 vfs_file_exists( const char* file  )
     return VFS_FILE_NOT_EXISTS;
 }
 
-vfs_file* vfs_file_create(void*buf,uvar64 size)
+vfs_file* vfs_file_create(void *buf,uvar64 size)
 {
 	vfs_file* vff;
+
+    if( !g_vfs )
+        return NULL;
 
 	vff = (vfs_file*)malloc(sizeof(vfs_file));
 	if( !vff )
@@ -145,6 +148,9 @@ vfs_file* vfs_file_open(const char* file )
 
     const char*filefullpath;
     char filepath[VFS_MAX_FILENAME+1];
+
+    if( !g_vfs )
+        return NULL;
 
 	if( !file )
 		return NULL;

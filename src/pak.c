@@ -30,6 +30,7 @@
 #include <vfs/util.h>
 #include <vfs/base.h>
 #include "pak.h"
+#include "vfs_private.h"
 #include <stdio.h>
 #include <memory.h>
 
@@ -94,6 +95,9 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
     char* key = NULL;
 
     struct hashtable *ht_iteminfos = NULL;
+
+    if( !g_vfs )
+        return NULL;
 
     if( _prefix )
         prefixlen = strlen(_prefix);

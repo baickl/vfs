@@ -101,6 +101,9 @@ int main(int argc,char* argv[])
 	pak_iteminfo *iteminfo;
 
 
+    if( VFS_TRUE != vfs_create(".") )
+        return -1;
+
 	_pak = pak_open(media,NULL);
 	if( !_pak )
 		return -1;
@@ -110,6 +113,9 @@ int main(int argc,char* argv[])
         pak_item_foreach(_pak,pak_item_foreach_for_save,NULL);
 	
     pak_close(_pak);
+
+
+    vfs_destroy();
 }
 
 

@@ -45,7 +45,7 @@
  *                      返回FOREACH_PROC_ERROR,通知遍历函数，处理函数处理时有错误，中断遍历
  *                      
  */
-typedef var32 (*dir_foreach_item_proc)(const char*fullpath,var32 dir,void*p);
+typedef var32           (*dir_foreach_item_proc)(const char*fullpath,var32 dir,void*p);
 
 /*****************************************************************************
  * 计算一段内存的校验码

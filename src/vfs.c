@@ -122,15 +122,15 @@ VFS_BOOL vfs_create(const char* sdk_version,const char* workpath,struct vfs_mm *
 
     if( mm )
     {
-        g_vfs->malloc = mm->malloc;
-        g_vfs->realloc = mm->realloc;
-        g_vfs->free = mm->free;
+        g_vfs->_M_mm.malloc = mm->malloc;
+        g_vfs->_M_mm.realloc = mm->realloc;
+        g_vfs->_M_mm.free = mm->free;
     }
     else
     {
-        g_vfs->malloc = &malloc;
-        g_vfs->realloc = &realloc;
-        g_vfs->free = &free;
+        g_vfs->_M_mm.malloc = &malloc;
+        g_vfs->_M_mm.realloc = &realloc;
+        g_vfs->_M_mm.free = &free;
     }
 
 	return VFS_TRUE;
@@ -251,21 +251,21 @@ VFS_BOOL vfs_remove_pak(const char* pakfile )
 void* vfs_malloc(size_t size )
 {
     if( g_vfs )
-        return g_vfs->malloc(size);
+        return g_vfs->_M_mm.malloc(size);
     return NULL;
 }
 
 void* vfs_realloc(void*p,size_t size)
 {
     if( g_vfs )
-        return g_vfs->realloc(p,size);
+        return g_vfs->_M_mm.realloc(p,size);
     return NULL;
 }
 
 void vfs_free(void*p)
 {
     if( g_vfs && p )
-        g_vfs->free(p);
+        g_vfs->_M_mm.free(p);
 }
 
 

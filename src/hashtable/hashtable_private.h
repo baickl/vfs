@@ -13,6 +13,7 @@ struct entry
     struct entry *next;
 };
 
+
 struct hashtable {
     unsigned int tablelength;
     struct entry **table;
@@ -22,6 +23,8 @@ struct hashtable {
     unsigned int (*hashfn) (void *k);
     int (*eqfn) (void *k1, void *k2);
     void (*freekey)(void*k);
+    
+    struct hashtable_mm mm;
 };
 
 /*****************************************************************************/

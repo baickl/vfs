@@ -70,6 +70,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
     var32 keylen = 0;
     char* key = NULL;
 
+    struct hashtable_mm mm;
     struct hashtable *ht_iteminfos = NULL;
 
     if( !g_vfs )
@@ -115,7 +116,10 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	/* 
 	 * 提取文件信息
 	 * */
-    ht_iteminfos = create_hashtable(header._M_count,pak_item_hashcode,pak_item_equalkeys,pak_item_key_free);
+    mm.malloc = g_vfs->_M_mm.malloc;
+    mm.realloc = g_vfs->_M_mm.realloc;
+    mm.free = g_vfs->_M_mm.free;
+    ht_iteminfos = create_hashtable(header._M_count,pak_item_hashcode,pak_item_equalkeys,pak_item_key_free,&mm);
     if( !ht_iteminfos )
         goto ERROR;    
 

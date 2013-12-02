@@ -30,7 +30,9 @@
 #ifndef _VFS_VFS_PRIVATE_H_
 #define _VFS_VFS_PRIVATE_H_
 
+#include <vfs/mm.h>
 #include "pak_private.h"
+
 
 typedef struct vfs_t
 {
@@ -44,9 +46,7 @@ typedef struct vfs_t
     uvar64          _M_mem_pak_used;
     uvar64          _M_mem_hashtable_used;
 
-    void*           (*malloc)(size_t);
-    void*           (*realloc)(void*,size_t);
-    void            (*free)(void*);
+    struct vfs_mm   _M_mm;
 
 }vfs;
 

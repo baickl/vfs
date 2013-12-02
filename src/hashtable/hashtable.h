@@ -3,8 +3,16 @@
 #ifndef __HASHTABLE_CWC22_H__
 #define __HASHTABLE_CWC22_H__
 
+#include <stdio.h>
+
 struct hashtable;
 
+struct hashtable_mm
+{
+    void* (*malloc)(size_t);
+    void* (*realloc)(void*,size_t);
+    void  (*free)(void*);
+};
 
 /* Example of use:
  *
@@ -78,7 +86,8 @@ struct hashtable *
 create_hashtable(unsigned int minsize,
                  unsigned int (*hashfunction) (void*),
                  int (*key_eq_fn) (void*,void*),
-                 int (*key_free_fn)(void*) );
+                 int (*key_free_fn)(void*), 
+                 struct hashtable_mm* mm);
 
 /*****************************************************************************
  * hashtable_insert

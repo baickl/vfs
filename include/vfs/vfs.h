@@ -64,8 +64,8 @@
  * 
  *
  */
-VFS_EXTERN VFS_BOOL     vfs_create( const char* sdk_version,
-                                    const char*workpath,
+VFS_EXTERN VFS_BOOL     vfs_create( const char *sdk_version,
+                                    const char *workpath,
                                     struct vfs_mm *mm);
 
 /*****************************************************************************

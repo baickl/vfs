@@ -29,28 +29,54 @@ struct hashtable *
 create_hashtable(unsigned int minsize,
                  unsigned int (*hashf) (void*),
                  int (*eqf) (void*,void*),
-                 int (*freekey)(void*))
+                 int (*freekey)(void*),
+                 struct hashtable_mm *mm )
 {
     struct hashtable *h;
     unsigned int pindex, size = primes[0];
+    
     /* Check requested hashtable isn't too large */
     if (minsize > (1u << 30)) return NULL;
+    
     /* Enforce size as prime */
     for (pindex=0; pindex < prime_table_length; pindex++) {
         if (primes[pindex] > minsize) { size = primes[pindex]; break; }
     }
-    h = (struct hashtable *)malloc(sizeof(struct hashtable));
-    if (NULL == h) return NULL; /*oom*/
-    h->table = (struct entry **)malloc(sizeof(struct entry*) * size);
-    if (NULL == h->table) { free(h); return NULL; } /*oom*/
+    
+    h = (struct hashtable *)(mm?mm->malloc(sizeof(struct hashtable)):malloc(sizeof(struct hashtable)));
+    if (NULL == h) {
+        return NULL;
+    }
+
+    h->table = (struct entry **)(mm?mm->malloc(sizeof(struct entry*) * size):malloc(sizeof(struct entry*) * size));
+    if (NULL == h->table) { 
+        mm?mm->free(h):free(h); 
+        return NULL; 
+    }
+
     memset(h->table, 0, size * sizeof(struct entry *));
     h->tablelength  = size;
     h->primeindex   = pindex;
     h->entrycount   = 0;
+    
     h->hashfn       = hashf;
     h->eqfn         = eqf;
     h->freekey      = freekey;
+
+    
     h->loadlimit    = (unsigned int) ceil(size * max_load_factor);
+
+    if( mm ){
+        h->mm.malloc    = mm->malloc;
+        h->mm.realloc   = mm->realloc;
+        h->mm.free      = mm->free;
+    }else{
+        h->mm.malloc    = &malloc;
+        h->mm.realloc   = &realloc;
+        h->mm.free      = &free;
+    }
+   
+
     return h;
 }
 
@@ -81,7 +107,7 @@ hashtable_expand(struct hashtable *h)
     if (h->primeindex == (prime_table_length - 1)) return 0;
     newsize = primes[++(h->primeindex)];
 
-    newtable = (struct entry **)malloc(sizeof(struct entry*) * newsize);
+    newtable = (struct entry **)h->mm.malloc(sizeof(struct entry*) * newsize);
     if (NULL != newtable)
     {
         memset(newtable, 0, newsize * sizeof(struct entry *));
@@ -95,14 +121,14 @@ hashtable_expand(struct hashtable *h)
                 newtable[index] = e;
             }
         }
-        free(h->table);
+        h->mm.free(h->table);
         h->table = newtable;
     }
     /* Plan B: realloc instead */
     else 
     {
         newtable = (struct entry **)
-                   realloc(h->table, newsize * sizeof(struct entry *));
+                   h->mm.realloc(h->table, newsize * sizeof(struct entry *));
         if (NULL == newtable) { (h->primeindex)--; return 0; }
         h->table = newtable;
         memset(newtable[h->tablelength], 0, newsize - h->tablelength);
@@ -149,7 +175,7 @@ hashtable_insert(struct hashtable *h, void *k, void *v)
          * element may be ok. Next time we insert, we'll try expanding again.*/
         hashtable_expand(h);
     }
-    e = (struct entry *)malloc(sizeof(struct entry));
+    e = (struct entry *)h->mm.malloc(sizeof(struct entry));
     if (NULL == e) { --(h->entrycount); return 0; } /*oom*/
     e->h = hash(h,k);
     index = indexFor(h->tablelength,e->h);
@@ -203,7 +229,7 @@ hashtable_remove(struct hashtable *h, void *k)
             h->entrycount--;
             v = e->v;
             h->freekey(e->k);
-            free(e);
+            h->mm.free(e);
             return v;
         }
         pE = &(e->next);
@@ -224,10 +250,10 @@ hashtable_destroy(struct hashtable *h)
     {
         e = table[i];
         while (NULL != e)
-        { f = e; e = e->next; h->freekey(f->k); free(f); }
+        { f = e; e = e->next; h->freekey(f->k); h->mm.free(f); }
     }
-    free(h->table);
-    free(h);
+    h->mm.free(h->table);
+    h->mm.free(h);
 }
 
 /*

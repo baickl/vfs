@@ -30,29 +30,29 @@ typedef unsigned int                                uvar32;
 	typedef __int64                                 var64;
 	typedef unsigned __int64                        uvar64;
 	
-	#define I64FMTX                                 "%016I64X"
-	#define I64FMTU                                 "%I64u"
-	#define I64FMTD                                 "%I64d"
+    #define I64FMTX                                 "%016I64X"
+    #define I64FMTU                                 "%I64u"
+    #define I64FMTD                                 "%I64d"
 
 #elif __GNUC__
-	#if __WORDSIZE == 64
+    #if __WORDSIZE == 64
 		typedef long int                            var64;
 		typedef unsigned long int                   uvar64;
-	#else
+    #else
 		__extension__ typedef long long             var64;
 		__extension__ typedef unsigned long long    uvar64;
-	#endif
+    #endif
 
-	#define I64FMTX                                 "%016llX"
-	#define I64FMTU                                 "%llu"
-	#define I64FMTD                                 "%lld"
+    #define I64FMTX                                 "%016llX"
+    #define I64FMTU                                 "%llu"
+    #define I64FMTD                                 "%lld"
 #else
 	typedef long long                               var64;
 	typedef unsigned long long                      uvar64;
 
-	#define I64FMTX                                 "%016llX"
-	#define I64FMTU                                 "%llu"
-	#define I64FMTD                                 "%lld"
+    #define I64FMTX                                 "%016llX"
+    #define I64FMTU                                 "%llu"
+    #define I64FMTD                                 "%lld"
 
 #endif
 

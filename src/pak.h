@@ -85,7 +85,7 @@ typedef var32               (*pak_item_foreach_proc)(pak*_pak ,char* key, pak_it
  * 而且我们之前写过的代码不用做任何调整，就能生效，这样岂不是很方便？
  *
  */
-VFS_EXTERN pak*			    pak_open( const char *pakfile,const char *prefix );
+VFS_EXTERN pak*             pak_open( const char *pakfile,const char *prefix );
 
 /*****************************************************************************
  * 关闭PAK文件包
@@ -95,7 +95,7 @@ VFS_EXTERN pak*			    pak_open( const char *pakfile,const char *prefix );
  * @return  void            无
  *
  */
-VFS_EXTERN void			    pak_close( pak* _pak );
+VFS_EXTERN void             pak_close( pak* _pak );
 
 
 /*****************************************************************************
@@ -106,7 +106,7 @@ VFS_EXTERN void			    pak_close( pak* _pak );
  * @return  var32           返回要获取的PAK对象中，元素个数 
  *
  */
-VFS_EXTERN var32		    pak_item_get_count( pak*_pak );
+VFS_EXTERN var32            pak_item_get_count( pak*_pak );
 
 
 /*****************************************************************************
@@ -148,7 +148,7 @@ VFS_EXTERN pak_iteminfo*    pak_item_locate( pak* _pak, const char *file);
  *                          ==VFS_FALSE  解压文件失败 
  *
  */
-VFS_EXTERN VFS_BOOL	        pak_item_unpack_filename( pak*, const char*, void*, uvar64) ;
+VFS_EXTERN VFS_BOOL         pak_item_unpack_filename( pak*, const char*, void*, uvar64) ;
 
 
 #endif/*_VFS_PAK_H_*/

@@ -92,7 +92,7 @@ VFS_EXTERN vfs_file*    vfs_file_open( const char *filename );
  * @return  void        无返回值 
  *
  */
-VFS_EXTERN void			vfs_file_close( vfs_file *_file );
+VFS_EXTERN void         vfs_file_close( vfs_file *_file );
 
 /*****************************************************************************
  * 保存文件

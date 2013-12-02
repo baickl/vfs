@@ -99,7 +99,7 @@ VFS_EXTERN VFS_BOOL     vfs_add_pak( const char* pakfile );
  *                      返回VFS_FALSE  移除pakfile失败
  *
  */
-VFS_EXTERN VFS_BOOL		vfs_remove_pak( const char* );
+VFS_EXTERN VFS_BOOL     vfs_remove_pak( const char* );
 
 
 #endif

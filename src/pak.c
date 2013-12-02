@@ -233,7 +233,7 @@ void pak_close(pak* _pak)
             do {
 
                 iteminfo =(pak_iteminfo*) hashtable_iterator_value(itr);
-                free(iteminfo);
+                VFS_SAFE_FREE(iteminfo);
 
             } while (hashtable_iterator_remove(itr));
         }

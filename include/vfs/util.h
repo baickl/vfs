@@ -56,7 +56,7 @@ typedef var32           (*dir_foreach_item_proc)(const char*fullpath,var32 dir,v
  * @return    uvar32    返回计算出来的校验码
  *                      
  */
-VFS_EXTERN uvar32		vfs_util_calc_crc32( void *buf, var32 bufsize );
+VFS_EXTERN uvar32       vfs_util_calc_crc32( void *buf, var32 bufsize );
 
 /*****************************************************************************
  * 输入原始数所大小和采用的算法，计算出压缩时需要的最大缓存大小
@@ -67,7 +67,7 @@ VFS_EXTERN uvar32		vfs_util_calc_crc32( void *buf, var32 bufsize );
  * @return    uvar32    返回压缩时需要的缓存的最大长度
  *                      
  */
-VFS_EXTERN var32		vfs_util_compress_bound( var8 type,var32 len );
+VFS_EXTERN var32        vfs_util_compress_bound( var8 type,var32 len );
 
 /*****************************************************************************
  * 根据指定算法压缩一段数据
@@ -81,7 +81,7 @@ VFS_EXTERN var32		vfs_util_compress_bound( var8 type,var32 len );
  * @return    uvar64    返回压缩后的数据长度，这个长度可能会比压缩前的长度大
  *                      
  */
-VFS_EXTERN uvar64		vfs_util_compress(   var32 type , const void *src, uvar64 srclen ,void *dst, uvar64 dstlen);
+VFS_EXTERN uvar64       vfs_util_compress(   var32 type , const void *src, uvar64 srclen ,void *dst, uvar64 dstlen);
 
 /*****************************************************************************
  * 根据指定算法解压缩一段数据
@@ -95,7 +95,7 @@ VFS_EXTERN uvar64		vfs_util_compress(   var32 type , const void *src, uvar64 src
  * @return    uvar64    返回解压后的数据长度，这个长度不会超过输出缓存大小
  *                      
  */
-VFS_EXTERN uvar64		vfs_util_decompress( var32 type , const void *src, uvar64 srclen ,void *dst, uvar64 dstlen);
+VFS_EXTERN uvar64       vfs_util_decompress( var32 type , const void *src, uvar64 srclen ,void *dst, uvar64 dstlen);
 
 /*****************************************************************************
  * 遍历目录
@@ -108,7 +108,7 @@ VFS_EXTERN uvar64		vfs_util_decompress( var32 type , const void *src, uvar64 src
  *                      返回VFS_FALSE   遍历目录失败
  *                      
  */
-VFS_EXTERN VFS_BOOL		vfs_util_dir_foreach(const char* dir, dir_foreach_item_proc proc,void *p);
+VFS_EXTERN VFS_BOOL     vfs_util_dir_foreach(const char* dir, dir_foreach_item_proc proc,void *p);
 
 /*****************************************************************************
  * 将字符串里的小写字母转换成大写
@@ -143,7 +143,7 @@ VFS_EXTERN char*        vfs_util_str_tolower(char *str);
  * 此函数会修改传进去的path,并且会将目录中的'\\'转换成'/'
  *                      
  */
-VFS_EXTERN char*		vfs_util_path_checkfix(char *path);
+VFS_EXTERN char*        vfs_util_path_checkfix(char *path);
 
 /*****************************************************************************
  * 克隆一个路径
@@ -156,7 +156,7 @@ VFS_EXTERN char*		vfs_util_path_checkfix(char *path);
  * 此函数会先拷贝要克隆的对象，然后调用vfs_util_path_checkfix对拷贝出来的数据进行检查修正
  *                      
  */
-VFS_EXTERN char*		vfs_util_path_clone(char *path,char *clone);
+VFS_EXTERN char*        vfs_util_path_clone(char *path,char *clone);
 
 /*****************************************************************************
  * 路径追加
@@ -180,7 +180,7 @@ VFS_EXTERN char*		vfs_util_path_clone(char *path,char *clone);
  * /home/xxx/app/aaa/bin.txt
  *
  */
-VFS_EXTERN char*		vfs_util_path_append(char *path,char *append);
+VFS_EXTERN char*        vfs_util_path_append(char *path,char *append);
 
 /*****************************************************************************
  * 路径连接
@@ -203,7 +203,7 @@ VFS_EXTERN char*		vfs_util_path_append(char *path,char *append);
  * /home/xxx/app/bin.txt
  *
  */
-VFS_EXTERN char*		vfs_util_path_join(char*,char*);
+VFS_EXTERN char*        vfs_util_path_join(char*,char*);
 
 /*****************************************************************************
  * 路径组合
@@ -226,7 +226,7 @@ VFS_EXTERN char*		vfs_util_path_join(char*,char*);
  * /home/xxx/app/bin.txt
  *
  */
-VFS_EXTERN char*		vfs_util_path_combine(char *path,const char *a,const char *b);
+VFS_EXTERN char*        vfs_util_path_combine(char *path,const char *a,const char *b);
 
 /*****************************************************************************
  * 在路径后面添加斜杠
@@ -248,7 +248,7 @@ VFS_EXTERN char*		vfs_util_path_combine(char *path,const char *a,const char *b);
  * /home/xxx/app/
  *
  */
-VFS_EXTERN char*		vfs_util_path_add_backslash(char *path);
+VFS_EXTERN char*        vfs_util_path_add_backslash(char *path);
 
 /*****************************************************************************
  * 去除路径后面的斜杠
@@ -270,7 +270,7 @@ VFS_EXTERN char*		vfs_util_path_add_backslash(char *path);
  * /home/xxx/app
  *
  */
-VFS_EXTERN char*		vfs_util_path_remove_backslash(char *path);
+VFS_EXTERN char*        vfs_util_path_remove_backslash(char *path);
 
 /*****************************************************************************
  * 移除路径中的文件名
@@ -289,7 +289,7 @@ VFS_EXTERN char*		vfs_util_path_remove_backslash(char *path);
  * /home/xxx/app/
  *
  */
-VFS_EXTERN char*		vfs_util_path_remove_filename(char *path);
+VFS_EXTERN char*        vfs_util_path_remove_filename(char *path);
 
 /*****************************************************************************
  * 移除路径中的文件扩展名
@@ -308,6 +308,6 @@ VFS_EXTERN char*		vfs_util_path_remove_filename(char *path);
  * /home/xxx/app/bin
  *
  */
-VFS_EXTERN char*		vfs_util_path_remove_extension(char*);
+VFS_EXTERN char*        vfs_util_path_remove_extension(char*);
 
 #endif/* _VFS_UTIL_H_ */

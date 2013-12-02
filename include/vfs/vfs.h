@@ -36,6 +36,7 @@
  * vfs系统创建
    
  * @name                vfs_create
+ * @param   version     sdk版本号
  * @param   workpath    程序的工作目录
  * @param   mm          内存管理接口,如果mm==NULL,则为系统默认接口
  * @return  VFS_BOOL    返回VFS_TRUE   创建VFS系统成功
@@ -63,7 +64,9 @@
  * 
  *
  */
-VFS_EXTERN VFS_BOOL     vfs_create( const char*workpath,struct vfs_mm *mm);
+VFS_EXTERN VFS_BOOL     vfs_create( const char* sdk_version,
+                                    const char*workpath,
+                                    struct vfs_mm *mm);
 
 /*****************************************************************************
  * vfs系统销毁

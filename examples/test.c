@@ -101,7 +101,7 @@ int main(void)
 	pak_iteminfo *iteminfo;
 
 
-    if( VFS_TRUE != vfs_create(".",NULL) )
+    if( VFS_TRUE != vfs_create(VFS_SDK_VERSION,".",NULL) )
         return -1;
 
 	_pak = pak_open(media,NULL);

@@ -100,12 +100,15 @@ var32 vfs_pak_search(const char* pakfile)
 	return (p - g_vfs->_M_paks);
 }
 
-VFS_BOOL vfs_create(const char* workpath,struct vfs_mm *mm)
+VFS_BOOL vfs_create(const char* sdk_version,const char* workpath,struct vfs_mm *mm)
 {
 	if( g_vfs )
 		return VFS_TRUE;
 
-    if( !workpath )
+    if( !workpath || !sdk_version )
+        return VFS_FALSE;
+
+    if( stricmp(VFS_SDK_VERSION,sdk_version) != 0 )
         return VFS_FALSE;
 
 	g_vfs = (vfs*)(mm?mm->malloc(sizeof(vfs)):malloc(sizeof(vfs)));

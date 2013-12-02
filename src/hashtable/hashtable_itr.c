@@ -9,7 +9,7 @@
 /* hashtable_iterator    - iterator constructor */
 
 struct hashtable_itr *
-hashtable_iterator(struct hashtable *h)
+hashtable_iterator_create(struct hashtable *h)
 {
     unsigned int i, tablelength;
     struct hashtable_itr *itr = (struct hashtable_itr *)
@@ -32,6 +32,13 @@ hashtable_iterator(struct hashtable *h)
         }
     }
     return itr;
+}
+
+void
+hashtable_iterator_destroy(struct hashtable_itr* itr)
+{
+    if( itr )
+        free(itr);
 }
 
 /*****************************************************************************/
@@ -113,7 +120,7 @@ hashtable_iterator_remove(struct hashtable_itr *itr)
     /* itr->e is now outside the hashtable */
     remember_e = itr->e;
     itr->h->entrycount--;
-    freekey(remember_e->k);
+    itr->h->freekey(remember_e->k);
 
     /* Advance the iterator, correcting the parent */
     remember_parent = itr->parent;

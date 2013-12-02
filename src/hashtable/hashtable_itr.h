@@ -18,11 +18,17 @@ struct hashtable_itr
 
 
 /*****************************************************************************/
-/* hashtable_iterator
+/* hashtable_iterator create
  */
-
 struct hashtable_itr *
-hashtable_iterator(struct hashtable *h);
+hashtable_iterator_create(struct hashtable *h);
+
+
+/*****************************************************************************/
+/* hashtable_iterator destroy
+ */
+void 
+hashtable_iterator_destroy(struct hashtable_itr*);
 
 /*****************************************************************************/
 /* hashtable_iterator_key

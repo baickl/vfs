@@ -37,6 +37,7 @@
    
  * @name                    pak_item_foreach_proc
  * @param   _pak            当前正在遍历的pak对象指针
+ * @param   filename        当前遍历到的文件名
  * @param   iteminfo        当前遍历到的文件信息 
  * @param   index           当前遍历的文件索引
  * @param   p               遍历操作传入的参数，可以是一个结构指针，也可以是一个函数，用在函数里处理你的逻辑
@@ -46,7 +47,7 @@
  *                          -VFS_FOREACH_PROC_ERROR      处理函数返回错误，要求中断FOREACH行为
  */
 
-typedef var32               (*pak_item_foreach_proc)(pak*_pak , pak_iteminfo *iteminfo , int index , void *p );
+typedef var32               (*pak_item_foreach_proc)(pak*_pak ,char* key, pak_iteminfo *iteminfo , int index , void *p );
 
 /*****************************************************************************
  * 打开PAK文件包
@@ -95,38 +96,6 @@ VFS_EXTERN pak*			    pak_open( const char *pakfile,const char *prefix );
  *
  */
 VFS_EXTERN void			    pak_close( pak* _pak );
-
-/*****************************************************************************
- * PAK文件中的元素的顺序比较函数
-   
- * @name                    pak_item_sort_cmp
- * @param   a               参与比较的元素a
- * @param   b               参与比较的元素
- * @return  var32           < 0 结果为a <  b
- *                          ==0 结果为a == b
- *                          > 0 结果为a >  b
- *
- *  此函数是提供给qsort的比较函数，为早期不支持hashtable的时候，排序数组时使用的比较函数
- *  现在已经不使用此函数了
- *
- */
-VFS_EXTERN var32		    pak_item_sort_cmp(const void*a,const void*b);
-
-/*****************************************************************************
- * 在PAK中查找元素的查找比较函数
-   
- * @name                    pak_item_sort_cmp
- * @param   a               要找查的元素a,a在这里表示路径
- * @param   b               待比较的元素
- * @return  var32           < 0 结果为a !=  b
- *                          ==0 结果为a == b
- *                          > 0 结果为a !=  b
- *
- *  此函数是提供给bsearch的比较函数，为早期不支持hashtable的时候，已过从已排好序的数组里索引时使用的比较函数
- *  现在已经不使用此函数了
- *
- */
-VFS_EXTERN var32		    pak_item_search_cmp(const void*a,const void*b);
 
 
 /*****************************************************************************

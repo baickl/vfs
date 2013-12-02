@@ -34,12 +34,12 @@ const char* media = "../media/src.pak";
 
 int pak_item_saveas(pak* _pak,const char *_file,const char *_saveas);
 
-var32 pak_item_foreach_for_save(pak* _pak,pak_iteminfo* iteminfo,int index,void*p )
+var32 pak_item_foreach_for_save(pak* _pak,char*filename,pak_iteminfo* iteminfo,int index,void*p )
 {
-    char filename[VFS_MAX_FILENAME];
+    char _filename[VFS_MAX_FILENAME];
     printf("pak[%d]:\nname=%s\noffset=" I64FMTU "\nsize=" I64FMTU "\ncrc32=%d\nct=%d\ncs=" I64FMTU "\ncc=%d\n\n",
             index,
-            iteminfo->_M_filename,
+            filename,
             iteminfo->_M_offset,
             iteminfo->_M_size,
             iteminfo->_M_crc32,
@@ -47,9 +47,9 @@ var32 pak_item_foreach_for_save(pak* _pak,pak_iteminfo* iteminfo,int index,void*
             iteminfo->_M_compress_size,
             iteminfo->_M_compress_crc32);
 
-    sprintf(filename,"file_%d",index);
-    if(pak_item_saveas(_pak,iteminfo->_M_filename,filename))
-        printf("pak save file:%s to %s\n",iteminfo->_M_filename,filename);
+    sprintf(_filename,"file_%d",index);
+    if(pak_item_saveas(_pak,filename,_filename))
+        printf("pak save file:%s to %s\n",filename,_filename);
 
     return VFS_FOREACH_CONTINUE;
 }

@@ -97,7 +97,7 @@ VFS_BOOL pak_begin( const char *path )
 	g_pak->_M_header._M_flag = MAKE_CC_ID('p','a','k','x');
 	g_pak->_M_header._M_version = VFS_VERSION;
 	g_pak->_M_header._M_count = 0;
-    g_pak->_M_ht_iteminfos = create_hashtable(256,pak_item_hashcode,pak_item_equalkeys);
+    g_pak->_M_ht_iteminfos = create_hashtable(256,pak_item_hashcode,pak_item_equalkeys,pak_item_key_free);
     if( !g_pak->_M_ht_iteminfos )
         return VFS_FALSE;
 
@@ -109,7 +109,9 @@ VFS_BOOL pak_additeminfo( const char* filepath )
 
     var32 filenamelen;
 	pak_iteminfo* iteminfo;
-    
+   
+    char* filename;
+
     if( !g_pak || !g_pak->_M_ht_iteminfos  )
         return VFS_FALSE;
 
@@ -118,23 +120,23 @@ VFS_BOOL pak_additeminfo( const char* filepath )
 	memset(iteminfo,0,sizeof(pak_iteminfo));
     
     filenamelen = strlen(filepath);
-    iteminfo->_M_filename = (char*)malloc(filenamelen+1);
-    if( iteminfo->_M_filename == NULL )
+    filename = (char*)malloc(filenamelen+1);
+    if( filename == NULL )
     {
         VFS_SAFE_FREE(iteminfo);
         return VFS_FALSE;
     }
 
-    memset(iteminfo->_M_filename,0,filenamelen+1);
-    strcpy(iteminfo->_M_filename,filepath);
-    vfs_util_path_checkfix(iteminfo->_M_filename);
-    vfs_util_str_tolower(iteminfo->_M_filename);
+    memset(filename,0,filenamelen+1);
+    strcpy(filename,filepath);
+    vfs_util_path_checkfix(filename);
+    vfs_util_str_tolower(filename);
 
     if( ! pak_item_insert(g_pak->_M_ht_iteminfos,
-                          iteminfo->_M_filename,
+                          filename,
                           iteminfo ))
     {
-        VFS_SAFE_FREE(iteminfo->_M_filename);
+        VFS_SAFE_FREE(filename);
         VFS_SAFE_FREE(iteminfo);
         return VFS_FALSE;
     }
@@ -189,13 +191,13 @@ VFS_BOOL fwrite_data(FILE*fp,void*buf,var32 bufsize)
 	return VFS_TRUE;
 }
 
-var32 pak_item_foreach_for_write(pak* _pak,pak_iteminfo* iteminfo,int index,void*p )
+var32 pak_item_foreach_for_write(pak* _pak,char*filename,pak_iteminfo* iteminfo,int index,void*p )
 {
     FILE*fp;
     uvar16 len;
 
     fp = (FILE*)p;
-    if( !fp )
+    if( !fp || !filename)
         return VFS_FOREACH_PROC_ERROR;
     
     if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_offset,sizeof(iteminfo->_M_offset)))
@@ -216,11 +218,11 @@ var32 pak_item_foreach_for_write(pak* _pak,pak_iteminfo* iteminfo,int index,void
     if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_crc32,sizeof(iteminfo->_M_compress_crc32)))
         return VFS_FOREACH_PROC_ERROR;
 
-    len = strlen(iteminfo->_M_filename);
+    len = strlen(filename);
     if( !VFS_CHECK_FWRITE(fp,&len,sizeof(len)))
         return VFS_FOREACH_PROC_ERROR;
 
-    if( !VFS_CHECK_FWRITE(fp,iteminfo->_M_filename,len))
+    if( !VFS_CHECK_FWRITE(fp,filename,len))
         return VFS_FOREACH_PROC_ERROR;
 
     return VFS_FOREACH_CONTINUE;
@@ -342,7 +344,7 @@ LB_ERROR:
 
 }
 
-var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int dir,void*p )
+var32 pak_item_foreach_for_pack(pak* _pak,char *filename,pak_iteminfo* iteminfo,int index,void*p )
 {
     FILE*fp;
     void* buf = NULL ;
@@ -358,14 +360,14 @@ var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int dir,void*p 
 
     memset(filetemp,0,sizeof(filetemp));
     if( g_dirlen > 0 )
-        vfs_util_path_combine(filetemp,g_dir,iteminfo->_M_filename);
+        vfs_util_path_combine(filetemp,g_dir,filename);
     else
-        vfs_util_path_clone(filetemp,iteminfo->_M_filename);
+        vfs_util_path_clone(filetemp,filename);
 
     fp = sfopen(filetemp,"rb");
     if( !fp )
     {
-        printf("error:dir_pack open file %s failed\n",iteminfo->_M_filename);
+        printf("error:dir_pack open file %s failed\n",filename);
         goto LBL_DP_ERROR;
     }
 
@@ -382,7 +384,7 @@ var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int dir,void*p 
         iteminfo->_M_compress_size = 0;
         iteminfo->_M_compress_crc32 = 0;
 
-        printf("warning:dir_pack empty file %s\n",iteminfo->_M_filename);
+        printf("warning:dir_pack empty file %s\n",filename);
     }
     else
     {
@@ -391,7 +393,7 @@ var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int dir,void*p 
         if( tmp != iteminfo->_M_size)
         {
             printf("error:dir_pack read file %s size=" I64FMTU " readsize=" I64FMTU " fpos=" I64FMTU " failed\n",
-                    iteminfo->_M_filename,
+                    filename,
                     iteminfo->_M_size,
                     tmp,
                     VFS_FTELL(fp));
@@ -417,7 +419,7 @@ var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int dir,void*p 
 
             if( !VFS_CHECK_FWRITE(fp_data,buf,iteminfo->_M_size))
             {
-                printf("error:dir_pack pack file[no compress] %s failed\n",iteminfo->_M_filename);
+                printf("error:dir_pack pack file[no compress] %s failed\n",filename);
                 goto LBL_DP_ERROR;
             }
 
@@ -433,7 +435,7 @@ var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int dir,void*p 
 
             if( !VFS_CHECK_FWRITE(fp_data,compress_buf,compress_result))
             {
-                printf("error:dir_pack pack file[compress] %s failed\n",iteminfo->_M_filename);
+                printf("error:dir_pack pack file[compress] %s failed\n",filename);
                 goto LBL_DP_ERROR;
             }
 
@@ -443,8 +445,8 @@ var32 pak_item_foreach_for_pack(pak* _pak,pak_iteminfo* iteminfo,int dir,void*p 
     }
 
 
-    printf("\nsuccessed:dir_pack pack file %s OK\n",iteminfo->_M_filename);
-    printf("\tfile=%s\n",iteminfo->_M_filename);
+    printf("\nsuccessed:dir_pack pack file %s OK\n",filename);
+    printf("\tfile=%s\n",filename);
     printf("\tsize=" I64FMTU "\n",iteminfo->_M_size);
     printf("\tcrc32=%d\n",iteminfo->_M_crc32);
     printf("\tcompress_type=%d\n",iteminfo->_M_compress_type);
@@ -543,7 +545,7 @@ void pak_end( const char *path )
         if( g_pak->_M_ht_iteminfos )
         {
             printf("free hashtable beg \n");
-            hashtable_destroy(g_pak->_M_ht_iteminfos,0);
+            hashtable_destroy(g_pak->_M_ht_iteminfos);
             g_pak->_M_ht_iteminfos = NULL;
             printf("free hashtable end \n");
         }

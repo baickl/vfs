@@ -21,6 +21,7 @@ struct hashtable {
     unsigned int primeindex;
     unsigned int (*hashfn) (void *k);
     int (*eqfn) (void *k1, void *k2);
+    void (*freekey)(void*k);
 };
 
 /*****************************************************************************/
@@ -31,18 +32,6 @@ unsigned int hash(struct hashtable *h, void *k);
 static unsigned int indexFor(unsigned int tablelength, unsigned int hashvalue) {
     return (hashvalue % tablelength);
 }
-
-/* Only works if tablelength == 2^N */
-/*static inline unsigned int
-indexFor(unsigned int tablelength, unsigned int hashvalue)
-{
-    return (hashvalue & (tablelength - 1u));
-}
-*/
-
-/*****************************************************************************/
-#define freekey(X) free(X)
-/*define freekey(X) ; */
 
 
 /*****************************************************************************/

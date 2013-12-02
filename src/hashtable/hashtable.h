@@ -13,8 +13,9 @@ struct hashtable;
  *
  *      static unsigned int         hash_from_key_fn( void *k );
  *      static int                  keys_equal_fn ( void *key1, void *key2 );
+ *      static void                 key_free_fn(void *k);
  *
- *      h = create_hashtable(16, hash_from_key_fn, keys_equal_fn);
+ *      h = create_hashtable(16, hash_from_key_fn, keys_equal_fn,key_free_fn);
  *      k = (struct some_key *)     malloc(sizeof(struct some_key));
  *      v = (struct some_value *)   malloc(sizeof(struct some_value));
  *
@@ -68,13 +69,15 @@ struct hashtable;
  * @param   minsize         minimum initial size of hashtable
  * @param   hashfunction    function for hashing keys
  * @param   key_eq_fn       function for determining key equality
+ * @param   key_free_fn     function for free key
  * @return                  newly created hashtable or NULL on failure
  */
 
 struct hashtable *
 create_hashtable(unsigned int minsize,
                  unsigned int (*hashfunction) (void*),
-                 int (*key_eq_fn) (void*,void*));
+                 int (*key_eq_fn) (void*,void*),
+                 int (*key_free_fn)(void*) );
 
 /*****************************************************************************
  * hashtable_insert
@@ -157,11 +160,10 @@ hashtable_count(struct hashtable *h);
    
  * @name        hashtable_destroy
  * @param   h   the hashtable
- * @param       free_values     whether to call 'free' on the remaining values
  */
 
 void
-hashtable_destroy(struct hashtable *h, int free_values);
+hashtable_destroy(struct hashtable *h);
 
 #endif /* __HASHTABLE_CWC22_H__ */
 

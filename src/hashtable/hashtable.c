@@ -28,7 +28,8 @@ const float max_load_factor = 0.65;
 struct hashtable *
 create_hashtable(unsigned int minsize,
                  unsigned int (*hashf) (void*),
-                 int (*eqf) (void*,void*))
+                 int (*eqf) (void*,void*),
+                 int (*freekey)(void*))
 {
     struct hashtable *h;
     unsigned int pindex, size = primes[0];
@@ -48,6 +49,7 @@ create_hashtable(unsigned int minsize,
     h->entrycount   = 0;
     h->hashfn       = hashf;
     h->eqfn         = eqf;
+    h->freekey      = freekey;
     h->loadlimit    = (unsigned int) ceil(size * max_load_factor);
     return h;
 }
@@ -200,7 +202,7 @@ hashtable_remove(struct hashtable *h, void *k)
             *pE = e->next;
             h->entrycount--;
             v = e->v;
-            freekey(e->k);
+            h->freekey(e->k);
             free(e);
             return v;
         }
@@ -213,28 +215,16 @@ hashtable_remove(struct hashtable *h, void *k)
 /*****************************************************************************/
 /* destroy */
 void
-hashtable_destroy(struct hashtable *h, int free_values)
+hashtable_destroy(struct hashtable *h)
 {
     unsigned int i;
     struct entry *e, *f;
     struct entry **table = h->table;
-    if (free_values)
+    for (i = 0; i < h->tablelength; i++)
     {
-        for (i = 0; i < h->tablelength; i++)
-        {
-            e = table[i];
-            while (NULL != e)
-            { f = e; e = e->next; freekey(f->k); free(f->v); free(f); }
-        }
-    }
-    else
-    {
-        for (i = 0; i < h->tablelength; i++)
-        {
-            e = table[i];
-            while (NULL != e)
-            { f = e; e = e->next; freekey(f->k); free(f); }
-        }
+        e = table[i];
+        while (NULL != e)
+        { f = e; e = e->next; h->freekey(f->k); free(f); }
     }
     free(h->table);
     free(h);

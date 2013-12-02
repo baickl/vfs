@@ -57,8 +57,6 @@ typedef struct pak_iteminfo_s
 	var8			_M_compress_type;
 	uvar64			_M_compress_size;
 	uvar32			_M_compress_crc32;
-
-	char		   *_M_filename;
 }pak_iteminfo;
 
 typedef struct pak
@@ -97,6 +95,22 @@ static int pak_item_equalkeys(void *k1, void *k2)
     _k2 = (char*)k2;
 
     return (0 == strcmp(_k1,_k2));
+}
+
+static void pak_item_key_free(void*key)
+{
+    if( key )
+    {
+        free(key);
+    }
+}
+
+static void pak_item_value_free(void*key)
+{
+    if( key )
+    {
+        free(key);
+    }
 }
 
 DEFINE_HASHTABLE_INSERT(pak_item_insert, char, pak_iteminfo);

@@ -54,30 +54,6 @@ static FILE* sfopen(const char* filename,const char* mode)
 #endif
 }
 
-var32 pak_item_sort_cmp(const void*a,const void*b)
-{
-
-	pak_iteminfo* _a;
-	pak_iteminfo* _b;
-	
-	_a = (pak_iteminfo*)a;
-	_b = (pak_iteminfo*)b;
-
-	return stricmp(_a->_M_filename,_b->_M_filename);
-}
-
-var32 pak_item_search_cmp(const void*key,const void*item)
-{
-
-	char*_key;
-	pak_iteminfo* _item;
-
-	_key  = (char*)key;
-	_item = (pak_iteminfo*)item;
-	return stricmp(_key,_item->_M_filename);
-}
-
-
 
 
 pak* pak_open(const char* _pakfile,const char* _prefix)
@@ -139,7 +115,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	/* 
 	 * 提取文件信息
 	 * */
-    ht_iteminfos = create_hashtable(header._M_count,pak_item_hashcode,pak_item_equalkeys);
+    ht_iteminfos = create_hashtable(header._M_count,pak_item_hashcode,pak_item_equalkeys,pak_item_key_free);
     if( !ht_iteminfos )
         goto ERROR;    
 
@@ -205,8 +181,6 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
             VFS_SAFE_FREE(key);
             goto ERROR;
         }
-
-        iteminfos->_M_filename = key;
         
         /* 清数据 */
         key = NULL;
@@ -236,7 +210,7 @@ ERROR:
 	VFS_SAFE_FREE(iteminfos);
     if( ht_iteminfos )
     {
-        hashtable_destroy(ht_iteminfos,0);
+        hashtable_destroy(ht_iteminfos);
     }
 
 	return NULL;
@@ -244,12 +218,28 @@ ERROR:
 
 void pak_close(pak* _pak)
 {
-	if( !_pak )
+    struct hashtable_itr *itr;
+    pak_iteminfo * iteminfo;
+	
+    if( !_pak )
 		return;
 
     if( _pak->_M_ht_iteminfos )
     {
-        hashtable_destroy(_pak->_M_ht_iteminfos,1);
+        
+        itr = hashtable_iterator_create(_pak->_M_ht_iteminfos);
+        if (itr && hashtable_count(_pak->_M_ht_iteminfos) > 0)
+        {
+            do {
+
+                iteminfo =(pak_iteminfo*) hashtable_iterator_value(itr);
+                free(iteminfo);
+
+            } while (hashtable_iterator_remove(itr));
+        }
+
+        hashtable_iterator_destroy(itr);
+        hashtable_destroy(_pak->_M_ht_iteminfos);
         _pak->_M_ht_iteminfos = NULL;
     }
 	VFS_SAFE_FREE(_pak);
@@ -270,6 +260,7 @@ VFS_BOOL pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p )
     var32 ret;
     int index;
     struct hashtable_itr *itr;
+    char *filename;
     pak_iteminfo * iteminfo;
     if( !_pak || !_pak->_M_ht_iteminfos )
         return VFS_FALSE;
@@ -278,21 +269,21 @@ VFS_BOOL pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p )
         return VFS_FALSE;
 
     index = 0;
-    itr = hashtable_iterator(_pak->_M_ht_iteminfos);
+    itr = hashtable_iterator_create(_pak->_M_ht_iteminfos);
     if( !itr )
         return VFS_FALSE;
 
     if (hashtable_count(_pak->_M_ht_iteminfos) > 0)
     {
         do {
-            
+            filename = (char*)hashtable_iterator_key(itr);
             iteminfo =(pak_iteminfo*) hashtable_iterator_value(itr);
-            ret = proc(_pak,iteminfo,index++,p);
+            ret = proc(_pak,filename,iteminfo,index++,p);
             switch(ret)
             {
                 case VFS_FOREACH_BREAK:
                     {
-                        free(itr);
+                        hashtable_iterator_destroy(itr);
                         return VFS_TRUE;
                     }
                 case VFS_FOREACH_CONTINUE:
@@ -304,7 +295,7 @@ VFS_BOOL pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p )
         } while (hashtable_iterator_advance(itr));
     }
 
-    free(itr);
+    hashtable_iterator_destroy(itr);
     return VFS_TRUE;
 
 }

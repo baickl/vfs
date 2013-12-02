@@ -37,7 +37,7 @@ int pak_item_saveas(pak* _pak,const char *_file,const char *_saveas);
 var32 pak_item_foreach_for_save(pak* _pak,char*filename,pak_iteminfo* iteminfo,int index,void*p )
 {
     char _filename[VFS_MAX_FILENAME];
-    printf("pak[%d]:\nname=%s\noffset=" I64FMTU "\nsize=" I64FMTU "\ncrc32=%d\nct=%d\ncs=" I64FMTU "\ncc=%d\n\n",
+    printf("pak[%d]:\nname=%s\noffset=" I64FMTU "\nsize=" I64FMTU "\ncrc32=%d\nct=%d\ncs=" I64FMTU "\ncc=%d\n",
             index,
             filename,
             iteminfo->_M_offset,
@@ -49,7 +49,7 @@ var32 pak_item_foreach_for_save(pak* _pak,char*filename,pak_iteminfo* iteminfo,i
 
     sprintf(_filename,"file_%d",index);
     if(pak_item_saveas(_pak,filename,_filename))
-        printf("pak save file:%s to %s\n",filename,_filename);
+        printf("pak save file:%s to %s\n\n",filename,_filename);
 
     return VFS_FOREACH_CONTINUE;
 }
@@ -101,7 +101,7 @@ int main(int argc,char* argv[])
 	pak_iteminfo *iteminfo;
 
 
-    if( VFS_TRUE != vfs_create(".") )
+    if( VFS_TRUE != vfs_create(".",NULL) )
         return -1;
 
 	_pak = pak_open(media,NULL);

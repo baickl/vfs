@@ -32,7 +32,7 @@
 #include "pak.h"
 #include <stdio.h>
 #include <string.h>
-
+#include <stdlib.h>
 
 vfs *g_vfs = NULL;
 
@@ -100,7 +100,7 @@ var32 vfs_pak_search(const char* pakfile)
 	return (p - g_vfs->_M_paks);
 }
 
-VFS_BOOL vfs_create(const char* workpath)
+VFS_BOOL vfs_create(const char* workpath,struct vfs_memmgr*mm)
 {
 	if( g_vfs )
 		return VFS_TRUE;
@@ -108,15 +108,28 @@ VFS_BOOL vfs_create(const char* workpath)
     if( !workpath )
         return VFS_FALSE;
 
-	g_vfs = (vfs*)malloc(sizeof(vfs));
+	g_vfs = (vfs*)(mm?mm->malloc(sizeof(vfs)):malloc(sizeof(vfs)));
 	if( !g_vfs )
 		return VFS_FALSE;
 
 	g_vfs->_M_count = 0;
 	g_vfs->_M_maxcount = 0;
 	g_vfs->_M_paks = NULL;
-
     strcpy(g_vfs->_M_workpath,workpath);
+
+    if( mm )
+    {
+        g_vfs->malloc = mm->malloc;
+        g_vfs->realloc = mm->realloc;
+        g_vfs->free = mm->free;
+    }
+    else
+    {
+        g_vfs->malloc = &malloc;
+        g_vfs->realloc = &realloc;
+        g_vfs->free = &free;
+    }
+
 	return VFS_TRUE;
 }
 
@@ -132,8 +145,13 @@ void vfs_destroy()
 		pak_close(g_vfs->_M_paks[i]);
 	}
 
-	VFS_SAFE_FREE(g_vfs->_M_paks);
-	VFS_SAFE_FREE(g_vfs);
+	if(g_vfs->_M_paks){
+        vfs_free(g_vfs->_M_paks);
+        g_vfs->_M_paks;
+    }
+	
+    vfs_free(g_vfs);
+    g_vfs=NULL;
 }
 
 VFS_BOOL vfs_add_pak( const char* pakfile )
@@ -225,6 +243,26 @@ VFS_BOOL vfs_remove_pak(const char* pakfile )
 
 	vfs_pak_sort();
 	return VFS_TRUE;
+}
+
+void* vfs_malloc(size_t size )
+{
+    if( g_vfs )
+        return g_vfs->malloc(size);
+    return NULL;
+}
+
+void* vfs_realloc(void*p,size_t size)
+{
+    if( g_vfs )
+        return g_vfs->realloc(p,size);
+    return NULL;
+}
+
+void vfs_free(void*p)
+{
+    if( g_vfs && p )
+        g_vfs->free(p);
 }
 
 

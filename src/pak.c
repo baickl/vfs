@@ -123,7 +123,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	for( i = 0; i<header._M_count; ++i )
 	{
 
-        iteminfos = (pak_iteminfo*)malloc(sizeof(pak_iteminfo));
+        iteminfos = (pak_iteminfo*)vfs_malloc(sizeof(pak_iteminfo));
         if( !iteminfos )
             goto ERROR;
 
@@ -159,7 +159,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
             goto ERROR;
 
         keylen = filenamelen + prefixlen;
-        key = (char*)malloc(keylen+1);
+        key = (char*)vfs_malloc(keylen+1);
         if( !key )
             goto ERROR;
 		
@@ -178,7 +178,11 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
         vfs_util_str_tolower(key);
         if( !pak_item_insert(ht_iteminfos,key,iteminfos))
         {
-            VFS_SAFE_FREE(key);
+            if( key )
+            {
+                vfs_free(key);
+                key = NULL;
+            }
             goto ERROR;
         }
         
@@ -193,7 +197,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	/* 
 	 * 读取成功，组织文件包
 	 * */
-	_pak = (pak*)malloc(sizeof(pak));
+	_pak = (pak*)vfs_malloc(sizeof(pak));
 	if( !_pak )
 		goto ERROR;
 	
@@ -207,10 +211,16 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 
 ERROR:
 	VFS_SAFE_FCLOSE(fp);
-	VFS_SAFE_FREE(iteminfos);
+	if(iteminfos)
+    {
+        vfs_free(iteminfos);
+        iteminfos = NULL;
+    }
+
     if( ht_iteminfos )
     {
         hashtable_destroy(ht_iteminfos);
+        ht_iteminfos = NULL;
     }
 
 	return NULL;
@@ -233,7 +243,10 @@ void pak_close(pak* _pak)
             do {
 
                 iteminfo =(pak_iteminfo*) hashtable_iterator_value(itr);
-                VFS_SAFE_FREE(iteminfo);
+                if(iteminfo){
+                    vfs_free(iteminfo);
+                    iteminfo = NULL;
+                }
 
             } while (hashtable_iterator_remove(itr));
         }
@@ -242,7 +255,12 @@ void pak_close(pak* _pak)
         hashtable_destroy(_pak->_M_ht_iteminfos);
         _pak->_M_ht_iteminfos = NULL;
     }
-	VFS_SAFE_FREE(_pak);
+
+	if(_pak)
+    {
+        vfs_free(_pak);
+        _pak = NULL;
+    }
 }
 
 
@@ -365,7 +383,7 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bu
 	else if( iteminfo->_M_compress_type == VFS_COMPRESS_BZIP2 )
 	{
 
-		compress_buf = (void*)malloc(iteminfo->_M_compress_size);
+		compress_buf = (void*)vfs_malloc(iteminfo->_M_compress_size);
 		if( !compress_buf )
 			goto ERROR;
 
@@ -380,7 +398,12 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bu
 								 _buf,_bufsize) != iteminfo->_M_size  )
 			goto ERROR;
 
-		VFS_SAFE_FREE(compress_buf);
+		if(compress_buf)
+        {
+            vfs_free(compress_buf);
+            compress_buf = NULL;
+        }
+
 		VFS_SAFE_FCLOSE(fp);
 
 		if( vfs_util_calc_crc32(_buf,(var32)iteminfo->_M_size) != iteminfo->_M_crc32) 
@@ -390,7 +413,11 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bu
 	}
 	
 ERROR:
-	VFS_SAFE_FREE(compress_buf);
+	if(compress_buf)
+    {
+        vfs_free(compress_buf);
+        compress_buf = NULL;
+    }
 	VFS_SAFE_FCLOSE(fp);
 
 	return VFS_FALSE;

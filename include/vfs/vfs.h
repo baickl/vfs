@@ -32,12 +32,19 @@
 
 #include "base.h"
 
+struct vfs_memmgr
+{
+    void* (*malloc)(size_t);
+    void* (*realloc)(void*,size_t);
+    void  (*free)(void*);
+};
 
 /*****************************************************************************
  * vfs系统创建
    
  * @name                vfs_create
  * @param   workpath    程序的工作目录
+ * @param   mm          内存管理接口,如果mm==NULL,则为系统默认接口
  * @return  VFS_BOOL    返回VFS_TRUE   创建VFS系统成功
  *                      返回VFS_FALSE  创建VFS系统失败
  *
@@ -63,7 +70,7 @@
  * 
  *
  */
-VFS_EXTERN VFS_BOOL     vfs_create( const char*workpath );
+VFS_EXTERN VFS_BOOL     vfs_create( const char*workpath,struct vfs_memmgr* mm);
 
 /*****************************************************************************
  * vfs系统销毁

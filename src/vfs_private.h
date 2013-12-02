@@ -38,9 +38,17 @@ typedef struct vfs_t
 	var32		    _M_maxcount;
 	pak**			_M_paks;
     char            _M_workpath[VFS_MAX_FILENAME];
+
+    void*           (*malloc)(size_t);
+    void*           (*realloc)(void*,size_t);
+    void            (*free)(void*);
 }vfs;
 
 VFS_EXTERN vfs *g_vfs;
+
+VFS_EXTERN void*            vfs_malloc(size_t);
+VFS_EXTERN void*            vfs_realloc(void*p,size_t);
+VFS_EXTERN void             vfs_free(void*p);
 
 VFS_EXTERN var32			vfs_get_pak_count( );
 VFS_EXTERN pak*				vfs_get_pak_index( var32 );

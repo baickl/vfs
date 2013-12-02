@@ -5,6 +5,7 @@
 
 struct hashtable;
 
+
 /* Example of use:
  *
  *      struct hashtable  *h;

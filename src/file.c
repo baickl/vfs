@@ -105,10 +105,9 @@ vfs_file* vfs_file_create(void *buf,uvar64 size)
     if( !g_vfs )
         return NULL;
 
-	vff = (vfs_file*)malloc(sizeof(vfs_file));
+	vff = (vfs_file*)vfs_malloc(sizeof(vfs_file));
 	if( !vff )
 	{
-		VFS_SAFE_FREE(buf);
 		return NULL;
 	}
 
@@ -120,10 +119,10 @@ vfs_file* vfs_file_create(void *buf,uvar64 size)
 	}
 	else
 	{
-		vff->_M_buffer = (void*)malloc(size);
+		vff->_M_buffer = (void*)vfs_malloc(size);
 		if( !vff->_M_buffer )
 		{
-			VFS_SAFE_FREE(buf);
+            vfs_free(vff);
 			return NULL;
 		}
 		vff->_M_position = 0;
@@ -163,20 +162,28 @@ vfs_file* vfs_file_open(const char* file )
             continue;
 
         size = iteminfo->_M_size;
-        buf = (void*)malloc(size);
+        buf = (void*)vfs_malloc(size);
         if( !buf )
             return NULL;
 
         if( VFS_TRUE != pak_item_unpack_filename(g_vfs->_M_paks[i],file,buf,size) ) 
         {
-            VFS_SAFE_FREE(buf);
+            if(buf)
+            {
+                vfs_free(buf);
+                buf = NULL;
+            }
             return NULL;
         }
 
         vff = vfs_file_create(0,0);
         if( !vff )
         {
-            VFS_SAFE_FREE(buf);
+            if(buf)
+            {
+                vfs_free(buf);
+                buf = NULL;
+            }
             return NULL;
         }
         vff->_M_buffer = buf;
@@ -206,7 +213,7 @@ vfs_file* vfs_file_open(const char* file )
 
 		if( size > 0 )
 		{
-			buf = (void*)malloc(size);
+			buf = (void*)vfs_malloc(size);
 			if( !buf )
 			{
 				VFS_SAFE_FCLOSE(fp);
@@ -216,7 +223,11 @@ vfs_file* vfs_file_open(const char* file )
 			if( !VFS_CHECK_FREAD(fp,buf,size) )
 			{
 				VFS_SAFE_FCLOSE(fp);
-				VFS_SAFE_FREE(buf);
+				if(buf)
+                {
+                    vfs_free(buf);
+                    buf = NULL;
+                }
 				return NULL;
 			}
 
@@ -226,7 +237,10 @@ vfs_file* vfs_file_open(const char* file )
 		vff = vfs_file_create(0,0);
 		if( !vff )
 		{
-			VFS_SAFE_FREE(buf);
+			if(buf){
+                vfs_free(buf);
+                buf = NULL;
+            }
 			return NULL;
 		}
 		vff->_M_buffer = buf;
@@ -243,8 +257,13 @@ void vfs_file_close(vfs_file* file)
 {
 	if( file )
 	{
-		VFS_SAFE_FREE(file->_M_buffer);
-		VFS_SAFE_FREE(file);
+		if(file->_M_buffer)
+        {
+            vfs_free(file->_M_buffer);
+            file->_M_buffer = NULL;
+        }
+		vfs_free(file);
+        file = NULL;
 	}
 }
 
@@ -348,7 +367,7 @@ size_t vfs_file_write(void* buf , size_t size , size_t count , vfs_file*fp )
         needsize = (count - realcount)*size;
         if( fp->_M_size == 0 )
         {
-            tmp = (void*)malloc(needsize );
+            tmp = (void*)vfs_malloc(needsize );
             if( tmp )
             {
                 fp->_M_buffer = tmp;

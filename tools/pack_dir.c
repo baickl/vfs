@@ -95,7 +95,7 @@ VFS_BOOL pak_begin( const char *path )
 
 	g_pak = _pak;
 	g_pak->_M_header._M_flag = MAKE_CC_ID('p','a','k','x');
-	g_pak->_M_header._M_version = VFS_VERSION;
+	g_pak->_M_header._M_version = PAK_VERSION;
 	g_pak->_M_header._M_count = 0;
     g_pak->_M_ht_iteminfos = create_hashtable(256,pak_item_hashcode,pak_item_equalkeys,pak_item_key_free);
     if( !g_pak->_M_ht_iteminfos )

@@ -27,8 +27,8 @@ typedef unsigned int                                uvar32;
 
 #if defined(_MSC_VER) || ((__BORLANDC__ >= 0x530) && !defined(__STRICT_ANSI__))
 
-	typedef __int64                                 var64;
-	typedef unsigned __int64                        uvar64;
+    typedef __int64                                 var64;
+    typedef unsigned __int64                        uvar64;
 	
     #define I64FMTX                                 "%016I64X"
     #define I64FMTU                                 "%I64u"
@@ -36,19 +36,19 @@ typedef unsigned int                                uvar32;
 
 #elif __GNUC__
     #if __WORDSIZE == 64
-		typedef long int                            var64;
-		typedef unsigned long int                   uvar64;
+        typedef long int                            var64;
+        typedef unsigned long int                   uvar64;
     #else
-		__extension__ typedef long long             var64;
-		__extension__ typedef unsigned long long    uvar64;
+        __extension__ typedef long long             var64;
+        __extension__ typedef unsigned long long    uvar64;
     #endif
 
     #define I64FMTX                                 "%016llX"
     #define I64FMTU                                 "%llu"
     #define I64FMTD                                 "%lld"
 #else
-	typedef long long                               var64;
-	typedef unsigned long long                      uvar64;
+    typedef long long                               var64;
+    typedef unsigned long long                      uvar64;
 
     #define I64FMTX                                 "%016llX"
     #define I64FMTU                                 "%llu"
@@ -69,18 +69,18 @@ typedef unsigned int                                uvar32;
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER > 1310 && !defined (_WIN32_WCE)
-	#define swprintf                                swprintf_s
-	#define snprintf                                sprintf_s
+    #define swprintf                                swprintf_s
+    #define snprintf                                sprintf_s
 #else
-	#define swprintf                                _snwprintf
-	#define snprintf                                _snprintf
+    #define swprintf                                _snwprintf
+    #define snprintf                                _snprintf
     #define stricmp                                 strcasecmp
 #endif
 
 
 /************************************************************************/
 /* BOOL值模拟 */
-typedef var32 VFS_BOOL;
+typedef var32                                       VFS_BOOL;
 
 #define VFS_TRUE                                    (1)
 #define VFS_FALSE                                   (0)

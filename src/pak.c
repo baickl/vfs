@@ -97,7 +97,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	if( fread(&header._M_version,1,sizeof(header._M_version),fp) != sizeof(header._M_version))
 		goto ERROR;
 
-	if( header._M_version > VFS_VERSION )
+	if( header._M_version > PAK_VERSION )
 		goto ERROR;
 
 	if( fread(&header._M_count,1,sizeof(header._M_count),fp) != sizeof(header._M_count))

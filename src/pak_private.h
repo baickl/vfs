@@ -34,6 +34,8 @@
 #include "hashtable/hashtable.h"
 #include "hashtable/hashtable_itr.h"
 
+#define PAK_VERSION     1
+
 typedef struct pak_header_s
 {
 	var32			_M_flag;

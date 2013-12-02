@@ -39,6 +39,7 @@ typedef struct vfs_t
 	pak**			_M_paks;
     char            _M_workpath[VFS_MAX_FILENAME];
 
+    uvar64          _M_mem_max_used;
     uvar64          _M_mem_total_used;
     uvar64          _M_mem_pak_used;
     uvar64          _M_mem_hashtable_used;

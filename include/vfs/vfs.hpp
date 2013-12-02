@@ -171,7 +171,7 @@ public:
 
     bool Create(const char*workpath)
     {
-        if(VFS_TRUE == vfs_create(workpath))
+        if(VFS_TRUE == vfs_create(workpath,NULL))
             return true;
         else
             return false;

@@ -31,7 +31,7 @@
 #include <vfs/file.h>
 #include <stdio.h>
 
-int main(int argc,char* argv[] )
+int main( void )
 {
 
 	vfs_file *vf;

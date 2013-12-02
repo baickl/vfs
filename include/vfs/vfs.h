@@ -30,14 +30,7 @@
 #ifndef _VFS_VFS_H_
 #define _VFS_VFS_H_
 
-#include "base.h"
-
-struct vfs_memmgr
-{
-    void* (*malloc)(size_t);
-    void* (*realloc)(void*,size_t);
-    void  (*free)(void*);
-};
+#include "mm.h"
 
 /*****************************************************************************
  * vfs系统创建
@@ -70,7 +63,7 @@ struct vfs_memmgr
  * 
  *
  */
-VFS_EXTERN VFS_BOOL     vfs_create( const char*workpath,struct vfs_memmgr* mm);
+VFS_EXTERN VFS_BOOL     vfs_create( const char*workpath,struct vfs_mm *mm);
 
 /*****************************************************************************
  * vfs系统销毁

@@ -100,7 +100,7 @@ var32 vfs_pak_search(const char* pakfile)
 	return (p - g_vfs->_M_paks);
 }
 
-VFS_BOOL vfs_create(const char* workpath,struct vfs_memmgr*mm)
+VFS_BOOL vfs_create(const char* workpath,struct vfs_mm *mm)
 {
 	if( g_vfs )
 		return VFS_TRUE;

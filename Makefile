@@ -12,6 +12,7 @@ OBJS=objs/pak.o 		\
 	 objs/util.o		\
 	 objs/vfs.o			\
 	 objs/file.o		\
+	 objs/mm.o			\
 	 objs/hashtable.o	\
 	 objs/hashtable_itr.o		\
 	 objs/hashtable_utility.o	\
@@ -42,6 +43,9 @@ objs/vfs.o:src/vfs.c
 	
 objs/file.o:src/file.c
 	$(CC) $(CFLAGS) -c src/file.c -o objs/file.o
+
+objs/mm.o:src/mm.c
+	$(CC) $(CFLAGS) -c src/mm.c -o objs/mm.o
 
 objs/hashtable.o:src/hashtable/hashtable.c
 	$(CC) $(CFLAGS) -c src/hashtable/hashtable.c -o objs/hashtable.o

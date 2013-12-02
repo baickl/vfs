@@ -171,7 +171,7 @@ public:
 
     bool Create(const char*workpath)
     {
-        if(VFS_TRUE == vfs_create(workpath,NULL))
+        if(VFS_TRUE == vfs_create(VFS_SDK_VERSION,workpath,NULL))
             return true;
         else
             return false;

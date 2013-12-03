@@ -34,7 +34,7 @@
 #include "version.h"
 
 /************************************************************************/
-/* º¯Êýµ¼³ö¶¨Òå */
+/* å‡½æ•°å¯¼å‡ºå®šä¹‰ */
 #ifndef __cplusplus
 #define VFS_EXTERN extern
 #else
@@ -42,22 +42,22 @@
 #endif
 
 /************************************************************************/
-/* °æ±¾¶¨Òå */
+/* ç‰ˆæœ¬å®šä¹‰ */
 
 #define VFS_MAX_FILENAME                            (512)
 
-#define VFS_FOREACH_IGNORE                          (0)	    /* ·µ»ØFOREACH£¬±¾´Î½á¹û²»´¦Àí£¬Èç¹ûÊÇÓöµ½Ä¿Â¼·µ»Ø£¬Ôò±íÊ¾²»½øÈëÄ¿Â¼¼ÌÐøFOREACH */
-#define VFS_FOREACH_CONTINUE                        (1)     /* ¼ÌÐøFOREACH£¬Ö÷ÒªÓÃÓÚ´¦ÀíÄ¿Â¼½øÈë*/
-#define VFS_FOREACH_BREAK                           (2)     /* ÖÐ¶ÏFOREACH£¬Ò»°ãÊÇÕÒµ½ÏëÒªµÄÎÄ¼þ¼Ð»òÊÇÎÄ¼þºó£¬²»ÐèÒª¼ÌÐøFOREACHÁË */
-#define VFS_FOREACH_PROC_ERROR                      (3)     /* ´¦Àíº¯Êý·µ»Ø´íÎó£¬ÒªÇóÖÐ¶ÏFOREACHÐÐÎª */
+#define VFS_FOREACH_IGNORE                          (0)	    /* è¿”å›žFOREACHï¼Œæœ¬æ¬¡ç»“æžœä¸å¤„ç†ï¼Œå¦‚æžœæ˜¯é‡åˆ°ç›®å½•è¿”å›žï¼Œåˆ™è¡¨ç¤ºä¸è¿›å…¥ç›®å½•ç»§ç»­FOREACH */
+#define VFS_FOREACH_CONTINUE                        (1)     /* ç»§ç»­FOREACHï¼Œä¸»è¦ç”¨äºŽå¤„ç†ç›®å½•è¿›å…¥*/
+#define VFS_FOREACH_BREAK                           (2)     /* ä¸­æ–­FOREACHï¼Œä¸€èˆ¬æ˜¯æ‰¾åˆ°æƒ³è¦çš„æ–‡ä»¶å¤¹æˆ–æ˜¯æ–‡ä»¶åŽï¼Œä¸éœ€è¦ç»§ç»­FOREACHäº† */
+#define VFS_FOREACH_PROC_ERROR                      (3)     /* å¤„ç†å‡½æ•°è¿”å›žé”™è¯¯ï¼Œè¦æ±‚ä¸­æ–­FOREACHè¡Œä¸º */
 
 /************************************************************************/
-/* Ñ¹ËõÀàÐÍ¶¨Òå */
+/* åŽ‹ç¼©ç±»åž‹å®šä¹‰ */
 #define VFS_COMPRESS_NONE                           (0x0000)
 #define VFS_COMPRESS_BZIP2                          (0x0001)
 
 /************************************************************************/
-/* ¼ì²éÎÄ¼þ´æÔÚµÄ½á¹û */
+/* æ£€æŸ¥æ–‡ä»¶å­˜åœ¨çš„ç»“æžœ */
 #define VFS_FILE_NOT_EXISTS	                        (0)
 #define VFS_FILE_EXISTS_IN_PAK                      (1)
 #define VFS_FILE_EXISTS_IN_DIR                      (2)
@@ -71,7 +71,7 @@
 
 
 /************************************************************************/
-/* Ïà¹ØÊµÓÃºê¶¨Òå */
+/* ç›¸å…³å®žç”¨å®å®šä¹‰ */
 #define VFS_SAFE_FCLOSE(x)                          if(x){fclose(x);x=NULL;}
 #define VFS_SAFE_FREE(x)                            if(x){free((void*)x);x=NULL;}
 

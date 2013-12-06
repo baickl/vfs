@@ -1,4 +1,4 @@
-/***********************************************************************************
+﻿/***********************************************************************************
  * Copyright (c) 2013, baickl(baickl@gmail.com)
  * All rights reserved.
  * 
@@ -171,7 +171,7 @@ public:
 
     bool Create(const char*workpath)
     {
-        if(VFS_TRUE == vfs_create(VFS_SDK_VERSION,workpath,NULL))
+        if(VFS_TRUE == vfs_create(VFS_SDK_VERSION,workpath))
             return true;
         else
             return false;

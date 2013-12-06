@@ -1,4 +1,4 @@
-/***********************************************************************************
+﻿/***********************************************************************************
  * Copyright (c) 2013, baickl(baickl@gmail.com)
  * All rights reserved.
  * 
@@ -36,7 +36,7 @@
 
 static FILE* sfopen(const char* filename,const char* mode)
 {
-#ifndef _WIN32
+#ifdef __linux__
 	return fopen(filename,mode);
 #else
 	FILE* fp = NULL;
@@ -70,7 +70,6 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
     var32 keylen = 0;
     char* key = NULL;
 
-    struct hashtable_mm mm;
     struct hashtable *ht_iteminfos = NULL;
 
     if( !g_vfs )
@@ -116,10 +115,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	/* 
 	 * 提取文件信息
 	 * */
-    mm.malloc = g_vfs->_M_mm.malloc;
-    mm.realloc = g_vfs->_M_mm.realloc;
-    mm.free = g_vfs->_M_mm.free;
-    ht_iteminfos = create_hashtable(header._M_count,pak_item_hashcode,pak_item_equalkeys,pak_item_key_free,&mm);
+    ht_iteminfos = create_hashtable(header._M_count,pak_item_hashcode,pak_item_equalkeys,pak_item_key_free);
     if( !ht_iteminfos )
         goto ERROR;    
 
@@ -127,7 +123,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	for( i = 0; i<header._M_count; ++i )
 	{
 
-        iteminfos = (pak_iteminfo*)vfs_malloc(sizeof(pak_iteminfo));
+        iteminfos = (pak_iteminfo*)malloc(sizeof(pak_iteminfo));
         if( !iteminfos )
             goto ERROR;
 
@@ -163,7 +159,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
             goto ERROR;
 
         keylen = filenamelen + prefixlen;
-        key = (char*)vfs_malloc(keylen+1);
+        key = (char*)malloc(keylen+1);
         if( !key )
             goto ERROR;
 		
@@ -184,7 +180,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
         {
             if( key )
             {
-                vfs_free(key);
+                free(key);
                 key = NULL;
             }
             goto ERROR;
@@ -201,7 +197,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	/* 
 	 * 读取成功，组织文件包
 	 * */
-	_pak = (pak*)vfs_malloc(sizeof(pak));
+	_pak = (pak*)malloc(sizeof(pak));
 	if( !_pak )
 		goto ERROR;
 	
@@ -215,14 +211,12 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 
 ERROR:
 	VFS_SAFE_FCLOSE(fp);
-	if(iteminfos)
-    {
-        vfs_free(iteminfos);
+	if(iteminfos){
+        free(iteminfos);
         iteminfos = NULL;
     }
 
-    if( ht_iteminfos )
-    {
+    if( ht_iteminfos ){
         hashtable_destroy(ht_iteminfos);
         ht_iteminfos = NULL;
     }
@@ -238,17 +232,15 @@ void pak_close(pak* _pak)
     if( !_pak )
 		return;
 
-    if( _pak->_M_ht_iteminfos )
-    {
+    if( _pak->_M_ht_iteminfos ){
         
         itr = hashtable_iterator_create(_pak->_M_ht_iteminfos);
-        if (itr && hashtable_count(_pak->_M_ht_iteminfos) > 0)
-        {
+        if (itr && hashtable_count(_pak->_M_ht_iteminfos) > 0) {
             do {
 
                 iteminfo =(pak_iteminfo*) hashtable_iterator_value(itr);
                 if(iteminfo){
-                    vfs_free(iteminfo);
+                    free(iteminfo);
                     iteminfo = NULL;
                 }
 
@@ -262,7 +254,7 @@ void pak_close(pak* _pak)
 
 	if(_pak)
     {
-        vfs_free(_pak);
+        free(_pak);
         _pak = NULL;
     }
 }
@@ -301,17 +293,15 @@ VFS_BOOL pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p )
             filename = (char*)hashtable_iterator_key(itr);
             iteminfo =(pak_iteminfo*) hashtable_iterator_value(itr);
             ret = proc(_pak,filename,iteminfo,index++,p);
-            switch(ret)
-            {
-                case VFS_FOREACH_BREAK:
-                    {
-                        hashtable_iterator_destroy(itr);
-                        return VFS_TRUE;
-                    }
-                case VFS_FOREACH_CONTINUE:
-                case VFS_FOREACH_IGNORE:
-                default:
-                    break; 
+            switch(ret){
+            case VFS_FOREACH_BREAK:
+                hashtable_iterator_destroy(itr);
+                return VFS_TRUE;
+            case VFS_FOREACH_CONTINUE:
+            case VFS_FOREACH_IGNORE:
+                break;
+            default:
+                break; 
             }
 
         } while (hashtable_iterator_advance(itr));
@@ -368,8 +358,7 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bu
 	if( VFS_FSEEK(fp,iteminfo->_M_offset,SEEK_SET) != 0)
 		goto ERROR;
 
-	if( iteminfo->_M_compress_type == VFS_COMPRESS_NONE)
-	{
+	if( iteminfo->_M_compress_type == VFS_COMPRESS_NONE){
 		if( fread(_buf,1,(size_t)iteminfo->_M_size,fp) != iteminfo->_M_size)
 			goto ERROR;
 
@@ -383,11 +372,9 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bu
 			goto ERROR;
 
 		return VFS_TRUE;
-	}
-	else if( iteminfo->_M_compress_type == VFS_COMPRESS_BZIP2 )
-	{
+	} else if( iteminfo->_M_compress_type == VFS_COMPRESS_BZIP2 ) {
 
-		compress_buf = (void*)vfs_malloc(iteminfo->_M_compress_size);
+		compress_buf = (void*)malloc(iteminfo->_M_compress_size);
 		if( !compress_buf )
 			goto ERROR;
 
@@ -397,14 +384,11 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bu
 		if( vfs_util_calc_crc32(compress_buf,(var32)iteminfo->_M_compress_size) != iteminfo->_M_compress_crc32)
 			goto ERROR;
 
-		if( vfs_util_decompress( iteminfo->_M_compress_type,
-								 compress_buf,iteminfo->_M_compress_size,
-								 _buf,_bufsize) != iteminfo->_M_size  )
+		if( vfs_util_decompress( iteminfo->_M_compress_type , compress_buf , iteminfo->_M_compress_size , _buf,_bufsize) != iteminfo->_M_size  )
 			goto ERROR;
 
-		if(compress_buf)
-        {
-            vfs_free(compress_buf);
+		if(compress_buf){
+            free(compress_buf);
             compress_buf = NULL;
         }
 
@@ -417,9 +401,8 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bu
 	}
 	
 ERROR:
-	if(compress_buf)
-    {
-        vfs_free(compress_buf);
+	if(compress_buf){
+        free(compress_buf);
         compress_buf = NULL;
     }
 	VFS_SAFE_FCLOSE(fp);

@@ -1,4 +1,4 @@
-/***********************************************************************************
+﻿/***********************************************************************************
  * Copyright (c) 2013, baickl(baickl@gmail.com)
  * All rights reserved.
  * 
@@ -32,13 +32,12 @@
 #include "pak.h"
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 
 vfs *g_vfs = NULL;
 
 static FILE* sfopen(const char* filename,const char* mode)
 {
-#ifndef _WIN32
+#ifdef __linux__
 	return fopen(filename,mode);
 #else
 	FILE* fp = NULL;
@@ -100,7 +99,7 @@ var32 vfs_pak_search(const char* pakfile)
 	return (p - g_vfs->_M_paks);
 }
 
-VFS_BOOL vfs_create(const char* sdk_version,const char* workpath,struct vfs_mm *mm)
+VFS_BOOL vfs_create(const char* sdk_version,const char* workpath)
 {
 	if( g_vfs )
 		return VFS_TRUE;
@@ -111,27 +110,17 @@ VFS_BOOL vfs_create(const char* sdk_version,const char* workpath,struct vfs_mm *
     if( stricmp(VFS_SDK_VERSION,sdk_version) != 0 )
         return VFS_FALSE;
 
-	g_vfs = (vfs*)(mm?mm->malloc(sizeof(vfs)):malloc(sizeof(vfs)));
+	g_vfs = (vfs*)(malloc(sizeof(vfs)));
 	if( !g_vfs )
+    {
+        
 		return VFS_FALSE;
+    }
 
 	g_vfs->_M_count = 0;
 	g_vfs->_M_maxcount = 0;
 	g_vfs->_M_paks = NULL;
     strcpy(g_vfs->_M_workpath,workpath);
-
-    if( mm )
-    {
-        g_vfs->_M_mm.malloc = mm->malloc;
-        g_vfs->_M_mm.realloc = mm->realloc;
-        g_vfs->_M_mm.free = mm->free;
-    }
-    else
-    {
-        g_vfs->_M_mm.malloc = &malloc;
-        g_vfs->_M_mm.realloc = &realloc;
-        g_vfs->_M_mm.free = &free;
-    }
 
 	return VFS_TRUE;
 }
@@ -149,11 +138,11 @@ void vfs_destroy()
 	}
 
 	if(g_vfs->_M_paks){
-        vfs_free(g_vfs->_M_paks);
+        free(g_vfs->_M_paks);
         g_vfs->_M_paks;
     }
 	
-    vfs_free(g_vfs);
+    free(g_vfs);
     g_vfs=NULL;
 }
 
@@ -246,26 +235,6 @@ VFS_BOOL vfs_remove_pak(const char* pakfile )
 
 	vfs_pak_sort();
 	return VFS_TRUE;
-}
-
-void* vfs_malloc(size_t size )
-{
-    if( g_vfs )
-        return g_vfs->_M_mm.malloc(size);
-    return NULL;
-}
-
-void* vfs_realloc(void*p,size_t size)
-{
-    if( g_vfs )
-        return g_vfs->_M_mm.realloc(p,size);
-    return NULL;
-}
-
-void vfs_free(void*p)
-{
-    if( g_vfs && p )
-        g_vfs->_M_mm.free(p);
 }
 
 

@@ -1,4 +1,4 @@
-/***********************************************************************************
+﻿/***********************************************************************************
  * Copyright (c) 2013, baickl(baickl@gmail.com)
  * All rights reserved.
  * 
@@ -30,7 +30,6 @@
 #ifndef _VFS_VFS_PRIVATE_H_
 #define _VFS_VFS_PRIVATE_H_
 
-#include <vfs/mm.h>
 #include "pak_private.h"
 
 
@@ -40,15 +39,14 @@ typedef struct vfs_t
     var32           _M_maxcount;
     pak**           _M_paks;
     char            _M_workpath[VFS_MAX_FILENAME];
+<<<<<<< HEAD
     struct vfs_mm   _M_mm;
 
+=======
+>>>>>>> 24eee487800909392cca153b897dad6ac236e37c
 }vfs;
 
 VFS_EXTERN vfs              *g_vfs;
-
-VFS_EXTERN void*            vfs_malloc(size_t);
-VFS_EXTERN void*            vfs_realloc(void*p,size_t);
-VFS_EXTERN void             vfs_free(void*p);
 
 VFS_EXTERN var32            vfs_get_pak_count( );
 VFS_EXTERN pak*             vfs_get_pak_index( var32 );

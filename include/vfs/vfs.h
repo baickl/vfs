@@ -1,4 +1,4 @@
-/***********************************************************************************
+﻿/***********************************************************************************
  * Copyright (c) 2013, baickl(baickl@gmail.com)
  * All rights reserved.
  * 
@@ -30,7 +30,7 @@
 #ifndef _VFS_VFS_H_
 #define _VFS_VFS_H_
 
-#include "mm.h"
+#include "base.h"
 
 /*****************************************************************************
  * vfs系统创建
@@ -65,8 +65,7 @@
  *
  */
 VFS_EXTERN VFS_BOOL     vfs_create( const char *sdk_version,
-                                    const char *workpath,
-                                    struct vfs_mm *mm);
+                                    const char *workpath);
 
 /*****************************************************************************
  * vfs系统销毁

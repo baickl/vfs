@@ -1,4 +1,4 @@
-/***********************************************************************************
+﻿/***********************************************************************************
  * Copyright (c) 2013, baickl(baickl@gmail.com)
  * All rights reserved.
  * 
@@ -36,7 +36,7 @@
 
 static FILE* sfopen(const char* filename,const char* mode)
 {
-#ifndef _WIN32
+#ifdef __linux__
 	return fopen(filename,mode);
 #else
 	FILE* fp = NULL;
@@ -105,7 +105,7 @@ vfs_file* vfs_file_create(void *buf,uvar64 size)
     if( !g_vfs )
         return NULL;
 
-	vff = (vfs_file*)vfs_malloc(sizeof(vfs_file));
+	vff = (vfs_file*)malloc(sizeof(vfs_file));
 	if( !vff )
 	{
 		return NULL;
@@ -119,10 +119,10 @@ vfs_file* vfs_file_create(void *buf,uvar64 size)
 	}
 	else
 	{
-		vff->_M_buffer = (void*)vfs_malloc(size);
+		vff->_M_buffer = (void*)malloc(size);
 		if( !vff->_M_buffer )
 		{
-            vfs_free(vff);
+            free(vff);
 			return NULL;
 		}
 		vff->_M_position = 0;
@@ -162,7 +162,7 @@ vfs_file* vfs_file_open(const char* file )
             continue;
 
         size = iteminfo->_M_size;
-        buf = (void*)vfs_malloc(size);
+        buf = (void*)malloc(size);
         if( !buf )
             return NULL;
 
@@ -170,7 +170,7 @@ vfs_file* vfs_file_open(const char* file )
         {
             if(buf)
             {
-                vfs_free(buf);
+                free(buf);
                 buf = NULL;
             }
             return NULL;
@@ -181,7 +181,7 @@ vfs_file* vfs_file_open(const char* file )
         {
             if(buf)
             {
-                vfs_free(buf);
+                free(buf);
                 buf = NULL;
             }
             return NULL;
@@ -213,7 +213,7 @@ vfs_file* vfs_file_open(const char* file )
 
 		if( size > 0 )
 		{
-			buf = (void*)vfs_malloc(size);
+			buf = (void*)malloc(size);
 			if( !buf )
 			{
 				VFS_SAFE_FCLOSE(fp);
@@ -225,7 +225,7 @@ vfs_file* vfs_file_open(const char* file )
 				VFS_SAFE_FCLOSE(fp);
 				if(buf)
                 {
-                    vfs_free(buf);
+                    free(buf);
                     buf = NULL;
                 }
 				return NULL;
@@ -238,7 +238,7 @@ vfs_file* vfs_file_open(const char* file )
 		if( !vff )
 		{
 			if(buf){
-                vfs_free(buf);
+                free(buf);
                 buf = NULL;
             }
 			return NULL;
@@ -259,10 +259,10 @@ void vfs_file_close(vfs_file* file)
 	{
 		if(file->_M_buffer)
         {
-            vfs_free(file->_M_buffer);
+            free(file->_M_buffer);
             file->_M_buffer = NULL;
         }
-		vfs_free(file);
+		free(file);
         file = NULL;
 	}
 }
@@ -367,7 +367,7 @@ size_t vfs_file_write(void* buf , size_t size , size_t count , vfs_file*fp )
         needsize = (count - realcount)*size;
         if( fp->_M_size == 0 )
         {
-            tmp = (void*)vfs_malloc(needsize );
+            tmp = (void*)malloc(needsize );
             if( tmp )
             {
                 fp->_M_buffer = tmp;

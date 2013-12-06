@@ -80,8 +80,7 @@ struct hashtable *
 create_hashtable(unsigned int minsize,
                  unsigned int (*hashfunction) (void*),
                  int (*key_eq_fn) (void*,void*),
-                 int (*key_free_fn)(void*), 
-                 struct hashtable_mm* mm);
+                 int (*key_free_fn)(void*));
 
 /*****************************************************************************
  * hashtable_insert

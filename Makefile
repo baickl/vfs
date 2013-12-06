@@ -11,6 +11,7 @@ CFLAGS = $(WARN) $(INCS) $(DEFINES)
 OBJS=objs/pak.o 		\
 	 objs/util.o		\
 	 objs/vfs.o			\
+	 objs/file.o		\
 	 objs/hashtable.o	\
 	 objs/hashtable_itr.o		\
 	 objs/hashtable_utility.o	\

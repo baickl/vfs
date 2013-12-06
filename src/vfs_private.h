@@ -39,11 +39,6 @@ typedef struct vfs_t
     var32           _M_maxcount;
     pak**           _M_paks;
     char            _M_workpath[VFS_MAX_FILENAME];
-<<<<<<< HEAD
-    struct vfs_mm   _M_mm;
-
-=======
->>>>>>> 24eee487800909392cca153b897dad6ac236e37c
 }vfs;
 
 VFS_EXTERN vfs              *g_vfs;

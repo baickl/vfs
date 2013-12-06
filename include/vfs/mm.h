@@ -30,7 +30,7 @@
 #ifndef _VFS_MM_H_
 #define _VFS_MM_H_
 
-#include "base.h"
+#include <vfs/base.h>
 
 struct vfs_mm
 {    

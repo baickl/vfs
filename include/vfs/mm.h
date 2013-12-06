@@ -39,8 +39,4 @@ struct vfs_mm
     void  (*free)(void*);
 };
 
-VFS_EXTERN uvar64   vfs_mm_mem_total_used();
-VFS_EXTERN uvar64   vfs_mm_mem_pak_used();
-VFS_EXTERN uvar64   vfs_mm_mem_hashtable_used();
-
 #endif

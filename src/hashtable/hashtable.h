@@ -4,15 +4,9 @@
 #define __HASHTABLE_CWC22_H__
 
 #include <stdio.h>
+#include "hashtable_mm.h"
 
 struct hashtable;
-
-struct hashtable_mm
-{
-    void* (*malloc)(size_t);
-    void* (*realloc)(void*,size_t);
-    void  (*free)(void*);
-};
 
 /* Example of use:
  *

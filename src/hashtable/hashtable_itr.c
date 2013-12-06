@@ -12,8 +12,7 @@ struct hashtable_itr *
 hashtable_iterator_create(struct hashtable *h)
 {
     unsigned int i, tablelength;
-    struct hashtable_itr *itr = (struct hashtable_itr *)
-        h->mm.malloc(sizeof(struct hashtable_itr));
+    struct hashtable_itr *itr = (struct hashtable_itr *)malloc(sizeof(struct hashtable_itr));
     if (NULL == itr) return NULL;
     itr->h = h;
     itr->e = NULL;
@@ -38,7 +37,7 @@ void
 hashtable_iterator_destroy(struct hashtable_itr* itr)
 {
     if( itr )
-        itr->h->mm.free(itr);
+        free(itr);
 }
 
 /*****************************************************************************/

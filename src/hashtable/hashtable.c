@@ -96,7 +96,7 @@ hashtable_expand(struct hashtable *h)
     if (h->primeindex == (prime_table_length - 1)) return 0;
     newsize = primes[++(h->primeindex)];
 
-    newtable = (struct entry **)h->mm.malloc(sizeof(struct entry*) * newsize);
+    newtable = (struct entry **)malloc(sizeof(struct entry*) * newsize);
     if (NULL != newtable)
     {
         memset(newtable, 0, newsize * sizeof(struct entry *));
@@ -110,14 +110,13 @@ hashtable_expand(struct hashtable *h)
                 newtable[index] = e;
             }
         }
-        h->mm.free(h->table);
+        free(h->table);
         h->table = newtable;
     }
     /* Plan B: realloc instead */
     else 
     {
-        newtable = (struct entry **)
-                   h->mm.realloc(h->table, newsize * sizeof(struct entry *));
+        newtable = (struct entry **)realloc(h->table, newsize * sizeof(struct entry *));
         if (NULL == newtable) { (h->primeindex)--; return 0; }
         h->table = newtable;
         memset(newtable[h->tablelength], 0, newsize - h->tablelength);
@@ -164,7 +163,7 @@ hashtable_insert(struct hashtable *h, void *k, void *v)
          * element may be ok. Next time we insert, we'll try expanding again.*/
         hashtable_expand(h);
     }
-    e = (struct entry *)h->mm.malloc(sizeof(struct entry));
+    e = (struct entry *)malloc(sizeof(struct entry));
     if (NULL == e) { --(h->entrycount); return 0; } /*oom*/
     e->h = hash(h,k);
     index = indexFor(h->tablelength,e->h);
@@ -218,7 +217,7 @@ hashtable_remove(struct hashtable *h, void *k)
             h->entrycount--;
             v = e->v;
             h->freekey(e->k);
-            h->mm.free(e);
+            free(e);
             return v;
         }
         pE = &(e->next);
@@ -239,10 +238,10 @@ hashtable_destroy(struct hashtable *h)
     {
         e = table[i];
         while (NULL != e)
-        { f = e; e = e->next; h->freekey(f->k); h->mm.free(f); }
+        { f = e; e = e->next; h->freekey(f->k); free(f); }
     }
-    h->mm.free(h->table);
-    h->mm.free(h);
+    free(h->table);
+    free(h);
 }
 
 /*

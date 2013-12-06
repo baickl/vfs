@@ -4,7 +4,6 @@
 #define __HASHTABLE_CWC22_H__
 
 #include <stdio.h>
-#include "hashtable_mm.h"
 
 struct hashtable;
 

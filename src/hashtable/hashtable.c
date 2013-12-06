@@ -29,8 +29,7 @@ struct hashtable *
 create_hashtable(unsigned int minsize,
                  unsigned int (*hashf) (void*),
                  int (*eqf) (void*,void*),
-                 int (*freekey)(void*),
-                 struct hashtable_mm *mm )
+                 int (*freekey)(void*))
 {
     struct hashtable *h;
     unsigned int pindex, size = primes[0];
@@ -43,14 +42,14 @@ create_hashtable(unsigned int minsize,
         if (primes[pindex] > minsize) { size = primes[pindex]; break; }
     }
     
-    h = (struct hashtable *)(mm?mm->malloc(sizeof(struct hashtable)):malloc(sizeof(struct hashtable)));
+    h = (struct hashtable *)(malloc(sizeof(struct hashtable)));
     if (NULL == h) {
         return NULL;
     }
 
-    h->table = (struct entry **)(mm?mm->malloc(sizeof(struct entry*) * size):malloc(sizeof(struct entry*) * size));
+    h->table = (struct entry **)(malloc(sizeof(struct entry*) * size));
     if (NULL == h->table) { 
-        mm?mm->free(h):free(h); 
+        free(h); 
         return NULL; 
     }
 
@@ -65,16 +64,6 @@ create_hashtable(unsigned int minsize,
 
     
     h->loadlimit    = (unsigned int) ceil(size * max_load_factor);
-
-    if( mm ){
-        h->mm.malloc    = mm->malloc;
-        h->mm.realloc   = mm->realloc;
-        h->mm.free      = mm->free;
-    }else{
-        h->mm.malloc    = &malloc;
-        h->mm.realloc   = &realloc;
-        h->mm.free      = &free;
-    }
    
 
     return h;

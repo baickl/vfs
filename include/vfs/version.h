@@ -1,4 +1,4 @@
-#ifndef _VFS_VERSION_H_
+﻿#ifndef _VFS_VERSION_H_
 #define _VFS_VERSION_H_
 
 /************************************************************************/

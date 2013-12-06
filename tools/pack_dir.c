@@ -33,7 +33,7 @@
 
 #include <string.h>
 #include <sys/types.h>
-#ifndef _WIN32
+#ifdef __linux__
 #include <dirent.h>
 #else
 #include <io.h>  
@@ -53,7 +53,7 @@ char g_file_data[VFS_MAX_FILENAME+1]={0};
 
 static FILE* sfopen(const char* filename,const char* mode)
 {
-#ifndef _WIN32
+#ifdef __linux__
 	return fopen(filename,mode);
 #else
 	FILE* fp = NULL;
@@ -97,7 +97,7 @@ VFS_BOOL pak_begin( const char *path )
 	g_pak->_M_header._M_flag = MAKE_CC_ID('p','a','k','x');
 	g_pak->_M_header._M_version = PAK_VERSION;
 	g_pak->_M_header._M_count = 0;
-    g_pak->_M_ht_iteminfos = create_hashtable(256,pak_item_hashcode,pak_item_equalkeys,pak_item_key_free,NULL);
+    g_pak->_M_ht_iteminfos = create_hashtable(256,pak_item_hashcode,pak_item_equalkeys,pak_item_key_free);
     if( !g_pak->_M_ht_iteminfos )
         return VFS_FALSE;
 

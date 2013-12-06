@@ -1,4 +1,4 @@
-/***********************************************************************************
+﻿/***********************************************************************************
  * Copyright (c) 2013, baickl(baickl@gmail.com)
  * All rights reserved.
  * 
@@ -36,7 +36,7 @@
 #include <memory.h>
 #include <sys/types.h>
 
-#ifndef _WIN32
+#ifdef __linux__
 #include <dirent.h>
 #else
 #include <io.h>  
@@ -104,7 +104,7 @@ uvar64 vfs_util_decompress(var32 compresstype,const void*src,uvar64 srcsize,void
 }
 
 
-#ifndef _WIN32
+#ifdef __linux__
 VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc,void*p)
 {
 	DIR* dir;

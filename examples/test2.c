@@ -40,7 +40,7 @@ int main( void )
 	size_t realsize ;
 	char buf[VFS_MAX_FILENAME+1];
 
-	if( VFS_TRUE != vfs_create(VFS_SDK_VERSION,"..",NULL))
+	if( VFS_TRUE != vfs_create(VFS_SDK_VERSION,".."))
 		goto ERROR;
 
 	if( VFS_TRUE != vfs_add_pak("media/src.pak"))

@@ -19,9 +19,9 @@
   当工作路径下的包不存在的时候，程序会认会这是开发模式，不会影响正常开发过程中资源频繁更换的问题。  
   
   代码如下：  
-  vfs_add_pak("script.pak");  
-  vfs_add_pak("effect.pak");  
-  vfs_add_pak("a/b/c/scene.pak");  
+  vfs_add_archive("script.pak",NULL);  
+  vfs_add_archive("effect.pak",NULL);  
+  vfs_add_archive("a/b/c/scene.pak",NULL);  
 
   以上接口调用主要用来模拟文件夹，举例说明一下.  
   比如说 当前目录架构是这样的  
@@ -80,9 +80,9 @@
   当然 这样，你的初始化PAK的代码得改一改  
    
   原来代码如下：  
-  vfs_add_pak("script.pak");  
-  vfs_add_pak("effect.pak");  
-  vfs_add_pak("a/b/c/scene.pak");  
+  vfs_add_archive("script.pak");  
+  vfs_add_archive("effect.pak");  
+  vfs_add_archive("a/b/c/scene.pak");  
   
   改后代码如下：  
   vfs_add_pak("script.pak");  

@@ -40,7 +40,7 @@ typedef struct vfs_plugin_s
     const char*     (*plugin_archive_get_plugin_name)();
     VFS_BOOL        (*plugin_archive_check_type)(const char* archive);
 
-    vfs_archive     (*plugin_archive_open)(const char* archive,const char* prefix);
+    vfs_archive     (*plugin_archive_open)(const char* archive,const char* prefix,const char* passwd);
     void            (*plugin_archive_close)( vfs_archive archive);
 
     const char*     (*plugin_archive_get_name)( vfs_archive archive);

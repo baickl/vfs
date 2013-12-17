@@ -49,7 +49,7 @@ typedef struct vfs_file_t
  * @name                vfs_file_exists
  * @param   filename    待检测是否存在的文件
  * @return  var32       -VFS_FILE_NOT_EXISTS        文件不存在
- *                      -VFS_FILE_EXISTS_IN_PAK     文件存在于当前已经加载的PAK中
+ *                      -VFS_FILE_EXISTS_IN_ARCHIVE 文件存在于当前已经加载的ARCHIVE中
  *                      -VFS_FILE_EXISTS_IN_DIR     文件存在于当前程序运行的目录中
  *
  */
@@ -75,10 +75,10 @@ VFS_EXTERN vfs_file*    vfs_file_create( void *buf , uvar64 bufsize) ;
  * @return  vfs_file*   成功返回vfs_file对象
  *                      失败返回NULL
  *
- * 当打开的文件在PAK包和目录中都同时存在时，优先从PAK包中读取，
- * 如果PAK包中没有，仅在目录中存在，那么将从目录中优先加载。
+ * 当打开的文件在ARCHIVE包和目录中都同时存在时，优先从ARCHIVE包中读取，
+ * 如果ARCHIVE包中没有，仅在目录中存在，那么将从目录中优先加载。
  *
- * 总之，PAK包的优先级大于目录，索引文件也是优先从PAK包中索引，
+ * 总之，ARCHIVE包的优先级大于目录，索引文件也是优先从ARCHIVE包中索引，
  * 然后才会是从目录中索引。
  *
  */

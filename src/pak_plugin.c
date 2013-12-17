@@ -92,7 +92,8 @@ static VFS_BOOL pak_plugin_archive_item_locate(vfs_archive archive,const char* f
     if( item == NULL )
         return VFS_FALSE;
     
-    *osize = item->_M_size;
+    if( osize )
+        *osize = item->_M_size;
     return VFS_TRUE;
 }
 

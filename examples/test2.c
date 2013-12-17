@@ -43,7 +43,7 @@ int main( void )
 	if( VFS_TRUE != vfs_create(VFS_SDK_VERSION,".."))
 		goto ERROR;
 
-	if( VFS_TRUE != vfs_add_archive("media/src.pak"))
+	if( VFS_TRUE != vfs_add_archive("media/src.pak",NULL))
     {
         printf("open pak error \n");
 		goto ERROR;

@@ -108,11 +108,12 @@ VFS_EXTERN void             vfs_unregister_archive_plugin(const char*pluginname 
    
  * @name                    vfs_add_archive
  * @param   archive         待添加的archive文件
+ * @param   passwd          打开archive用的密码，如果没有就置空
  * @return  VFS_BOOL        返回VFS_TRUE   添加archive成功
  *                          返回VFS_FALSE  添加archive失败
  *
  */
-VFS_EXTERN VFS_BOOL         vfs_add_archive( const char* archive );
+VFS_EXTERN VFS_BOOL         vfs_add_archive( const char* archive,const char* passwd );
 
 /*****************************************************************************
  * 从VFS系统中移除archive文件

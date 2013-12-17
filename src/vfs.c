@@ -218,16 +218,16 @@ void vfs_destroy()
 
 	if(g_vfs->_M_archives){
         free(g_vfs->_M_archives);
-        g_vfs->_M_archives;
+        g_vfs->_M_archives = NULL;
     }
 
     if(g_vfs->_M_plugins){
         free(g_vfs->_M_plugins);
-        g_vfs->_M_plugins;
+        g_vfs->_M_plugins = NULL;
     }
 	
     free(g_vfs);
-    g_vfs=NULL;
+    g_vfs = NULL;
 }
 
 
@@ -296,7 +296,7 @@ void vfs_unregister_archive_plugin(const char*pluginname )
     vfs_plugin_sort();
 }
 
-VFS_BOOL vfs_add_archive( const char* archive )
+VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
 {
 	vfs_archive_obj*  p;
 	vfs_archive_obj** _archives;
@@ -331,7 +331,7 @@ VFS_BOOL vfs_add_archive( const char* archive )
         return VFS_FALSE;
 
     p->plugin = plugin;
-	p->archive = p->plugin->plugin_archive_open(_fullpath,prefix);
+	p->archive = p->plugin->plugin_archive_open(_fullpath,prefix,passwd);
 	if( !p->archive)
     {
         free(p);

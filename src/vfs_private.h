@@ -55,7 +55,7 @@ typedef struct vfs_t
 
 VFS_EXTERN vfs             *g_vfs;
 
-VFS_EXTERN var32            vfs_get_archive_count( );
+VFS_EXTERN var32            vfs_get_archive_count();
 VFS_EXTERN vfs_archive_obj* vfs_get_archive_index( var32 );
 VFS_EXTERN vfs_archive_obj* vfs_get_archive_name( const char* );
 

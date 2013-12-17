@@ -49,7 +49,7 @@ static VFS_BOOL pak_plugin_archive_check_type(const char* archive)
     return VFS_FALSE;
 }
 
-static vfs_archive pak_plugin_archive_open(const char* archive,const char* prefix)
+static vfs_archive pak_plugin_archive_open(const char* archive,const char* prefix,const char* passwd)
 {
     return (vfs_archive)pak_open(archive,prefix);
 }

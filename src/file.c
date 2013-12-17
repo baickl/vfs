@@ -33,6 +33,16 @@
 #include <stdio.h>
 #include <string.h>
 
+/************************************************************************/
+/* VFS文件结构                                                  */
+/************************************************************************/
+struct vfs_file_t
+{
+    uvar64		_M_size;
+    uvar64		_M_position;
+    void*		_M_buffer;
+};
+
 static FILE* sfopen(const char* filename,const char* mode)
 {
 #ifdef __linux__
@@ -74,7 +84,7 @@ var32 vfs_file_exists( const char* file  )
     for( i = 0; i<count; ++i )
     {
         _archive = vfs_get_archive_index(i);
-        if( _archive && _archive->plugin->plugin_archive_item_locate(_archive->archive,file,&size) !=NULL  )
+        if( _archive && VFS_TRUE == _archive->plugin->plugin_archive_item_locate(_archive->archive,file,&size) )
             return VFS_FILE_EXISTS_IN_ARCHIVE;
     }
 
@@ -82,7 +92,7 @@ var32 vfs_file_exists( const char* file  )
     /* 判断是否在本地 */
     memset(filepath,0,sizeof(filepath));
     filefullpath = file;
-    if( vfs_util_path_combine(filepath,g_vfs->_M_workpath,file) )
+    if( NULL != (void*)vfs_util_path_combine(filepath,g_vfs->_M_workpath,file) )
     {
         filefullpath = filepath;
     }

@@ -482,7 +482,7 @@ char* vfs_util_path_get_filename(char* path )
     {
         if( path[cursor-1] == '/' || path[cursor-1] == '\\' && cursor < len )
         {
-            p = path[cursor];
+            p = &path[cursor];
             break;
         }
 

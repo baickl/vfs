@@ -166,7 +166,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\vfs\typedef.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\vfs\util.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\vfs\version.h"
 					>
 				</File>
 				<File

@@ -80,14 +80,14 @@
   当然 这样，你的初始化PAK的代码得改一改  
    
   原来代码如下：  
-  vfs_add_archive("script.pak");  
-  vfs_add_archive("effect.pak");  
-  vfs_add_archive("a/b/c/scene.pak");  
+  vfs_add_archive("script.pak",NULL);  
+  vfs_add_archive("effect.pak",NULL);  
+  vfs_add_archive("a/b/c/scene.pak",NULL);  
   
   改后代码如下：  
-  vfs_add_pak("script.pak");  
-  vfs_add_pak("effect.pak");  
-  vfs_add_pak("a.pak");  
+  vfs_add_archive("script.pak",NULL);  
+  vfs_add_archive("effect.pak",NULL);  
+  vfs_add_archive("a.pak",NULL);  
   
   你的读取代码却不用做任何改变，这样即使调整目录结构，也可以很轻松随意了。  
   

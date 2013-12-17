@@ -30,21 +30,33 @@
 #ifndef _VFS_VFS_PRIVATE_H_
 #define _VFS_VFS_PRIVATE_H_
 
-#include "pak_private.h"
+#include <vfs/plugin.h>
+
+
+typedef struct vfs_archive_obj_s
+{
+    vfs_archive             archive;
+    vfs_plugin*             plugin;
+}vfs_archive_obj;
 
 
 typedef struct vfs_t
 {
-    var32           _M_count;
-    var32           _M_maxcount;
-    pak**           _M_paks;
-    char            _M_workpath[VFS_MAX_FILENAME];
+    var32                   _M_count;
+    var32                   _M_maxcount;
+    vfs_archive_obj**       _M_archives;
+
+    var32                   _M_plugins_count;
+    var32                   _M_plugins_maxcount;
+    vfs_plugin**            _M_plugins;
+
+    char                    _M_workpath[VFS_MAX_FILENAME];
 }vfs;
 
-VFS_EXTERN vfs              *g_vfs;
+VFS_EXTERN vfs             *g_vfs;
 
-VFS_EXTERN var32            vfs_get_pak_count( );
-VFS_EXTERN pak*             vfs_get_pak_index( var32 );
-VFS_EXTERN pak*             vfs_get_pak_name( const char* );
+VFS_EXTERN var32            vfs_get_archive_count( );
+VFS_EXTERN vfs_archive_obj* vfs_get_archive_index( var32 );
+VFS_EXTERN vfs_archive_obj* vfs_get_archive_name( const char* );
 
 #endif/*_VFS_VFS_PRIVATE_H_*/

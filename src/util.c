@@ -462,3 +462,34 @@ char* vfs_util_path_remove_extension(char* path )
 
 	return path;
 }
+
+
+char* vfs_util_path_get_extension(char* path )
+{
+    var32 len;
+    char* p = NULL;
+
+    if( !path )
+        return path;
+
+    len = strlen(path);
+    if( len <= 0 )
+        return p;
+
+
+    while( len > 0   )
+    {
+        --len;
+        if( path[len] == '/' || path[len] == '\\' )
+            break;
+
+        if( path[len] == '.' )
+        {
+            p = &path[len];
+            break;
+        }
+    }
+
+    return p;
+}
+

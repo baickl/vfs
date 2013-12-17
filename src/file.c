@@ -29,7 +29,6 @@
 ***********************************************************************************/
 #include <vfs/file.h>
 #include <vfs/vfs.h>
-#include "pak.h"
 #include "vfs_private.h"
 #include <stdio.h>
 #include <string.h>
@@ -57,7 +56,8 @@ static FILE* sfopen(const char* filename,const char* mode)
 var32 vfs_file_exists( const char* file  )
 {
     int i,count;
-    pak* _pak;
+    vfs_archive_obj* _archive;
+    uvar64 size;
 
     const char*filefullpath;
     char filepath[VFS_MAX_FILENAME+1];
@@ -70,12 +70,12 @@ var32 vfs_file_exists( const char* file  )
         return VFS_FILE_NOT_EXISTS;
 
     /* 先尝试在包里查找 */
-    count = vfs_get_pak_count();
+    count = vfs_get_archive_count();
     for( i = 0; i<count; ++i )
     {
-        _pak = vfs_get_pak_index(i);
-        if( _pak && pak_item_locate(_pak,file) !=NULL  )
-            return VFS_FILE_EXISTS_IN_PAK;
+        _archive = vfs_get_archive_index(i);
+        if( _archive && _archive->plugin->plugin_archive_item_locate(_archive->archive,file,&size) !=NULL  )
+            return VFS_FILE_EXISTS_IN_ARCHIVE;
     }
 
 
@@ -140,7 +140,7 @@ vfs_file* vfs_file_open(const char* file )
 	var32 i ;
 	var64 size;
 	void* buf;
-	pak_iteminfo* iteminfo;
+    vfs_archive_obj* p;
 	vfs_file* vff;
 
 	FILE* fp;
@@ -157,22 +157,17 @@ vfs_file* vfs_file_open(const char* file )
 	/* 先尝试从包里读取 */
     for( i = 0; i<g_vfs->_M_count; ++i )
     {
-        iteminfo = pak_item_locate(g_vfs->_M_paks[i],file);
-        if( iteminfo == NULL )
+        p = g_vfs->_M_archives[i];
+        if( VFS_TRUE != p->plugin->plugin_archive_item_locate(p->archive,file,&size) )
             continue;
 
-        size = iteminfo->_M_size;
         buf = (void*)malloc(size);
         if( !buf )
             return NULL;
 
-        if( VFS_TRUE != pak_item_unpack_filename(g_vfs->_M_paks[i],file,buf,size) ) 
+        if( VFS_TRUE != p->plugin->plugin_archive_item_unpack_filename(p->archive,file,buf,size) ) 
         {
-            if(buf)
-            {
-                free(buf);
-                buf = NULL;
-            }
+            free(buf);
             return NULL;
         }
 

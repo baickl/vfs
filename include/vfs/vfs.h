@@ -31,16 +31,16 @@
 #define _VFS_VFS_H_
 
 #include "base.h"
+#include "plugin.h"
 
 /*****************************************************************************
  * vfs系统创建
    
- * @name                vfs_create
- * @param   version     sdk版本号
- * @param   workpath    程序的工作目录
- * @param   mm          内存管理接口,如果mm==NULL,则为系统默认接口
- * @return  VFS_BOOL    返回VFS_TRUE   创建VFS系统成功
- *                      返回VFS_FALSE  创建VFS系统失败
+ * @name                    vfs_create
+ * @param   version         sdk版本号
+ * @param   workpath        程序的工作目录
+ * @return  VFS_BOOL        返回VFS_TRUE   创建VFS系统成功
+ *                          返回VFS_FALSE  创建VFS系统失败
  *
  * 此函数是创建vfsh虚拟文件系统的，需要在创建的时候，指定资源路径或是程序运行路径
  * 指定一个工作路径的目标是为了方便的文件加载模块可以通过相对路径来读取文件
@@ -54,7 +54,7 @@
  *
  * 如果资源目录打包的话，只需要再将包添加到资源里就可以了
  * 比如说对data目录打包，那么添加包的代码就是
- * vfs_add_pak("a/b/c/data.pak")
+ * vfs_add_archive("a/b/c/data.pak")
  *
  * 以上代码，即使在开发时，也不会出错，因为开发时包不存在，VFS本身不会对这种文件包不存在的情况
  * 进行报错和预处理。
@@ -64,44 +64,66 @@
  * 
  *
  */
-VFS_EXTERN VFS_BOOL     vfs_create( const char *sdk_version,
-                                    const char *workpath);
+VFS_EXTERN VFS_BOOL         vfs_create( const char *sdk_version,
+                                        const char *workpath);
 
 /*****************************************************************************
  * vfs系统销毁
    
- * @name                vfs_destroy
- * @return    void      无返回值
+ * @name                    vfs_destroy
+ * @return    void          无返回值
  *                      
  *
  * 销毁VFS系统，此函数不返回任何值，调用即销毁了，
- * 注意，销毁以后，之前通过vfs_add_pak加载的pak，将全部被清除
+ * 注意，销毁以后，之前通过vfs_add_archive加载的archive，将全部被清除
  * 此函数的调用时期，一般是程序要结束的时候，释放资源的时候调用
  */
-VFS_EXTERN void         vfs_destroy();
+VFS_EXTERN void             vfs_destroy();
+
+/*****************************************************************************
+ * 注册vfs插件
+   
+ * @name                    vfs_register_archive_plugin
+ * @param     pluginname    插件名称
+ * @param     plugin        待注册的插件
+ * @return    VFS_BOOK      ==VFS_TRUE  注册成功
+ *                          ==VFS_FALSE 注册插件失败  
+ *
+ */
+VFS_EXTERN VFS_BOOL         vfs_register_archive_plugin(const char*pluginname,vfs_plugin plugin);
+
+/*****************************************************************************
+ * 反注册vfs插件
+   
+ * @name                    vfs_unregister_archive_plugin
+ * @param     pluginname    插件名称
+ * @return    void          无返回值
+ * 
+ */
+VFS_EXTERN void             vfs_unregister_archive_plugin(const char*pluginname );
 
 
 /*****************************************************************************
- * 添加pak文件到vfs系统中
+ * 添加archive到vfs系统中
    
- * @name                vfs_add_pak
- * @param   pakfile     待添加的PAK文件
- * @return  VFS_BOOL    返回VFS_TRUE   添加pakfile成功
- *                      返回VFS_FALSE  添加pakfile失败
+ * @name                    vfs_add_archive
+ * @param   archive         待添加的archive文件
+ * @return  VFS_BOOL        返回VFS_TRUE   添加archive成功
+ *                          返回VFS_FALSE  添加archive失败
  *
  */
-VFS_EXTERN VFS_BOOL     vfs_add_pak( const char* pakfile );
+VFS_EXTERN VFS_BOOL         vfs_add_archive( const char* archive );
 
 /*****************************************************************************
- * 从VFS系统中移除pak文件
+ * 从VFS系统中移除archive文件
    
- * @name                vfs_remove_pak
- * @param   pakfile     待移除的PAK文件
- * @return  VFS_BOOL    返回VFS_TRUE   移除pakfile成功
- *                      返回VFS_FALSE  移除pakfile失败
+ * @name                    vfs_remove_archive
+ * @param   archive         待移除的archive文件
+ * @return  VFS_BOOL        返回VFS_TRUE   移除archive成功
+ *                          返回VFS_FALSE  移除archive失败
  *
  */
-VFS_EXTERN VFS_BOOL     vfs_remove_pak( const char* );
+VFS_EXTERN VFS_BOOL         vfs_remove_archive( const char*archive );
 
 
 #endif

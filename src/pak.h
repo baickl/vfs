@@ -47,7 +47,7 @@
  *                          -VFS_FOREACH_PROC_ERROR      处理函数返回错误，要求中断FOREACH行为
  */
 
-typedef var32               (*pak_item_foreach_proc)(pak*_pak ,char* key, pak_iteminfo *iteminfo , int index , void *p );
+typedef var32               (*pak_item_foreach_proc)(pak*_pak ,char* filename, pak_iteminfo *iteminfo , int index , void *p );
 
 /*****************************************************************************
  * 打开PAK文件包
@@ -148,7 +148,7 @@ VFS_EXTERN pak_iteminfo*    pak_item_locate( pak* _pak, const char *file);
  *                          ==VFS_FALSE  解压文件失败 
  *
  */
-VFS_EXTERN VFS_BOOL         pak_item_unpack_filename( pak*, const char*, void*, uvar64) ;
+VFS_EXTERN VFS_BOOL         pak_item_unpack_filename( pak*_pak, const char*file, void*buf, uvar64 bufsize) ;
 
 
 #endif/*_VFS_PAK_H_*/

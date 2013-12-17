@@ -59,7 +59,7 @@
 /************************************************************************/
 /* 检查文件存在的结果 */
 #define VFS_FILE_NOT_EXISTS	                        (0)
-#define VFS_FILE_EXISTS_IN_PAK                      (1)
+#define VFS_FILE_EXISTS_IN_ARCHIVE                  (1)
 #define VFS_FILE_EXISTS_IN_DIR                      (2)
 
 

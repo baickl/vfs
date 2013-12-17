@@ -182,9 +182,9 @@ public:
         vfs_destroy();
     }
 
-    bool AddPath(const char* path )
+    bool AddArchive(const char* path )
     {
-        if( VFS_TRUE == vfs_add_pak(path) )
+        if( VFS_TRUE == vfs_add_archive(path) )
             return true;
         else
             return false;

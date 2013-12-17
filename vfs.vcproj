@@ -162,6 +162,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\vfs\plugin.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\vfs\util.h"
 					>
 				</File>
@@ -188,6 +192,14 @@
 			</File>
 			<File
 				RelativePath=".\src\pak.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pak_plugin.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pak_plugin.h"
 				>
 			</File>
 			<File

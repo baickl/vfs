@@ -1,4 +1,4 @@
-/***********************************************************************************
+ï»¿/***********************************************************************************
  * Copyright (c) 2013, baickl(baickl@gmail.com)
  * All rights reserved.
  * 
@@ -27,62 +27,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
-#include <vfs/vfs.h>
-#include <vfs/file.h>
-#include <stdio.h>
+#ifndef _VFS_PLUGIN_H_
+#define _VFS_PLUGIN_H_
 
-int main( void )
+#include "base.h"
+
+typedef void* vfs_archive;
+typedef var32 (*plugin_item_foreach_proc)(vfs_archive archive ,const char* filename, uvar64 size);
+
+typedef struct vfs_plugin_s
 {
+    const char*     (*plugin_archive_get_plugin_name)();
+    VFS_BOOL        (*plugin_archive_check_type)(const char* archive);
 
-	vfs_file *vf;
-    vfs_file *out;
+    vfs_archive     (*plugin_archive_open)(const char* archive,const char* prefix);
+    void            (*plugin_archive_close)( vfs_archive archive);
 
-	size_t realsize ;
-	char buf[VFS_MAX_FILENAME+1];
+    const char*     (*plugin_archive_get_name)( vfs_archive archive);
 
-	if( VFS_TRUE != vfs_create(VFS_SDK_VERSION,".."))
-		goto ERROR;
+    var32           (*plugin_archive_item_get_count)( vfs_archive archive);
+    VFS_BOOL        (*plugin_archive_item_foreach)( vfs_archive archive,plugin_item_foreach_proc proc);
+    VFS_BOOL        (*plugin_archive_item_locate)(vfs_archive archive,const char* filename,uvar64* osize);
 
-	if( VFS_TRUE != vfs_add_archive("media/src.pak"))
-    {
-        printf("open pak error \n");
-		goto ERROR;
-    }
+    VFS_BOOL        (*plugin_archive_item_unpack_filename)( vfs_archive archive, const char* filename, void* buf, uvar64 bufsize);
 
-	vf = vfs_file_open("mediA/src/bzip2/randtable.c");
-	if( !vf )
-    {
-        printf("vfs_file_open failed\n");
-		goto ERROR;
-    }
+}vfs_plugin;
 
-    out = vfs_file_create(0,0);
 
-	while( !vfs_file_eof(vf) )
-	{
-		realsize = vfs_file_read(buf,1,(size_t)VFS_MAX_FILENAME,vf);
-		if( realsize > 0 )
-		{
-			buf[realsize] = 0;
-			printf(buf);
-
-            if( vfs_file_write(buf,1,realsize,out) != realsize )
-            {
-                printf("Write Error!\n");
-            }
-		}
-	}
-
-    /* ±£´æÒ»ÏÂ */
-    vfs_file_save(out,"./randtable.c");
-    vfs_file_close(out);
-
-	vfs_file_close(vf);
-	vfs_destroy();
-	return 0;
-
-ERROR:
-	vfs_destroy();
-	return -1;
-
-}
+#endif/*_VFS_PLUGIN_H_*/

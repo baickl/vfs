@@ -233,7 +233,7 @@ VFS_EXTERN char*        vfs_util_path_combine(char *path,const char *a,const cha
    
  * @name                vfs_util_path_add_backslash
  * @param     path      待添加的路径，需要保证足够大小
- * @return    char*     返回添加结果，即参数path
+ * @return    char*     返回结果，即参数path
  *
  * 如果路径结尾已经以'/'结尾，那么本函数，不对path做任何改变，
  * 如果路径结尾不是'/'，那么会在路径结尾添加'/'，然后返回结果
@@ -250,12 +250,14 @@ VFS_EXTERN char*        vfs_util_path_combine(char *path,const char *a,const cha
  */
 VFS_EXTERN char*        vfs_util_path_add_backslash(char *path);
 
+
+
 /*****************************************************************************
  * 去除路径后面的斜杠
    
  * @name                vfs_util_path_remove_backslash
  * @param     path      待处理的路径
- * @return    char*     返回添加结果，即参数path
+ * @return    char*     返回结果，即参数path
  *
  * 如果路径结尾不是以'/'结尾，将不会做任何处理，并且直接返回
  * 如果路径结尾是以'/'结尾，，将会移除'/'，然后返回结果
@@ -277,7 +279,7 @@ VFS_EXTERN char*        vfs_util_path_remove_backslash(char *path);
    
  * @name                vfs_util_path_remove_filename
  * @param     path      待处理的路径
- * @return    char*     返回添加结果，即参数path
+ * @return    char*     返回结果，即参数path
  *
  * 此函数使用方法如下：
  * char path[VFS_MAX_FILENAME];
@@ -296,7 +298,7 @@ VFS_EXTERN char*        vfs_util_path_remove_filename(char *path);
    
  * @name                vfs_util_path_remove_extension
  * @param     path      待处理的路径
- * @return    char*     返回添加结果，即参数path
+ * @return    char*     返回结果，即参数path
  *
  * 此函数使用方法如下：
  * char path[VFS_MAX_FILENAME];
@@ -309,5 +311,25 @@ VFS_EXTERN char*        vfs_util_path_remove_filename(char *path);
  *
  */
 VFS_EXTERN char*        vfs_util_path_remove_extension(char*);
+
+
+/*****************************************************************************
+ * 取得路径中的文件扩展名
+   
+ * @name                vfs_util_path_remove_extension
+ * @param     path      待处理的路径
+ * @return    char*     返回结果，即扩展名(.png)，如果没有找到则为NULL
+ *
+ * 此函数使用方法如下：
+ * char path[VFS_MAX_FILENAME];
+ * strcpy(path,"home/xxx/app/bin.txt");
+ * vfs_util_path_remove_extension(path)
+ * printf(path); 
+ *
+ * 输出结果：
+ * /home/xxx/app/bin
+ *
+ */
+VFS_EXTERN char*        vfs_util_path_get_extension(char*);
 
 #endif/* _VFS_UTIL_H_ */

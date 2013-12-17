@@ -203,7 +203,7 @@ VFS_EXTERN char*        vfs_util_path_append(char *path,char *append);
  * /home/xxx/app/bin.txt
  *
  */
-VFS_EXTERN char*        vfs_util_path_join(char*,char*);
+VFS_EXTERN char*        vfs_util_path_join(char *path,char *join);
 
 /*****************************************************************************
  * 路径组合
@@ -310,7 +310,7 @@ VFS_EXTERN char*        vfs_util_path_remove_filename(char *path);
  * /home/xxx/app/bin
  *
  */
-VFS_EXTERN char*        vfs_util_path_remove_extension(char*);
+VFS_EXTERN char*        vfs_util_path_remove_extension(char *path);
 
 
 /*****************************************************************************
@@ -352,6 +352,6 @@ VFS_EXTERN char*        vfs_util_path_get_filename(char *path);
  * .txt
  *
  */
-VFS_EXTERN char*        vfs_util_path_get_extension(char*);
+VFS_EXTERN char*        vfs_util_path_get_extension(char *path);
 
 #endif/* _VFS_UTIL_H_ */

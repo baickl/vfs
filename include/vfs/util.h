@@ -314,6 +314,27 @@ VFS_EXTERN char*        vfs_util_path_remove_extension(char*);
 
 
 /*****************************************************************************
+ * 取得路径中的文件名
+   
+ * @name                vfs_util_path_get_filename
+ * @param     path      待处理的路径
+ * @return    char*     返回结果，即参数path
+ *
+ * 此函数使用方法如下：
+ * char* filename;
+ * char path[VFS_MAX_FILENAME];
+ * strcpy(path,"home/xxx/app/bin.txt");
+ * filename = vfs_util_path_remove_filename(path)
+ * printf(filename); 
+ *
+ * 输出结果：
+ * bin.txt
+ *
+ */
+VFS_EXTERN char*        vfs_util_path_get_filename(char *path);
+
+
+/*****************************************************************************
  * 取得路径中的文件扩展名
    
  * @name                vfs_util_path_remove_extension
@@ -321,13 +342,14 @@ VFS_EXTERN char*        vfs_util_path_remove_extension(char*);
  * @return    char*     返回结果，即扩展名(.png)，如果没有找到则为NULL
  *
  * 此函数使用方法如下：
+ * char*ext;
  * char path[VFS_MAX_FILENAME];
  * strcpy(path,"home/xxx/app/bin.txt");
- * vfs_util_path_remove_extension(path)
- * printf(path); 
+ * ext = vfs_util_path_get_extension(path)
+ * printf(ext); 
  *
  * 输出结果：
- * /home/xxx/app/bin
+ * .txt
  *
  */
 VFS_EXTERN char*        vfs_util_path_get_extension(char*);

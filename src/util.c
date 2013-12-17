@@ -463,10 +463,40 @@ char* vfs_util_path_remove_extension(char* path )
 	return path;
 }
 
+char* vfs_util_path_get_filename(char* path )
+{
+    var32 len;
+    var32 cursor;
+    char* p = NULL;
+
+    if( !path )
+        return p;
+
+    len = strlen(path);
+    if( len <= 0 )
+        return p;
+
+    cursor = len;
+
+    while( cursor > 0   )
+    {
+        if( path[cursor-1] == '/' || path[cursor-1] == '\\' && cursor < len )
+        {
+            p = path[cursor];
+            break;
+        }
+
+        --cursor;
+    }
+
+    return path;
+}
+
 
 char* vfs_util_path_get_extension(char* path )
 {
     var32 len;
+    var32 cursor;
     char* p = NULL;
 
     if( !path )
@@ -476,18 +506,21 @@ char* vfs_util_path_get_extension(char* path )
     if( len <= 0 )
         return p;
 
+    cursor = len;
 
-    while( len > 0   )
+
+    while( cursor > 0   )
     {
-        --len;
-        if( path[len] == '/' || path[len] == '\\' )
+        if( path[cursor-1] == '/' || path[cursor-1] == '\\' )
             break;
 
-        if( path[len] == '.' )
+        if( path[cursor-1] == '.' && cursor < len )
         {
-            p = &path[len];
+            p = &path[cursor];
             break;
         }
+
+        --cursor;
     }
 
     return p;

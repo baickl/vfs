@@ -156,7 +156,7 @@ VFS_EXTERN char*        vfs_util_path_checkfix(char *path);
  * 此函数会先拷贝要克隆的对象，然后调用vfs_util_path_checkfix对拷贝出来的数据进行检查修正
  *                      
  */
-VFS_EXTERN char*        vfs_util_path_clone(char *path,char *clone);
+VFS_EXTERN char*        vfs_util_path_clone(char *path,const char *clone);
 
 /*****************************************************************************
  * 路径追加
@@ -180,7 +180,7 @@ VFS_EXTERN char*        vfs_util_path_clone(char *path,char *clone);
  * /home/xxx/app/aaa/bin.txt
  *
  */
-VFS_EXTERN char*        vfs_util_path_append(char *path,char *append);
+VFS_EXTERN char*        vfs_util_path_append(char *path,const char *append);
 
 /*****************************************************************************
  * 路径连接
@@ -203,7 +203,7 @@ VFS_EXTERN char*        vfs_util_path_append(char *path,char *append);
  * /home/xxx/app/bin.txt
  *
  */
-VFS_EXTERN char*        vfs_util_path_join(char *path,char *join);
+VFS_EXTERN char*        vfs_util_path_join(char *path,const char *join);
 
 /*****************************************************************************
  * 路径组合
@@ -331,7 +331,7 @@ VFS_EXTERN char*        vfs_util_path_remove_extension(char *path);
  * bin.txt
  *
  */
-VFS_EXTERN char*        vfs_util_path_get_filename(char *path);
+VFS_EXTERN const char*  vfs_util_path_get_filename(const char *path);
 
 
 /*****************************************************************************
@@ -352,6 +352,6 @@ VFS_EXTERN char*        vfs_util_path_get_filename(char *path);
  * .txt
  *
  */
-VFS_EXTERN char*        vfs_util_path_get_extension(char *path);
+VFS_EXTERN const char*   vfs_util_path_get_extension(const char *path);
 
 #endif/* _VFS_UTIL_H_ */

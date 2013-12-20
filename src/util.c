@@ -316,7 +316,7 @@ char* vfs_util_path_checkfix(char* path )
 }
 
 
-char* vfs_util_path_clone(char*out_path,char*path )
+char* vfs_util_path_clone(char*out_path,const char*path )
 {
 	if( !out_path || !path )
 		return NULL;
@@ -328,9 +328,9 @@ char* vfs_util_path_clone(char*out_path,char*path )
     return out_path;
 }
 
-char* vfs_util_path_append(char* path ,char* append )
+char* vfs_util_path_append(char* path ,const char* append )
 {
-	char *p ;
+	const char *p ;
 	if( !path || !append)
 		return NULL;
 
@@ -355,7 +355,7 @@ char* vfs_util_path_append(char* path ,char* append )
     return path;
 }
 
-char* vfs_util_path_join(char* path ,char* join )
+char* vfs_util_path_join(char* path ,const char* join )
 {
 	if( !path || !join)
 		return NULL;
@@ -463,11 +463,11 @@ char* vfs_util_path_remove_extension(char* path )
 	return path;
 }
 
-char* vfs_util_path_get_filename(char* path )
+const char* vfs_util_path_get_filename(const char* path )
 {
     var32 len;
     var32 cursor;
-    char* p = NULL;
+    const char* p = NULL;
 
     if( !path )
         return p;
@@ -493,11 +493,11 @@ char* vfs_util_path_get_filename(char* path )
 }
 
 
-char* vfs_util_path_get_extension(char* path )
+const char* vfs_util_path_get_extension(const char* path )
 {
     var32 len;
     var32 cursor;
-    char* p = NULL;
+    const char* p = NULL;
 
     if( !path )
         return path;

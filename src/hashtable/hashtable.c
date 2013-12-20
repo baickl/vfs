@@ -29,7 +29,7 @@ struct hashtable *
 create_hashtable(unsigned int minsize,
                  unsigned int (*hashf) (void*),
                  int (*eqf) (void*,void*),
-                 int (*freekey)(void*))
+                 void (*freekey)(void*))
 {
     struct hashtable *h;
     unsigned int pindex, size = primes[0];

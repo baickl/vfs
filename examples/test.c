@@ -28,6 +28,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
 #include <pak.h>
+#include <vfs/vfs.h>
 #include <stdio.h>
 
 const char* media = "../media/src.pak";

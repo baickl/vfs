@@ -39,11 +39,11 @@ static const char* pak_plugin_archive_get_plugin_name()
 
 static VFS_BOOL pak_plugin_archive_check_type(const char* archive)
 {
-    char* p;
+    const char* p;
     if( !archive )
         return VFS_FALSE;
     
-    p = vfs_util_path_get_extension((char*)archive);
+    p = vfs_util_path_get_extension(archive);
     if( p && stricmp(p,"pak") == 0 )
         return VFS_TRUE;
 

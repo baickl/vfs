@@ -33,6 +33,7 @@
 #include <vfs/base.h>
 #include "hashtable/hashtable.h"
 #include "hashtable/hashtable_itr.h"
+#include "pool.h"
 
 #define PAK_VERSION     1
 
@@ -103,7 +104,7 @@ static void pak_item_key_free(void*key)
 {
     if( key )
     {
-        free(key);
+        vfs_pool_free(key);
     }
 }
 
@@ -111,7 +112,7 @@ static void pak_item_value_free(void*key)
 {
     if( key )
     {
-        free(key);
+        vfs_pool_free(key);
     }
 }
 

@@ -70,7 +70,7 @@ int pak_item_saveas(pak* _pak,const char *_file,const char *_saveas)
 	if( item->_M_size <= 0 )
 		goto ERROR;
 
-	buf = (void*)malloc((size_t)item->_M_size);
+	buf = (void*)vfs_pool_malloc((size_t)item->_M_size);
 	if( !pak_item_unpack_filename(_pak,_file,buf,item->_M_size))
 		goto ERROR;
 
@@ -98,8 +98,6 @@ int main(void)
 	pak *_pak;
 
 	int itemcount;
-	pak_iteminfo *iteminfo;
-
 
     if( VFS_TRUE != vfs_create(VFS_SDK_VERSION,".") )
         return -1;

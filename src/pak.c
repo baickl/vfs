@@ -31,6 +31,7 @@
 #include <vfs/base.h>
 #include "pak.h"
 #include "vfs_private.h"
+#include "pool.h"
 #include <stdio.h>
 #include <memory.h>
 
@@ -123,7 +124,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	for( i = 0; i<header._M_count; ++i )
 	{
 
-        iteminfos = (pak_iteminfo*)malloc(sizeof(pak_iteminfo));
+        iteminfos = (pak_iteminfo*)vfs_pool_malloc(sizeof(pak_iteminfo));
         if( !iteminfos )
             goto ERROR;
 
@@ -159,7 +160,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
             goto ERROR;
 
         keylen = filenamelen + prefixlen;
-        key = (char*)malloc(keylen+1);
+        key = (char*)vfs_pool_malloc(keylen+1);
         if( !key )
             goto ERROR;
 		
@@ -180,7 +181,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
         {
             if( key )
             {
-                free(key);
+                vfs_pool_free(key);
                 key = NULL;
             }
             goto ERROR;
@@ -197,7 +198,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	/* 
 	 * 读取成功，组织文件包
 	 * */
-	_pak = (pak*)malloc(sizeof(pak));
+	_pak = (pak*)vfs_pool_malloc(sizeof(pak));
 	if( !_pak )
 		goto ERROR;
 	
@@ -212,7 +213,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 ERROR:
 	VFS_SAFE_FCLOSE(fp);
 	if(iteminfos){
-        free(iteminfos);
+        vfs_pool_free(iteminfos);
         iteminfos = NULL;
     }
 
@@ -240,7 +241,7 @@ void pak_close(pak* _pak)
 
                 iteminfo =(pak_iteminfo*) hashtable_iterator_value(itr);
                 if(iteminfo){
-                    free(iteminfo);
+                    vfs_pool_free(iteminfo);
                     iteminfo = NULL;
                 }
 
@@ -254,7 +255,7 @@ void pak_close(pak* _pak)
 
 	if(_pak)
     {
-        free(_pak);
+        vfs_pool_free(_pak);
         _pak = NULL;
     }
 }
@@ -374,7 +375,7 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bu
 		return VFS_TRUE;
 	} else if( iteminfo->_M_compress_type == VFS_COMPRESS_BZIP2 ) {
 
-		compress_buf = (void*)malloc(iteminfo->_M_compress_size);
+		compress_buf = (void*)vfs_pool_malloc((size_t)iteminfo->_M_compress_size);
 		if( !compress_buf )
 			goto ERROR;
 
@@ -388,7 +389,7 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bu
 			goto ERROR;
 
 		if(compress_buf){
-            free(compress_buf);
+            vfs_pool_free(compress_buf);
             compress_buf = NULL;
         }
 
@@ -402,7 +403,7 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,uvar64 _bu
 	
 ERROR:
 	if(compress_buf){
-        free(compress_buf);
+        vfs_pool_free(compress_buf);
         compress_buf = NULL;
     }
 	VFS_SAFE_FCLOSE(fp);

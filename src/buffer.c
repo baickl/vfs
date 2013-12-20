@@ -28,6 +28,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
 #include "buffer.h"
+#include "pool.h"
 
 typedef struct vfs_buffer_data
 {
@@ -44,7 +45,7 @@ static void vfs_buffer_cleanup(vfs_buffer* obj )
         return ;
 
     buf = obj->pThis;
-    free(buf->_M_buf);
+    vfs_pool_free(buf->_M_buf);
     buf->_M_buf = 0;
 }
 
@@ -63,7 +64,7 @@ static VFS_BOOL vfs_buffer_resize(vfs_buffer* obj ,size_t size)
 
     if( buf->_M_size == 0 )
     {
-        buf->_M_buf = (void*)malloc(size);
+        buf->_M_buf = (void*)vfs_pool_malloc(size);
         if( buf->_M_buf )
         {
             buf->_M_size += size;
@@ -79,7 +80,7 @@ static VFS_BOOL vfs_buffer_resize(vfs_buffer* obj ,size_t size)
             buf->_M_size = size;
             if( size == 0 )
             {
-                free(buf->_M_buf);
+                vfs_pool_free(buf->_M_buf);
                 buf->_M_buf = 0;
                 return VFS_TRUE;
             }
@@ -88,7 +89,7 @@ static VFS_BOOL vfs_buffer_resize(vfs_buffer* obj ,size_t size)
         else
         {
 
-            p = (void*)realloc(buf->_M_buf,size);
+            p = (void*)vfs_pool_realloc(buf->_M_buf,size);
             if( !p )
                 return VFS_FALSE;
 
@@ -129,7 +130,7 @@ vfs_buffer* vfs_buffer_new(size_t size )
     vfs_buffer_data*buf;
     void* p;
 
-    obj = (vfs_buffer*)malloc(size);
+    obj = (vfs_buffer*)vfs_pool_malloc(size);
     if( obj == NULL )
         return NULL;
 
@@ -145,7 +146,7 @@ vfs_buffer* vfs_buffer_new(size_t size )
 
     if( size !=  0 )
     {
-        p = (void*)malloc(size);
+        p = (void*)vfs_pool_malloc(size);
         if( p == NULL )
         {
             vfs_buffer_delete(obj);
@@ -168,10 +169,10 @@ void vfs_buffer_delete( vfs_buffer* obj )
     buf = (vfs_buffer_data *)obj->pThis;
     buf->_M_size = 0;
     if( buf->_M_buf ){
-        free(buf->_M_buf);
+        vfs_pool_free(buf->_M_buf);
         buf->_M_buf = NULL;
     }    
 
-    free(obj);
+    vfs_pool_free(obj);
 }
 

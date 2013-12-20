@@ -29,7 +29,9 @@
 ***********************************************************************************/
 #include <vfs/file.h>
 #include <vfs/vfs.h>
+#include <vfs/util.h>
 #include "vfs_private.h"
+#include "pool.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -92,7 +94,7 @@ var32 vfs_file_exists( const char* file  )
     /* 判断是否在本地 */
     memset(filepath,0,sizeof(filepath));
     filefullpath = file;
-    if( NULL != (void*)vfs_util_path_combine(filepath,g_vfs->_M_workpath,file) )
+    if( vfs_util_path_combine(filepath,g_vfs->_M_workpath,file) )
     {
         filefullpath = filepath;
     }
@@ -115,7 +117,7 @@ vfs_file* vfs_file_create(void *buf,uvar64 size)
     if( !g_vfs )
         return NULL;
 
-	vff = (vfs_file*)malloc(sizeof(vfs_file));
+	vff = (vfs_file*)vfs_pool_malloc(sizeof(vfs_file));
 	if( !vff )
 	{
 		return NULL;
@@ -129,10 +131,10 @@ vfs_file* vfs_file_create(void *buf,uvar64 size)
 	}
 	else
 	{
-		vff->_M_buffer = (void*)malloc(size);
+		vff->_M_buffer = (void*)vfs_pool_malloc((size_t)size);
 		if( !vff->_M_buffer )
 		{
-            free(vff);
+            vfs_pool_free(vff);
 			return NULL;
 		}
 		vff->_M_position = 0;
@@ -171,13 +173,13 @@ vfs_file* vfs_file_open(const char* file )
         if( VFS_TRUE != p->plugin->plugin_archive_item_locate(p->archive,file,&size) )
             continue;
 
-        buf = (void*)malloc(size);
+        buf = (void*)vfs_pool_malloc((size_t)size);
         if( !buf )
             return NULL;
 
         if( VFS_TRUE != p->plugin->plugin_archive_item_unpack_filename(p->archive,file,buf,size) ) 
         {
-            free(buf);
+            vfs_pool_free(buf);
             return NULL;
         }
 
@@ -186,7 +188,7 @@ vfs_file* vfs_file_open(const char* file )
         {
             if(buf)
             {
-                free(buf);
+                vfs_pool_free(buf);
                 buf = NULL;
             }
             return NULL;
@@ -218,7 +220,7 @@ vfs_file* vfs_file_open(const char* file )
 
 		if( size > 0 )
 		{
-			buf = (void*)malloc(size);
+			buf = (void*)vfs_pool_malloc((size_t)size);
 			if( !buf )
 			{
 				VFS_SAFE_FCLOSE(fp);
@@ -230,7 +232,7 @@ vfs_file* vfs_file_open(const char* file )
 				VFS_SAFE_FCLOSE(fp);
 				if(buf)
                 {
-                    free(buf);
+                    vfs_pool_free(buf);
                     buf = NULL;
                 }
 				return NULL;
@@ -243,7 +245,7 @@ vfs_file* vfs_file_open(const char* file )
 		if( !vff )
 		{
 			if(buf){
-                free(buf);
+                vfs_pool_free(buf);
                 buf = NULL;
             }
 			return NULL;
@@ -264,10 +266,10 @@ void vfs_file_close(vfs_file* file)
 	{
 		if(file->_M_buffer)
         {
-            free(file->_M_buffer);
+            vfs_pool_free(file->_M_buffer);
             file->_M_buffer = NULL;
         }
-		free(file);
+		vfs_pool_free(file);
         file = NULL;
 	}
 }
@@ -372,7 +374,7 @@ size_t vfs_file_write(void* buf , size_t size , size_t count , vfs_file*fp )
         needsize = (count - realcount)*size;
         if( fp->_M_size == 0 )
         {
-            tmp = (void*)malloc(needsize );
+            tmp = (void*)vfs_pool_malloc(needsize );
             if( tmp )
             {
                 fp->_M_buffer = tmp;
@@ -383,7 +385,7 @@ size_t vfs_file_write(void* buf , size_t size , size_t count , vfs_file*fp )
         }
         else
         {
-            tmp = (void*)realloc(fp->_M_buffer,fp->_M_size + needsize );
+            tmp = (void*)vfs_pool_realloc(fp->_M_buffer,(size_t)(fp->_M_size + needsize) );
             if( tmp )
             {
                 fp->_M_buffer = tmp;

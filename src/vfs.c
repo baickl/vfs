@@ -28,8 +28,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
 #include <vfs/vfs.h>
+#include <vfs/util.h>
 #include "vfs_private.h"
 #include "pak_plugin.h"
+#include "pool.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -179,7 +182,7 @@ VFS_BOOL vfs_create(const char* sdk_version,const char* workpath)
     if( stricmp(VFS_SDK_VERSION,sdk_version) != 0 )
         return VFS_FALSE;
 
-	g_vfs = (vfs*)(malloc(sizeof(vfs)));
+	g_vfs = (vfs*)(vfs_pool_malloc(sizeof(vfs)));
 	if( !g_vfs )return VFS_FALSE;
 
 	g_vfs->_M_count = 0;
@@ -217,16 +220,16 @@ void vfs_destroy()
 	}
 
 	if(g_vfs->_M_archives){
-        free(g_vfs->_M_archives);
+        vfs_pool_free(g_vfs->_M_archives);
         g_vfs->_M_archives = NULL;
     }
 
     if(g_vfs->_M_plugins){
-        free(g_vfs->_M_plugins);
+        vfs_pool_free(g_vfs->_M_plugins);
         g_vfs->_M_plugins = NULL;
     }
 	
-    free(g_vfs);
+    vfs_pool_free(g_vfs);
     g_vfs = NULL;
 }
 
@@ -244,7 +247,7 @@ VFS_BOOL vfs_register_archive_plugin(const char*pluginname,vfs_plugin plugin)
 		if( g_vfs->_M_plugins_count == 0 )
 		{
 			g_vfs->_M_plugins_maxcount = 16;
-			g_vfs->_M_plugins = (vfs_plugin**)malloc(g_vfs->_M_plugins_maxcount*sizeof(vfs_plugin*));
+			g_vfs->_M_plugins = (vfs_plugin**)vfs_pool_malloc(g_vfs->_M_plugins_maxcount*sizeof(vfs_plugin*));
 			if( !g_vfs->_M_plugins )
 			{
 				g_vfs->_M_plugins_maxcount = 0;
@@ -254,7 +257,7 @@ VFS_BOOL vfs_register_archive_plugin(const char*pluginname,vfs_plugin plugin)
 		else
 		{
 			g_vfs->_M_plugins_maxcount += 16;
-			_plugins = (vfs_plugin**)realloc(g_vfs->_M_plugins,g_vfs->_M_plugins_maxcount*sizeof(vfs_plugin*));
+			_plugins = (vfs_plugin**)vfs_pool_realloc(g_vfs->_M_plugins,g_vfs->_M_plugins_maxcount*sizeof(vfs_plugin*));
 			if( !_plugins )
 			{
 				g_vfs->_M_plugins_maxcount -= 16;
@@ -268,7 +271,7 @@ VFS_BOOL vfs_register_archive_plugin(const char*pluginname,vfs_plugin plugin)
 		}
 	}
 
-    _plugin = (vfs_plugin*)malloc(sizeof(vfs_plugin));
+    _plugin = (vfs_plugin*)vfs_pool_malloc(sizeof(vfs_plugin));
     if( !_plugin )return VFS_FALSE;
     memcpy(_plugin,&plugin,sizeof(vfs_plugin));
     g_vfs->_M_plugins[g_vfs->_M_plugins_count++] = _plugin;
@@ -289,7 +292,7 @@ void vfs_unregister_archive_plugin(const char*pluginname )
     if( index < 0 || index >= g_vfs->_M_plugins_count )
         return;
 
-    free(g_vfs->_M_plugins[index]);
+    vfs_pool_free(g_vfs->_M_plugins[index]);
     g_vfs->_M_plugins[index]= g_vfs->_M_plugins[g_vfs->_M_plugins_count -1];
     --g_vfs->_M_plugins;
 
@@ -310,7 +313,7 @@ VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
     if( !g_vfs || !archive )
         return VFS_FALSE;
 
-    if( !vfs_util_path_clone(_filepath,archive) )
+    if( !vfs_util_path_clone(_filepath,(char*)archive) )
         return VFS_FALSE;
 
     if( (prefix = strstr(_filepath,g_vfs->_M_workpath)) == NULL )
@@ -326,7 +329,7 @@ VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
     if( !plugin )
         return VFS_FALSE;
 
-    p = (vfs_archive_obj*)malloc(sizeof(vfs_archive_obj));
+    p = (vfs_archive_obj*)vfs_pool_malloc(sizeof(vfs_archive_obj));
     if( !p )
         return VFS_FALSE;
 
@@ -334,7 +337,7 @@ VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
 	p->archive = p->plugin->plugin_archive_open(_fullpath,prefix,passwd);
 	if( !p->archive)
     {
-        free(p);
+        vfs_pool_free(p);
         return VFS_FALSE;
     }
 
@@ -343,12 +346,12 @@ VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
 		if( g_vfs->_M_count == 0 )
 		{
 			g_vfs->_M_maxcount = 16;
-			g_vfs->_M_archives = (vfs_archive_obj**)malloc(g_vfs->_M_maxcount*sizeof(vfs_archive_obj*));
+			g_vfs->_M_archives = (vfs_archive_obj**)vfs_pool_malloc(g_vfs->_M_maxcount*sizeof(vfs_archive_obj*));
 			if( !g_vfs->_M_archives )
 			{
 				g_vfs->_M_maxcount = 0;
                 p->plugin->plugin_archive_close(p->archive);
-                free(p);
+                vfs_pool_free(p);
 
 				return VFS_FALSE;
 			}
@@ -356,13 +359,13 @@ VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
 		else
 		{
 			g_vfs->_M_maxcount += 16;
-			_archives = (vfs_archive_obj**)realloc(g_vfs->_M_archives,g_vfs->_M_maxcount*sizeof(vfs_archive_obj*));
+			_archives = (vfs_archive_obj**)vfs_pool_realloc(g_vfs->_M_archives,g_vfs->_M_maxcount*sizeof(vfs_archive_obj*));
 			if( !_archives )
 			{
 				g_vfs->_M_maxcount -= 16;
 				
                 p->plugin->plugin_archive_close(p->archive);
-                free(p);
+                vfs_pool_free(p);
 
 				return VFS_FALSE;
 			}
@@ -399,7 +402,7 @@ VFS_BOOL vfs_remove_archive(const char* archive )
 
     p = g_vfs->_M_archives[index];
     p->plugin->plugin_archive_close(p->archive);
-	free(p);
+	vfs_pool_free(p);
 
 	g_vfs->_M_archives[index]= g_vfs->_M_archives[g_vfs->_M_count -1];
 	--g_vfs->_M_count;

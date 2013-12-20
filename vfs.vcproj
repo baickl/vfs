@@ -191,6 +191,14 @@
 			Name="src"
 			>
 			<File
+				RelativePath=".\src\buffer.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\buffer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\file.c"
 				>
 			</File>
@@ -212,6 +220,14 @@
 			</File>
 			<File
 				RelativePath=".\src\pak_private.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pool.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pool.h"
 				>
 			</File>
 			<File

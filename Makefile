@@ -12,6 +12,8 @@ OBJS=objs/pak.o 		\
 	 objs/util.o		\
 	 objs/vfs.o			\
 	 objs/file.o		\
+	 objs/pool.o		\
+	 objs/buffer.o		\
 	 objs/pak_plugin.o		\
 	 objs/hashtable.o	\
 	 objs/hashtable_itr.o		\
@@ -43,6 +45,12 @@ objs/vfs.o:src/vfs.c
 	
 objs/file.o:src/file.c
 	$(CC) $(CFLAGS) -c src/file.c -o objs/file.o
+	
+objs/pool.o:src/pool.c
+	$(CC) $(CFLAGS) -c src/pool.c -o objs/pool.o
+	
+objs/buffer.o:src/buffer.c
+	$(CC) $(CFLAGS) -c src/buffer.c -o objs/buffer.o
 	
 objs/pak_plugin.o:src/pak_plugin.c
 	$(CC) $(CFLAGS) -c src/pak_plugin.c -o objs/pak_plugin.o

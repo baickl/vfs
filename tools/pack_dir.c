@@ -87,7 +87,7 @@ uvar64 file_getlen(FILE*fp)
 
 VFS_BOOL pak_begin( const char *path )
 {
-	pak* _pak = (pak*)malloc(sizeof(pak));
+	pak* _pak = (pak*)vfs_pool_malloc(sizeof(pak));
 	if( !_pak)
 		return VFS_FALSE;
 
@@ -115,12 +115,12 @@ VFS_BOOL pak_additeminfo( const char* filepath )
     if( !g_pak || !g_pak->_M_ht_iteminfos  )
         return VFS_FALSE;
 
-    iteminfo = (pak_iteminfo*)malloc(sizeof(pak_iteminfo));
+    iteminfo = (pak_iteminfo*)vfs_pool_malloc(sizeof(pak_iteminfo));
     if( !iteminfo )return VFS_FALSE;
 	memset(iteminfo,0,sizeof(pak_iteminfo));
     
     filenamelen = strlen(filepath);
-    filename = (char*)malloc(filenamelen+1);
+    filename = (char*)vfs_pool_malloc(filenamelen+1);
     if( filename == NULL )
     {
         VFS_SAFE_FREE(iteminfo);
@@ -388,7 +388,7 @@ var32 pak_item_foreach_for_pack(pak* _pak,char *filename,pak_iteminfo* iteminfo,
     }
     else
     {
-        buf = (void*)malloc(iteminfo->_M_size);
+        buf = (void*)vfs_pool_malloc((size_t)iteminfo->_M_size);
         tmp = fread(buf,1,(size_t)iteminfo->_M_size,fp);
         if( tmp != iteminfo->_M_size)
         {
@@ -405,7 +405,7 @@ var32 pak_item_foreach_for_pack(pak* _pak,char *filename,pak_iteminfo* iteminfo,
         iteminfo->_M_crc32 = vfs_util_calc_crc32(buf,(var32)iteminfo->_M_size);
 
         compress_buf_size = vfs_util_compress_bound(VFS_COMPRESS_BZIP2,(var32)iteminfo->_M_size);
-        compress_buf = (void*)malloc(compress_buf_size);
+        compress_buf = (void*)vfs_pool_malloc((size_t)compress_buf_size);
 
         compress_result = vfs_util_compress(VFS_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,compress_buf_size);
         if(compress_result == 0 || compress_result >= iteminfo->_M_size)

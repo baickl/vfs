@@ -76,7 +76,7 @@ static unsigned int pak_item_hashcode(void *k)
     int i; 
     int len;
 
-    len = strlen((char*)k);
+    len = strlen((const char*)k);
   
     for(i=0;i<len;i++)  
     {  

@@ -38,26 +38,6 @@
 
 vfs *g_vfs = NULL;
 
-static FILE* sfopen(const char* filename,const char* mode)
-{
-#ifdef __linux__
-	return fopen(filename,mode);
-#else
-	FILE* fp = NULL;
-	var32 err;
-
-	err = fopen_s(&fp,filename,mode);
-	if( err == 0 )
-	{
-		return fp;
-	}
-	else
-	{
-		return NULL;
-	}
-#endif
-}
-
 
 /************************************************************************/
 /* pak search and locate                                                */
@@ -91,7 +71,6 @@ static void vfs_archive_obj_sort()
 
 static var32 vfs_archive_obj_search(const char* archive)
 {
-	var32 ret = -1;
 	vfs_archive_obj** p=NULL;
 
 	if( !g_vfs || !archive)
@@ -136,7 +115,6 @@ static void vfs_plugin_sort()
 
 static var32 vfs_plugin_search(const char* pluginname)
 {
-    var32 ret = -1;
     vfs_plugin** p=NULL;
 
     if( !g_vfs || !pluginname)

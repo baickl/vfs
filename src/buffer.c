@@ -29,63 +29,149 @@
 ***********************************************************************************/
 #include "buffer.h"
 
-void vfs_buffer_init(struct vfs_buffer* buf )
+typedef struct vfs_buffer_data
 {
-    if( !buf )
-        return;
+    size_t _M_size;
+    void*  _M_buf;
+}vfs_buffer_data;
 
-    buf->_M_size = 0;
+
+static void vfs_buffer_cleanup(vfs_buffer* obj )
+{
+    vfs_buffer_data* buf;
+
+    if( !obj )
+        return ;
+
+    buf = obj->pThis;
+    free(buf->_M_buf);
     buf->_M_buf = 0;
 }
 
-void* vfs_buffer_alloc(struct vfs_buffer* buf ,size_t size)
+static VFS_BOOL vfs_buffer_resize(vfs_buffer* obj ,size_t size)
 {
     void*p;
+    vfs_buffer_data* buf;
 
-    if( !buf )
-        return NULL;
+    if( !obj )
+        return VFS_FALSE;
+
+    buf = obj->pThis;
 
     if( buf->_M_size == size )
-        return buf->_M_buf;
+        return VFS_TRUE;
 
-    if( buf->_M_size == 0 ){
-        buf->_M_buf = malloc(size);
-        if( buf->_M_buf ){
+    if( buf->_M_size == 0 )
+    {
+        buf->_M_buf = (void*)malloc(size);
+        if( buf->_M_buf )
+        {
             buf->_M_size += size;
-            return buf->_M_buf;
+            return VFS_TRUE;
         }
-    }else{
-        if( size < buf->_M_size ){
+
+        return VFS_FALSE;
+    }
+    else
+    {
+        if( size < buf->_M_size )
+        {
             buf->_M_size = size;
-            if( size == 0 ){
+            if( size == 0 )
+            {
                 free(buf->_M_buf);
                 buf->_M_buf = 0;
+                return VFS_TRUE;
             }
-            return buf->_M_buf;
-        }else{
+            return VFS_TRUE;
+        }
+        else
+        {
 
-            p = malloc(size);
+            p = (void*)realloc(buf->_M_buf,size);
             if( !p )
-                return NULL;
+                return VFS_FALSE;
 
-            memcpy(p,buf->_M_buf,buf->_M_size);
-            free(buf->_M_buf);
             buf->_M_buf = p;
             buf->_M_size = size;
-            return buf->_M_buf;
+            return VFS_TRUE;
         }
     }
 }
 
-void vfs_mm_buffer_cleanup(struct vfs_buffer* buf)
-{
-    if(!buf)
-        return;
 
+static size_t vfs_buffer_get_size(vfs_buffer* obj)
+{
+    vfs_buffer_data* buf;
+
+    if( !obj )
+        return 0;
+
+    buf = obj->pThis;
+    return buf->_M_size;
+}
+
+static void* vfs_buffer_get_data(vfs_buffer*obj)
+{
+    vfs_buffer_data* buf;
+
+    if( !obj )
+        return 0;
+
+    buf = obj->pThis;
+    return buf->_M_buf;
+}
+
+
+vfs_buffer* vfs_buffer_new(size_t size )
+{
+    vfs_buffer *obj;
+    vfs_buffer_data*buf;
+    void* p;
+
+    obj = (vfs_buffer*)malloc(size);
+    if( obj == NULL )
+        return NULL;
+
+    obj->cleanup  = vfs_buffer_cleanup;
+    obj->resize   = vfs_buffer_resize;
+    obj->get_size = vfs_buffer_get_size;
+    obj->get_data = vfs_buffer_get_data;
+
+    buf = (vfs_buffer_data*)obj->pThis;
+    buf->_M_size = 0;
+    buf->_M_buf = 0;
+    
+
+    if( size !=  0 )
+    {
+        p = (void*)malloc(size);
+        if( p == NULL )
+        {
+            vfs_buffer_delete(obj);
+            return NULL;
+        }
+
+        buf->_M_size = size;
+        buf->_M_buf = p;
+    }
+
+    return obj;
+}
+
+void vfs_buffer_delete( vfs_buffer* obj )
+{
+    vfs_buffer_data *buf;
+    if(!obj)
+        return;
+    
+    buf = (vfs_buffer_data *)obj->pThis;
     buf->_M_size = 0;
     if( buf->_M_buf ){
         free(buf->_M_buf);
         buf->_M_buf = NULL;
-    }
+    }    
+
+    free(obj);
 }
 

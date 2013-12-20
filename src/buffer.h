@@ -30,14 +30,22 @@
 #ifndef _VFS_BUFFER_H_
 #define _VFS_BUFFER_H_
 
+#include <vfs/base.h>
+
+typedef struct vfs_buffer vfs_buffer;
 struct vfs_buffer
 {
-    size_t  _M_size;
-    void*   _M_buf;
+    void*    pThis;
+
+    void     (*cleanup)(vfs_buffer* pThis );
+    VFS_BOOL (*resize)( vfs_buffer* pThis ,size_t);
+    
+    size_t   (*get_size)(vfs_buffer* pThis );
+    void*    (*get_data)(vfs_buffer* pThis);
+
 };
 
-VFS_EXTERN void     vfs_buffer_init(struct vfs_buffer*);
-VFS_EXTERN void*    vfs_buffer_alloc(struct vfs_buffer*,size_t);
-VFS_EXTERN void     vfs_buffer_cleanup(struct vfs_buffer*);
+VFS_EXTERN vfs_buffer*      vfs_buffer_new( size_t );
+VFS_EXTERN void             vfs_buffer_delete( vfs_buffer* obj);
 
 #endif

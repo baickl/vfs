@@ -182,6 +182,9 @@ VFS_BOOL vfs_create(const char* sdk_version,const char* workpath)
     if( stricmp(VFS_SDK_VERSION,sdk_version) != 0 )
         return VFS_FALSE;
 
+    if( VFS_FALSE == vfs_pool_init() )
+        return VFS_FALSE;
+
 	g_vfs = (vfs*)(vfs_pool_malloc(sizeof(vfs)));
 	if( !g_vfs )return VFS_FALSE;
 
@@ -231,6 +234,8 @@ void vfs_destroy()
 	
     vfs_pool_free(g_vfs);
     g_vfs = NULL;
+
+    vfs_pool_release();
 }
 
 

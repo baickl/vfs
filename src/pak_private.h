@@ -116,9 +116,9 @@ static void pak_item_value_free(void*key)
     }
 }
 
-DEFINE_HASHTABLE_INSERT(pak_item_insert, char, pak_iteminfo);
-DEFINE_HASHTABLE_SEARCH(pak_item_search, char, pak_iteminfo);
-DEFINE_HASHTABLE_REMOVE(pak_item_remove, char, pak_iteminfo);
-DEFINE_HASHTABLE_ITERATOR_SEARCH(pak_item_iter_search, char);
+DEFINE_HASHTABLE_INSERT(pak_item_insert, char, pak_iteminfo)
+DEFINE_HASHTABLE_SEARCH(pak_item_search, char, pak_iteminfo)
+DEFINE_HASHTABLE_REMOVE(pak_item_remove, char, pak_iteminfo)
+DEFINE_HASHTABLE_ITERATOR_SEARCH(pak_item_iter_search, char)
 
 #endif/*_VFS_PAK_PRIVATE_H_*/

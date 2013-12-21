@@ -107,13 +107,31 @@ typedef unsigned int                                uvar32;
     #define stricmp                                 strcasecmp
 #endif
 
+/************************************************************************/
+enum
+{
+    VFS_FALSE=0,
+    VFS_TRUE
+};
 
 /************************************************************************/
-/* BOOL值模拟 */
-typedef var32                                       VFS_BOOL;
+typedef var8                                        VFS_INT8;
+typedef var16                                       VFS_INT16;
+typedef var32                                       VFS_INT32;
+typedef var64                                       VFS_INT64;
 
-#define VFS_TRUE                                    (1)
-#define VFS_FALSE                                   (0)
+typedef uvar8                                       VFS_UINT8;
+typedef uvar16                                      VFS_UINT16;
+typedef uvar32                                      VFS_UINT32;
+typedef uvar64                                      VFS_UINT64;
 
+typedef void                                        VFS_VOID;
+typedef char                                        VFS_CHAR;
+typedef unsigned char                               VFS_BYTE;
+typedef wchar_t                                     VFS_WCHAR;
+typedef VFS_INT8                                    VFS_BOOL;
+typedef size_t                                      VFS_SIZE;
+typedef float                                       VFS_FLOAT;
+typedef double                                      VFS_DOUBLE;
 
 #endif

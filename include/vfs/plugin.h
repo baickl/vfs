@@ -32,15 +32,15 @@
 
 #include "base.h"
 
-typedef void* vfs_archive;
-typedef var32 (*archive_item_foreach_proc)(vfs_archive archive ,const char* filename, uvar64 size);
-
 enum
 {
     PLUGIN_ARCHIVE,
     PLUGIN_COMPRESS,
     PLUGIN_ENCRYPT
 };
+
+typedef void* vfs_archive;
+typedef var32 (*archive_item_foreach_proc)(vfs_archive archive ,const char* filename, uvar64 size);
 
 typedef struct vfs_plugin_info
 {
@@ -66,9 +66,9 @@ typedef struct vfs_plugin_archive
 
 typedef struct vfs_plugin_compress
 {
-    var32                   (*compress_bound)( var8 type,var32 len );
-    uvar64                  (*compress)( var32 type , const void *src, uvar64 srclen ,void *dst, uvar64 dstlen);
-    uvar64                  (*decompress)( var32 type , const void *src, uvar64 srclen ,void *dst, uvar64 dstlen);
+    size_t                  (*compress_bound)(size_t len );
+    size_t                  (*compress)(const void *src, size_t srclen ,void *dst, size_t dstlen);
+    size_t                  (*decompress)(const void *src, size_t srclen ,void *dst, size_t dstlen);
 }vfs_plugin_compress;
 
 typedef struct vfs_plugin_encrypt

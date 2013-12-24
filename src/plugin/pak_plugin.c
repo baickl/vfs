@@ -28,7 +28,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
 #include "pak_plugin.h"
-#include "pak.h"
+#include "../pak.h"
 #include <vfs/util.h>
 #include <string.h>
 
@@ -49,12 +49,12 @@ static const char* pak_plugin_archive_get_plugin_description()
 
 static const char* pak_plugin_archive_get_plugin_copyright()
 {
-    return "(C)copyright baickl@gmail.com";
+    return "Copyright(C) baickl(baickl@gmail.com)";
 }
 
 static const char* pak_plugin_archive_get_plugin_support()
 {
-    return "baickl@gmail.com";
+    return "Email:baickl@gmail.com";
 }
 
 static VFS_BOOL pak_plugin_archive_check_type(const char* archive)
@@ -134,14 +134,13 @@ vfs_plugin vfs_get_plugin_archive_pak()
     memset(&plugin,0,sizeof(plugin));
 
     plugin.type = PLUGIN_ARCHIVE;
-    plugin.info.get_plugin_name         = pak_plugin_archive_get_plugin_name;
-    plugin.info.get_plugin_version      = pak_plugin_archive_get_plugin_version;
-    plugin.info.get_plugin_description  = pak_plugin_archive_get_plugin_description;
-    plugin.info.get_plugin_copyright    = pak_plugin_archive_get_plugin_copyright;
-    plugin.info.get_plugin_support      = pak_plugin_archive_get_plugin_support;
+    plugin.info.get_plugin_name                             = pak_plugin_archive_get_plugin_name;
+    plugin.info.get_plugin_version                          = pak_plugin_archive_get_plugin_version;
+    plugin.info.get_plugin_description                      = pak_plugin_archive_get_plugin_description;
+    plugin.info.get_plugin_copyright                        = pak_plugin_archive_get_plugin_copyright;
+    plugin.info.get_plugin_support                          = pak_plugin_archive_get_plugin_support;
     
-    plugin.plugin.archive.archive_check_suppert = pak_plugin_archive_check_type;
-
+    plugin.plugin.archive.archive_check_suppert             = pak_plugin_archive_check_type;
     plugin.plugin.archive.archive_open                      = pak_plugin_archive_open;
     plugin.plugin.archive.archive_close                     = pak_plugin_archive_close;
     plugin.plugin.archive.archive_get_name                  = pak_plugin_archive_get_name;

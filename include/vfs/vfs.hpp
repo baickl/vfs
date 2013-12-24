@@ -68,7 +68,7 @@ public:
 
 public:
 
-    bool Create(void*buf,uvar64 bufsize)
+    bool Create(void*buf,VFS_UINT64 bufsize)
     {
         Close();
 
@@ -111,17 +111,17 @@ public:
         return vfs_file_eof(_M_file);
     }
 
-    uvar64 Tell()const 
+    VFS_UINT64 Tell()const 
     {
         return vfs_file_tell(_M_file);
     }
 
-    uvar64 Seek(uvar64 pos,int mod = SEEK_SET)
+    VFS_UINT64 Seek(VFS_UINT64 pos,int mod = SEEK_SET)
     {
         return vfs_file_seek(_M_file,pos,SEEK_SET);
     }
 
-    uvar64 Size()const 
+    VFS_UINT64 Size()const 
     {
         return vfs_file_size(_M_file);
     }

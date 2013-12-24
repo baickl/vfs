@@ -41,9 +41,9 @@
 #endif 
 
 static pak *g_pak = NULL;
-static var32  g_maxcount = 0;
+static VFS_INT32  g_maxcount = 0;
 static char g_dir[VFS_MAX_FILENAME+1];
-static var32  g_dirlen = 0;
+static VFS_INT32  g_dirlen = 0;
 static vfs_plugin* g_plugin = NULL;
 
 char g_file_header[VFS_MAX_FILENAME+1]={0};
@@ -58,7 +58,7 @@ static FILE* sfopen(const char* filename,const char* mode)
 	return fopen(filename,mode);
 #else
 	FILE* fp = NULL;
-	var32 err;
+	VFS_INT32 err;
 	
 	err = fopen_s(&fp,filename,mode);
 	if( err == 0 )
@@ -72,10 +72,10 @@ static FILE* sfopen(const char* filename,const char* mode)
 #endif
 }
 
-uvar64 file_getlen(FILE*fp)
+VFS_UINT64 file_getlen(FILE*fp)
 {
-	uvar64 curpos;
-	uvar64 flen = 0;
+	VFS_UINT64 curpos;
+	VFS_UINT64 flen = 0;
 
 	if( !fp )
 		return 0;
@@ -108,7 +108,7 @@ VFS_BOOL pak_begin( const char *path )
 VFS_BOOL pak_additeminfo( const char* filepath )
 {
 
-    var32 filenamelen;
+    VFS_INT32 filenamelen;
 	pak_iteminfo* iteminfo;
    
     char* filename;
@@ -148,7 +148,7 @@ VFS_BOOL pak_additeminfo( const char* filepath )
 
 }
 
-var32 dir_collect_fileinfo_proc(const char*fullpath,var32 dir,void* p)
+VFS_INT32 dir_collect_fileinfo_proc(const char*fullpath,VFS_INT32 dir,void* p)
 {
 	const char* strfile;
 
@@ -178,7 +178,7 @@ VFS_BOOL dir_collect_fileinfo( const char *_path )
 }
 
 
-VFS_BOOL fwrite_data(FILE*fp,void*buf,var32 bufsize)
+VFS_BOOL fwrite_data(FILE*fp,void*buf,VFS_INT32 bufsize)
 {
 	if( !fp )
 		return VFS_FALSE;
@@ -192,10 +192,10 @@ VFS_BOOL fwrite_data(FILE*fp,void*buf,var32 bufsize)
 	return VFS_TRUE;
 }
 
-var32 pak_item_foreach_for_write(pak* _pak,char*filename,pak_iteminfo* iteminfo,int index,void*p )
+VFS_INT32 pak_item_foreach_for_write(pak* _pak,char*filename,pak_iteminfo* iteminfo,int index,void*p )
 {
     FILE*fp;
-    uvar16 len;
+    VFS_UINT16 len;
 
     fp = (FILE*)p;
     if( !fp || !filename)
@@ -286,8 +286,8 @@ VFS_BOOL pakfile_combine(FILE* fp_header,FILE*fp_iteminfo,FILE* fp_data,const ch
 	FILE *fp = NULL;
 	FILE *fp_temp = NULL;
 
-	var32 bufsize = 1024;
-	var32 readsize =0;
+	VFS_INT32 bufsize = 1024;
+	VFS_INT32 readsize =0;
 	char buf[1024];
 
 	if( !fp_header || !fp_iteminfo || !fp_data )
@@ -349,14 +349,14 @@ LB_ERROR:
 
 }
 
-var32 pak_item_foreach_for_pack(pak* _pak,char *filename,pak_iteminfo* iteminfo,int index,void*p )
+VFS_INT32 pak_item_foreach_for_pack(pak* _pak,char *filename,pak_iteminfo* iteminfo,int index,void*p )
 {
     FILE*fp;
     void* buf = NULL ;
-	uvar64	compress_buf_size = 0 ;
+	VFS_UINT64	compress_buf_size = 0 ;
 	void* compress_buf = NULL ;
-	uvar64 compress_result = 0;
-	uvar64 tmp = 0;
+	VFS_UINT64 compress_result = 0;
+	VFS_UINT64 tmp = 0;
     char filetemp[VFS_MAX_FILENAME+1];
 
     FILE* fp_data = (FILE*)p;
@@ -408,7 +408,7 @@ var32 pak_item_foreach_for_pack(pak* _pak,char *filename,pak_iteminfo* iteminfo,
 
         VFS_SAFE_FCLOSE(fp);
 
-        iteminfo->_M_crc32 = vfs_util_calc_crc32(buf,(var32)iteminfo->_M_size);
+        iteminfo->_M_crc32 = vfs_util_calc_crc32(buf,(VFS_INT32)iteminfo->_M_size);
 
         if( g_plugin )
         {

@@ -39,13 +39,13 @@
  * @param     fullpath  当前遍历时找到的文件或目录
  * @param     dir       如果dir==1,表示当前项目是目录，否则表示当前项目文件
  * @param     p         上层传递进来的参数，可以借此做一些扩展处理
- * @return    uvar32    返回VFS_FOREACH_IGNOR,通过遍历函数，不递归当前的目录遍历，不会对遍历其他目录的处理有影响
+ * @return    VFS_UINT32    返回VFS_FOREACH_IGNOR,通过遍历函数，不递归当前的目录遍历，不会对遍历其他目录的处理有影响
  *                      返回VFS_FOREACH_CONTINUE,通知遍历函数，继续遍历
  *                      返回VFS_FOREACH_BREAK,通知遍历函数，中断遍历
  *                      返回VFS_FOREACH_PROC_ERROR,通知遍历函数，处理函数处理时有错误，中断遍历
  *                      
  */
-typedef var32           (*dir_foreach_item_proc)(const char*fullpath,var32 dir,void*p);
+typedef VFS_INT32           (*dir_foreach_item_proc)(const char*fullpath,VFS_INT32 dir,void*p);
 
 /*****************************************************************************
  * 计算一段内存的校验码
@@ -53,49 +53,11 @@ typedef var32           (*dir_foreach_item_proc)(const char*fullpath,var32 dir,v
  * @name                vfs_util_calc_crc32
  * @param     buf       输入数据
  * @param     bufsize   输入数据大小
- * @return    uvar32    返回计算出来的校验码
+ * @return    VFS_UINT32    返回计算出来的校验码
  *                      
  */
-VFS_EXTERN uvar32       vfs_util_calc_crc32( void *buf, var32 bufsize );
+VFS_EXTERN VFS_UINT32       vfs_util_calc_crc32( void *buf, VFS_INT32 bufsize );
 
-/*****************************************************************************
- * 输入原始数所大小和采用的算法，计算出压缩时需要的最大缓存大小
-   
- * @name                vfs_util_compress_bound
- * @param     type      压缩方法
- * @param     len       原始数据长度
- * @return    uvar32    返回压缩时需要的缓存的最大长度
- *                      
- */
-VFS_EXTERN var32        vfs_util_compress_bound( var8 type,var32 len );
-
-/*****************************************************************************
- * 根据指定算法压缩一段数据
-   
- * @name                vfs_util_compress
- * @param     type      采用的压缩类型
- * @param     src       待压缩的数据
- * @param     srclen    待压缩的数据长度
- * @param     dst       存放压缩后的数据缓存
- * @param     dstlen    存放压缩后数据缓存的长度
- * @return    uvar64    返回压缩后的数据长度，这个长度可能会比压缩前的长度大
- *                      
- */
-VFS_EXTERN uvar64       vfs_util_compress(   var32 type , const void *src, uvar64 srclen ,void *dst, uvar64 dstlen);
-
-/*****************************************************************************
- * 根据指定算法解压缩一段数据
-   
- * @name                vfs_util_decompress
- * @param     type      采用的解压缩类型
- * @param     src       待解压的数据
- * @param     srclen    待解压的数据长度
- * @param     dst       存放解压后的数据缓存
- * @param     dstlen    存放解压后数据缓存的长度
- * @return    uvar64    返回解压后的数据长度，这个长度不会超过输出缓存大小
- *                      
- */
-VFS_EXTERN uvar64       vfs_util_decompress( var32 type , const void *src, uvar64 srclen ,void *dst, uvar64 dstlen);
 
 /*****************************************************************************
  * 遍历目录

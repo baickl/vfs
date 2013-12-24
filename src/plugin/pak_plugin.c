@@ -88,12 +88,12 @@ static const char* pak_plugin_archive_get_name(vfs_archive* archive)
     return _pak->_M_filename;
 }
 
-static var32 pak_plugin_archive_item_get_count( vfs_archive archive)
+static VFS_INT32 pak_plugin_archive_item_get_count( vfs_archive archive)
 {
     return pak_item_get_count((pak*)archive);
 }
 
-static var32 pak_plugin_item_foreach_proc(pak*_pak ,char* filename, pak_iteminfo *iteminfo , int index, void*p )
+static VFS_INT32 pak_plugin_item_foreach_proc(pak*_pak ,char* filename, pak_iteminfo *iteminfo , int index, void*p )
 {
     archive_item_foreach_proc proc;
     proc = (archive_item_foreach_proc)p;
@@ -105,7 +105,7 @@ static VFS_BOOL pak_plugin_archive_item_foreach( vfs_archive archive,archive_ite
     return pak_item_foreach((pak*)archive,pak_plugin_item_foreach_proc,proc);
 }
 
-static VFS_BOOL pak_plugin_archive_item_locate(vfs_archive archive,const char* filename,uvar64* osize)
+static VFS_BOOL pak_plugin_archive_item_locate(vfs_archive archive,const char* filename,VFS_UINT64* osize)
 {
     pak_iteminfo* item;
     
@@ -118,7 +118,7 @@ static VFS_BOOL pak_plugin_archive_item_locate(vfs_archive archive,const char* f
     return VFS_TRUE;
 }
 
-static VFS_BOOL pak_plugin_archive_item_unpack_filename( vfs_archive archive, const char* filename, void* buf, uvar64 bufsize)
+static VFS_BOOL pak_plugin_archive_item_unpack_filename( vfs_archive archive, const char* filename, void* buf, VFS_UINT64 bufsize)
 {
     return pak_item_unpack_filename((pak*)archive,filename,buf,bufsize);
 }

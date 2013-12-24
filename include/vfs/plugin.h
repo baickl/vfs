@@ -40,7 +40,8 @@ enum
 };
 
 typedef void* vfs_archive;
-typedef var32 (*archive_item_foreach_proc)(vfs_archive archive ,const char* filename, uvar64 size);
+typedef VFS_INT32 (*archive_item_foreach_proc)(vfs_archive archive ,const char* filename, VFS_UINT64 size);
+
 
 typedef struct vfs_plugin_info
 {
@@ -50,18 +51,6 @@ typedef struct vfs_plugin_info
     const char*             (*get_plugin_copyright)();
     const char*             (*get_plugin_support)();
 }vfs_plugin_info;
-
-typedef struct vfs_plugin_archive
-{
-    VFS_BOOL                (*archive_check_suppert)(const char* archive);
-    vfs_archive             (*archive_open)(const char* archive,const char* prefix,const char* passwd);
-    void                    (*archive_close)( vfs_archive archive);
-    const char*             (*archive_get_name)( vfs_archive archive);
-    var32                   (*archive_get_item_count)( vfs_archive archive);
-    VFS_BOOL                (*archive_foreach_item)( vfs_archive archive,archive_item_foreach_proc proc);
-    VFS_BOOL                (*archive_locate_item)(vfs_archive archive,const char* filename,uvar64* osize);
-    VFS_BOOL                (*archive_unpack_item_by_filename)( vfs_archive archive, const char* filename, void* buf, uvar64 bufsize);
-}vfs_plugin_archive;
 
 typedef struct vfs_plugin_compress
 {
@@ -76,6 +65,18 @@ typedef struct vfs_plugin_encrypt
     size_t                  (*decrypt)(const void*src,size_t srclen,void*dst,size_t dstlen );
 }vfs_plugin_encrypt;
 
+typedef struct vfs_plugin_archive
+{
+    VFS_BOOL                (*archive_check_suppert)(const char* archive);
+    vfs_archive             (*archive_open)(const char* archive,const char* prefix,const char* passwd);
+    void                    (*archive_close)( vfs_archive archive);
+    const char*             (*archive_get_name)( vfs_archive archive);
+    VFS_INT32                   (*archive_get_item_count)( vfs_archive archive);
+    VFS_BOOL                (*archive_foreach_item)( vfs_archive archive,archive_item_foreach_proc proc);
+    VFS_BOOL                (*archive_locate_item)(vfs_archive archive,const char* filename,VFS_UINT64* osize);
+    VFS_BOOL                (*archive_unpack_item_by_filename)( vfs_archive archive, const char* filename, void* buf, VFS_UINT64 bufsize);
+}vfs_plugin_archive;
+
 typedef union vfs_plugin_obj
 {
     vfs_plugin_archive      archive;
@@ -85,7 +86,7 @@ typedef union vfs_plugin_obj
 
 typedef struct vfs_plugin
 {
-    var32                   type;
+    VFS_INT32               type;
     vfs_plugin_info         info;
     vfs_plugin_obj          plugin;
 }vfs_plugin;

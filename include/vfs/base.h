@@ -32,8 +32,7 @@
 
 #include "typedef.h"
 #include "version.h"
-#include <stdlib.h>
-#include <string.h>
+
 
 /************************************************************************/
 /* 函数导出定义 */
@@ -54,11 +53,6 @@
 #define VFS_FOREACH_PROC_ERROR                      3     /* 处理函数返回错误，要求中断FOREACH行为 */
 
 /************************************************************************/
-/* 压缩类型定义 */
-#define VFS_COMPRESS_NONE                           (0x0000)
-#define VFS_COMPRESS_BZIP2                          (0x0001)
-
-/************************************************************************/
 /* 检查文件存在的结果 */
 #define VFS_FILE_NOT_EXISTS	                        (0)
 #define VFS_FILE_EXISTS_IN_ARCHIVE                  (1)
@@ -68,8 +62,8 @@
 /************************************************************************/
 /* MAKE_CC  */
 #define MAKE_CC_ID(c0, c1, c2, c3)                                      \
-        ((uvar32)(uvar8)(c0) | ((uvar32)(uvar8)(c1) << 8) |             \
-        ((uvar32)(uvar8)(c2) << 16) | ((uvar32)(uvar8)(c3) << 24 ))
+        ((VFS_UINT32)(VFS_UINT8)(c0) | ((VFS_UINT32)(VFS_UINT8)(c1) << 8) |             \
+        ((VFS_UINT32)(VFS_UINT8)(c2) << 16) | ((VFS_UINT32)(VFS_UINT8)(c3) << 24 ))
 
 
 /************************************************************************/

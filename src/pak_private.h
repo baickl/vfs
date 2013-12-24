@@ -40,25 +40,25 @@
 
 typedef struct pak_header_s
 {
-	var32			_M_flag;
-	var32			_M_version;
-	var32			_M_count;
-	uvar64			_M_offset;
+	VFS_INT32			_M_flag;
+	VFS_INT32			_M_version;
+	VFS_INT32			_M_count;
+	VFS_UINT64			_M_offset;
 }pak_header;
 
-static const var32 pak_header_size = sizeof(var32)+ 
-									 sizeof(var32)+ 
-									 sizeof(var32)+
-									 sizeof(uvar64);
+static const VFS_INT32 pak_header_size = sizeof(VFS_INT32)+ 
+									 sizeof(VFS_INT32)+ 
+									 sizeof(VFS_INT32)+
+									 sizeof(VFS_UINT64);
 
 typedef struct pak_iteminfo_s
 {
-	uvar64			_M_offset;
+	VFS_UINT64			_M_offset;
 	
-	uvar64			_M_size;
-	uvar32			_M_crc32;
+	VFS_UINT64			_M_size;
+	VFS_UINT32			_M_crc32;
 
-    uvar64			_M_compress_size;
+    VFS_UINT64			_M_compress_size;
 	char			_M_compress_plugin[PAK_MAX_PLUGIN_LEN+1];
 	
 }pak_iteminfo;

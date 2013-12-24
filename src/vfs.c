@@ -43,7 +43,7 @@ vfs *g_vfs = NULL;
 /************************************************************************/
 /* pak search and locate                                                */
 /************************************************************************/
-static var32 vfs_archive_obj_sort_cmp(const void*a,const void*b)
+static VFS_INT32 vfs_archive_obj_sort_cmp(const void*a,const void*b)
 {
 	vfs_archive_obj* _a;
 	vfs_archive_obj* _b;
@@ -55,7 +55,7 @@ static var32 vfs_archive_obj_sort_cmp(const void*a,const void*b)
                    _b->plugin->info.get_plugin_name(_b->archive));
 }
 
-static var32 vfs_archive_obj_search_cmp(const void*key,const void*item)
+static VFS_INT32 vfs_archive_obj_search_cmp(const void*key,const void*item)
 {
 	char*_key;
 	vfs_archive_obj* _item;
@@ -70,7 +70,7 @@ static void vfs_archive_obj_sort()
 	qsort((void*)g_vfs->_M_archives,g_vfs->_M_count,sizeof(vfs_archive_obj*),vfs_archive_obj_sort_cmp);
 }
 
-static var32 vfs_archive_obj_search(const char* archive)
+static VFS_INT32 vfs_archive_obj_search(const char* archive)
 {
 	vfs_archive_obj** p=NULL;
 
@@ -88,7 +88,7 @@ static var32 vfs_archive_obj_search(const char* archive)
 /************************************************************************/
 /* plugin search and locate                                             */
 /************************************************************************/
-static var32 vfs_plugin_sort_cmp(const void*a,const void*b)
+static VFS_INT32 vfs_plugin_sort_cmp(const void*a,const void*b)
 {
     vfs_plugin* _a;
     vfs_plugin* _b;
@@ -99,7 +99,7 @@ static var32 vfs_plugin_sort_cmp(const void*a,const void*b)
     return stricmp(_a->info.get_plugin_name(),_b->info.get_plugin_name());
 }
 
-static var32 vfs_plugin_search_cmp(const void*key,const void*item)
+static VFS_INT32 vfs_plugin_search_cmp(const void*key,const void*item)
 {
     char*_key;
     vfs_plugin* _item;
@@ -114,7 +114,7 @@ static void vfs_plugin_sort()
     qsort((void*)g_vfs->_M_plugins,g_vfs->_M_plugins_count,sizeof(vfs_plugin*),vfs_plugin_sort_cmp);
 }
 
-static var32 vfs_plugin_search(const char* pluginname)
+static VFS_INT32 vfs_plugin_search(const char* pluginname)
 {
     vfs_plugin** p=NULL;
 
@@ -202,7 +202,7 @@ VFS_BOOL vfs_create(const char* sdk_version,const char* workpath)
 
 void vfs_destroy()
 {
-	var32 i;
+	VFS_INT32 i;
 
     vfs_archive_obj* archive;
 
@@ -233,7 +233,7 @@ void vfs_destroy()
 
 vfs_plugin* vfs_locate_plugin(const char*pluginname)
 {
-    var32 index;
+    VFS_INT32 index;
     
     if( !pluginname )
         return NULL;
@@ -295,7 +295,7 @@ VFS_BOOL vfs_register_plugin(const char*pluginname,vfs_plugin plugin)
 
 void vfs_unregister_plugin(const char*pluginname )
 {
-    var32 index;
+    VFS_INT32 index;
     if( !g_vfs )
         return;
 
@@ -401,7 +401,7 @@ VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
 VFS_BOOL vfs_remove_archive(const char* archive )
 {
 
-	var32 index;
+	VFS_INT32 index;
     vfs_archive_obj* p;
 
 	if( !g_vfs )
@@ -426,14 +426,14 @@ VFS_BOOL vfs_remove_archive(const char* archive )
 }
 
 
-var32 vfs_get_archive_count()
+VFS_INT32 vfs_get_archive_count()
 {
 	if( g_vfs )
 		return g_vfs->_M_count;
 	return 0;
 }
 
-vfs_archive_obj* vfs_get_archive_index(var32 idx )
+vfs_archive_obj* vfs_get_archive_index(VFS_INT32 idx )
 {
 	if( g_vfs && idx >= 0 && idx <= g_vfs->_M_count )
 		return g_vfs->_M_archives[idx];
@@ -444,7 +444,7 @@ vfs_archive_obj* vfs_get_archive_index(var32 idx )
 vfs_archive_obj* vfs_get_archive_name(const char* archive)
 {	
 	vfs_archive_obj* p;
-	var32 index;
+	VFS_INT32 index;
 
 	index = vfs_archive_obj_search(archive);
 	if( index < 0 || index >= g_vfs->_M_count )

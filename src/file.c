@@ -40,8 +40,8 @@
 /************************************************************************/
 struct vfs_file_t
 {
-    uvar64		_M_size;
-    uvar64		_M_position;
+    VFS_UINT64		_M_size;
+    VFS_UINT64		_M_position;
     void*		_M_buffer;
 };
 
@@ -51,7 +51,7 @@ static FILE* sfopen(const char* filename,const char* mode)
 	return fopen(filename,mode);
 #else
 	FILE* fp = NULL;
-	var32 err;
+	VFS_INT32 err;
 
 	err = fopen_s(&fp,filename,mode);
 	if( err == 0 )
@@ -65,11 +65,11 @@ static FILE* sfopen(const char* filename,const char* mode)
 #endif
 }
 
-var32 vfs_file_exists( const char* file  )
+VFS_INT32 vfs_file_exists( const char* file  )
 {
     int i,count;
     vfs_archive_obj* _archive;
-    uvar64 size;
+    VFS_UINT64 size;
 
     const char*filefullpath;
     char filepath[VFS_MAX_FILENAME+1];
@@ -110,7 +110,7 @@ var32 vfs_file_exists( const char* file  )
     return VFS_FILE_NOT_EXISTS;
 }
 
-vfs_file* vfs_file_create(void *buf,uvar64 size)
+vfs_file* vfs_file_create(void *buf,VFS_UINT64 size)
 {
 	vfs_file* vff;
 
@@ -149,8 +149,8 @@ vfs_file* vfs_file_create(void *buf,uvar64 size)
 
 vfs_file* vfs_file_open(const char* file )
 {
-	var32 i ;
-	var64 size;
+	VFS_INT32 i ;
+	VFS_INT64 size;
 	void* buf;
     vfs_archive_obj* p;
 	vfs_file* vff;
@@ -283,7 +283,7 @@ VFS_BOOL vfs_file_eof(vfs_file* file )
 		return VFS_FALSE;
 }
 
-uvar64 vfs_file_tell(vfs_file* file)
+VFS_UINT64 vfs_file_tell(vfs_file* file)
 {
 	if( file )
 		return file->_M_position;
@@ -291,7 +291,7 @@ uvar64 vfs_file_tell(vfs_file* file)
 	return 0;
 }
 
-uvar64 vfs_file_size( vfs_file* file )
+VFS_UINT64 vfs_file_size( vfs_file* file )
 {
 	if( !file )
 		return 0;
@@ -307,9 +307,9 @@ const void* vfs_file_data( vfs_file* file )
     return file->_M_buffer;
 }
 
-uvar64 vfs_file_seek(vfs_file* file,var64 pos, var32 mod )
+VFS_UINT64 vfs_file_seek(vfs_file* file,VFS_INT64 pos, VFS_INT32 mod )
 {
-	uvar64 _pos;
+	VFS_UINT64 _pos;
 	if( !file )
 		return -1;
 
@@ -327,7 +327,7 @@ uvar64 vfs_file_seek(vfs_file* file,var64 pos, var32 mod )
 	}
 	else
 	{
-		if( pos >= 0 && pos < (var64)file->_M_size  )
+		if( pos >= 0 && pos < (VFS_INT64)file->_M_size  )
 			file->_M_position = pos;
 	}
 
@@ -413,9 +413,9 @@ VFS_BOOL vfs_file_save(vfs_file* file,const char* saveas)
 {
 
 	FILE* fp;
-	uvar64 offset;
+	VFS_UINT64 offset;
 
-	uvar64 realsize ;
+	VFS_UINT64 realsize ;
 	char buf[512+1];
 
 	if( !file || !saveas  )

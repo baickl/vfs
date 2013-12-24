@@ -41,13 +41,13 @@
  * @param   iteminfo        当前遍历到的文件信息 
  * @param   index           当前遍历的文件索引
  * @param   p               遍历操作传入的参数，可以是一个结构指针，也可以是一个函数，用在函数里处理你的逻辑
- * @return  var32           -VFS_FOREACH_IGNORE         返回FOREACH，本次结果不处理，如果是遇到目录返回，则表示不进入目录继续FOREACH
+ * @return  VFS_INT32           -VFS_FOREACH_IGNORE         返回FOREACH，本次结果不处理，如果是遇到目录返回，则表示不进入目录继续FOREACH
  *                          -VFS_FOREACH_CONTINUE       继续FOREACH，主要用于处理目录进入
  *                          -VFS_FOREACH_BREAK          中断FOREACH，一般是找到想要的文件夹或是文件后，不需要继续FOREACH
  *                          -VFS_FOREACH_PROC_ERROR      处理函数返回错误，要求中断FOREACH行为
  */
 
-typedef var32               (*pak_item_foreach_proc)(pak*_pak ,char* filename, pak_iteminfo *iteminfo , int index , void *p );
+typedef VFS_INT32               (*pak_item_foreach_proc)(pak*_pak ,char* filename, pak_iteminfo *iteminfo , int index , void *p );
 
 /*****************************************************************************
  * 打开PAK文件包
@@ -103,10 +103,10 @@ VFS_EXTERN void             pak_close( pak* _pak );
    
  * @name                    pak_item_get_count
  * @param   _pak            从哪个PAK对象中获取元素个数
- * @return  var32           返回要获取的PAK对象中，元素个数 
+ * @return  VFS_INT32           返回要获取的PAK对象中，元素个数 
  *
  */
-VFS_EXTERN var32            pak_item_get_count( pak*_pak );
+VFS_EXTERN VFS_INT32            pak_item_get_count( pak*_pak );
 
 
 /*****************************************************************************
@@ -148,7 +148,7 @@ VFS_EXTERN pak_iteminfo*    pak_item_locate( pak* _pak, const char *file);
  *                          ==VFS_FALSE  解压文件失败 
  *
  */
-VFS_EXTERN VFS_BOOL         pak_item_unpack_filename( pak*_pak, const char*file, void*buf, uvar64 bufsize) ;
+VFS_EXTERN VFS_BOOL         pak_item_unpack_filename( pak*_pak, const char*file, void*buf, VFS_UINT64 bufsize) ;
 
 
 #endif/*_VFS_PAK_H_*/

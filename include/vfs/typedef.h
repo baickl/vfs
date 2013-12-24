@@ -30,34 +30,45 @@
 #ifndef _VFS_TYPEDEF_H_
 #define _VFS_TYPEDEF_H_
 
+#include <stdlib.h>
+#include <string.h>
+
+
+/************************************************************************/
+enum
+{
+    VFS_FALSE=0,
+    VFS_TRUE
+};
+
 /************************************************************************/
 /* 常用整型定义 */
 #if defined(_MSC_VER) || ((__BORLANDC__ >= 0x530) && !defined(__STRICT_ANSI__))
 
-typedef __int8                                      var8;
-typedef __int16                                     var16;
-typedef __int32                                     var32;
+typedef __int8                                      VFS_INT8;
+typedef __int16                                     VFS_INT16;
+typedef __int32                                     VFS_INT32;
 
-typedef unsigned __int8                             uvar8;
-typedef unsigned __int16                            uvar16;
-typedef unsigned __int32                            uvar32;
+typedef unsigned __int8                             VFS_UINT8;
+typedef unsigned __int16                            VFS_UINT16;
+typedef unsigned __int32                            VFS_UINT32;
 
 #else
 
-typedef signed char                                 var8;
-typedef signed short                                var16;
-typedef signed int                                  var32;
+typedef signed char                                  VFS_INT8;
+typedef signed short                                 VFS_INT16;
+typedef signed int                                   VFS_INT32;
 
-typedef unsigned char                               uvar8;
-typedef unsigned short                              uvar16;
-typedef unsigned int                                uvar32;
+typedef unsigned char                                VFS_UINT8;
+typedef unsigned short                               VFS_UINT16;
+typedef unsigned int                                 VFS_UINT32;
 
 #endif
 
 #if defined(_MSC_VER) || ((__BORLANDC__ >= 0x530) && !defined(__STRICT_ANSI__))
 
-    typedef __int64                                 var64;
-    typedef unsigned __int64                        uvar64;
+    typedef __int64                                 VFS_INT64;
+    typedef unsigned __int64                        VFS_UINT64;
 	
     #define I64FMTX                                 "%016I64X"
     #define I64FMTU                                 "%I64u"
@@ -65,19 +76,19 @@ typedef unsigned int                                uvar32;
 
 #elif __GNUC__
     #if __WORDSIZE == 64
-        typedef long int                            var64;
-        typedef unsigned long int                   uvar64;
+        typedef long int                            VFS_INT64;
+        typedef unsigned long int                   VFS_UINT64;
     #else
-        __extension__ typedef long long             var64;
-        __extension__ typedef unsigned long long    uvar64;
+        __extension__ typedef long long             VFS_INT64;
+        __extension__ typedef unsigned long long    VFS_UINT64;
     #endif
 
     #define I64FMTX                                 "%016llX"
     #define I64FMTU                                 "%llu"
     #define I64FMTD                                 "%lld"
 #else
-    typedef long long                               var64;
-    typedef unsigned long long                      uvar64;
+    typedef long long                               VFS_INT64;
+    typedef unsigned long long                      VFS_UINT64;
 
     #define I64FMTX                                 "%016llX"
     #define I64FMTU                                 "%llu"
@@ -85,6 +96,15 @@ typedef unsigned int                                uvar32;
 
 #endif
 
+/************************************************************************/
+typedef void                                        VFS_VOID;
+typedef char                                        VFS_CHAR;
+typedef unsigned char                               VFS_BYTE;
+typedef wchar_t                                     VFS_WCHAR;
+typedef VFS_INT8                                    VFS_BOOL;
+typedef size_t                                      VFS_SIZE;
+typedef float                                       VFS_FLOAT;
+typedef double                                      VFS_DOUBLE;
 
 /************************************************************************/
 /* 宽字符相关定义 */
@@ -107,31 +127,4 @@ typedef unsigned int                                uvar32;
     #define stricmp                                 strcasecmp
 #endif
 
-/************************************************************************/
-enum
-{
-    VFS_FALSE=0,
-    VFS_TRUE
-};
-
-/************************************************************************/
-typedef var8                                        VFS_INT8;
-typedef var16                                       VFS_INT16;
-typedef var32                                       VFS_INT32;
-typedef var64                                       VFS_INT64;
-
-typedef uvar8                                       VFS_UINT8;
-typedef uvar16                                      VFS_UINT16;
-typedef uvar32                                      VFS_UINT32;
-typedef uvar64                                      VFS_UINT64;
-
-typedef void                                        VFS_VOID;
-typedef char                                        VFS_CHAR;
-typedef unsigned char                               VFS_BYTE;
-typedef wchar_t                                     VFS_WCHAR;
-typedef VFS_INT8                                    VFS_BOOL;
-typedef size_t                                      VFS_SIZE;
-typedef float                                       VFS_FLOAT;
-typedef double                                      VFS_DOUBLE;
-
-#endif
+#endif /* _VFS_TYPEDEF_H_ */

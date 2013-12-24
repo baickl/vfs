@@ -113,10 +113,6 @@ VFS_EXTERN VFS_BOOL         vfs_register_plugin(const char*pluginname,vfs_plugin
  */
 VFS_EXTERN void             vfs_unregister_plugin(const char*pluginname );
 
-
-
-
-
 /*****************************************************************************
  * 添加archive到vfs系统中
    

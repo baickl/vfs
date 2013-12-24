@@ -43,12 +43,12 @@ typedef struct vfs_file_t vfs_file;
    
  * @name                vfs_file_exists
  * @param   filename    待检测是否存在的文件
- * @return  var32       -VFS_FILE_NOT_EXISTS        文件不存在
+ * @return  VFS_INT32       -VFS_FILE_NOT_EXISTS        文件不存在
  *                      -VFS_FILE_EXISTS_IN_ARCHIVE 文件存在于当前已经加载的ARCHIVE中
  *                      -VFS_FILE_EXISTS_IN_DIR     文件存在于当前程序运行的目录中
  *
  */
-VFS_EXTERN var32        vfs_file_exists( const char *filename );
+VFS_EXTERN VFS_INT32        vfs_file_exists( const char *filename );
 
 /*****************************************************************************
  * 创建一个读写的虚拟文件,可以指定初始化数据和大小
@@ -60,7 +60,7 @@ VFS_EXTERN var32        vfs_file_exists( const char *filename );
  *                      失败返回NULL
  *
  */
-VFS_EXTERN vfs_file*    vfs_file_create( void *buf , uvar64 bufsize) ;
+VFS_EXTERN vfs_file*    vfs_file_create( void *buf , VFS_UINT64 bufsize) ;
 
 /*****************************************************************************
  * 打开文件
@@ -117,10 +117,10 @@ VFS_EXTERN VFS_BOOL     vfs_file_eof( vfs_file *_file );
    
  * @name                vfs_file_tell
  * @param   _file       文件指针对象
- * @return  uvar64      返回当前文件的位移量
+ * @return  VFS_UINT64      返回当前文件的位移量
  *
  */
-VFS_EXTERN uvar64       vfs_file_tell( vfs_file *_file );
+VFS_EXTERN VFS_UINT64       vfs_file_tell( vfs_file *_file );
 
 /*****************************************************************************
  * 移动到文件的指定位置 
@@ -132,20 +132,20 @@ VFS_EXTERN uvar64       vfs_file_tell( vfs_file *_file );
  *                      =SEEK_SET   从文件头开始位移
  *                      =SEEK_CUR   从文件当前位置开始移动
  *                      =SEEK_END   从文件尾部开始移动
- * @return  uvar64      返回当前文件的位移量
+ * @return  VFS_UINT64      返回当前文件的位移量
  *
  */
-VFS_EXTERN uvar64       vfs_file_seek( vfs_file *_file , var64 pos , var32 mod );
+VFS_EXTERN VFS_UINT64       vfs_file_seek( vfs_file *_file , VFS_INT64 pos , VFS_INT32 mod );
 
 /*****************************************************************************
  * 获得文件的大小 
    
  * @name                vfs_file_size
  * @param   _file       文件指针对象
- * @return  uvar64      返回当前文件的大小
+ * @return  VFS_UINT64      返回当前文件的大小
  *
  */
-VFS_EXTERN uvar64       vfs_file_size( vfs_file *_file );
+VFS_EXTERN VFS_UINT64       vfs_file_size( vfs_file *_file );
 
 /*****************************************************************************
  * 获得文件的数据 

@@ -49,60 +49,10 @@ void bz_internal_error ( int errcode )
 {
 }
 
-uvar32 vfs_util_calc_crc32(void*buf,var32 size)
+VFS_UINT32 vfs_util_calc_crc32(void*buf,VFS_INT32 size)
 {
 	return calc_crc32(buf,size);
 }
-
-var32 vfs_util_compress_bound( var8 compresstype, var32 srclen )
-{
-	switch(compresstype)
-	{
-	case VFS_COMPRESS_BZIP2:
-		return (var32)(srclen*1.01+600);
-
-	case VFS_COMPRESS_NONE:
-	default:
-		return srclen;
-	}
-}
-
-uvar64 vfs_util_compress(var32 compresstype, const void*src,uvar64 srcsize,void*dst,uvar64 dstsize)
-{
-	uvar64 r;
-	uvar64 compressed_size = dstsize;
-
-	switch(compresstype)
-	{
-	case VFS_COMPRESS_BZIP2:
-		r = BZ2_bzBuffToBuffCompress((char*)dst,(unsigned int*)&compressed_size,(char*)src,(unsigned int)srcsize,9,3,30);
-		if( r != BZ_OK)
-			return 0;
-		return compressed_size;
-
-	case VFS_COMPRESS_NONE:
-	default:
-		return 0;
-	}
-}
-
-uvar64 vfs_util_decompress(var32 compresstype,const void*src,uvar64 srcsize,void*dst,uvar64 dstsize)
-{
-	uvar64 r;
-	uvar64 uncompressed_size = dstsize;
-	switch(compresstype)
-	{
-	case VFS_COMPRESS_BZIP2:
-		r = BZ2_bzBuffToBuffDecompress((char*)dst,(unsigned int*)&uncompressed_size,(char*)src,(unsigned int)srcsize,0,2);
-		if( r != BZ_OK )
-			return 0;
-		return uncompressed_size;
-	case VFS_COMPRESS_NONE:
-	default:
-		return 0;
-	}
-}
-
 
 #ifdef __linux__
 VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc,void*p)
@@ -113,7 +63,7 @@ VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc,void*p
 	char find_full[VFS_MAX_FILENAME+1];
 	char path_temp[VFS_MAX_FILENAME+1];
 
-	var32 rt;
+	VFS_INT32 rt;
 
     if( !path || !proc )
         return VFS_FALSE;
@@ -188,7 +138,7 @@ VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc,void*p
 	char find_full[VFS_MAX_FILENAME+1] = {0};
 	char path_temp[VFS_MAX_FILENAME+1] = {0};
 
-	var32 rt;
+	VFS_INT32 rt;
 
 	long hFile=0;  
 	struct _finddata_t fileinfo; 
@@ -380,7 +330,7 @@ char* vfs_util_path_combine(char* path ,const char* dir ,const char* append )
 
 char* vfs_util_path_add_backslash(char* path )
 {
-	var32 len;
+	VFS_INT32 len;
 	if( !path )
 		return NULL;
 
@@ -397,7 +347,7 @@ char* vfs_util_path_add_backslash(char* path )
 
 char* vfs_util_path_remove_backslash(char* path )
 {
-	var32 len;
+	VFS_INT32 len;
 	if( !path )
 		return path;
 
@@ -417,7 +367,7 @@ char* vfs_util_path_remove_backslash(char* path )
 
 char* vfs_util_path_remove_filename(char* path )
 {
-    var32 len;
+    VFS_INT32 len;
     if( !path )
         return path;
 
@@ -439,7 +389,7 @@ char* vfs_util_path_remove_filename(char* path )
 
 char* vfs_util_path_remove_extension(char* path )
 {
-    var32 len;
+    VFS_INT32 len;
     if( !path )
         return path;
 
@@ -465,8 +415,8 @@ char* vfs_util_path_remove_extension(char* path )
 
 const char* vfs_util_path_get_filename(const char* path )
 {
-    var32 len;
-    var32 cursor;
+    VFS_INT32 len;
+    VFS_INT32 cursor;
     const char* p = NULL;
 
     if( !path )
@@ -495,8 +445,8 @@ const char* vfs_util_path_get_filename(const char* path )
 
 const char* vfs_util_path_get_extension(const char* path )
 {
-    var32 len;
-    var32 cursor;
+    VFS_INT32 len;
+    VFS_INT32 cursor;
     const char* p = NULL;
 
     if( !path )

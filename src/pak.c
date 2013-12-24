@@ -175,9 +175,9 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
         {
             if( fread(compress_plugin_name,1,compress_plugin_namelen,fp) != compress_plugin_namelen )
                 goto ERROR;
-
-            strcpy(iteminfos->_M_compress_plugin,compress_plugin_name);
         }
+
+        strcpy(iteminfos->_M_compress_plugin,compress_plugin_name);
 
 		if( fread(&iteminfos->_M_compress_size,1,sizeof(iteminfos->_M_compress_size),fp) != sizeof(iteminfos->_M_compress_size))
 			goto ERROR;	

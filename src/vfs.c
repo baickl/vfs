@@ -184,9 +184,6 @@ VFS_BOOL vfs_create(const char* sdk_version,const char* workpath)
 
 
     plugin = vfs_get_plugin_archive_pak();
-
-
-    /* 注册组件 */
     if( VFS_TRUE != vfs_register_plugin(plugin.info.get_plugin_name(),plugin) )
     {
         vfs_destroy();
@@ -231,6 +228,21 @@ void vfs_destroy()
     g_vfs = NULL;
 
     vfs_pool_release();
+}
+
+
+vfs_plugin* vfs_locate_plugin(const char*pluginname)
+{
+    var32 index;
+    
+    if( !pluginname )
+        return NULL;
+
+    index = vfs_plugin_search(pluginname);
+    if( index >= 0 && index < g_vfs->_M_plugins_count )
+        return g_vfs->_M_plugins[index];
+    else
+        return NULL;
 }
 
 

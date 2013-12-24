@@ -35,7 +35,8 @@
 #include "hashtable/hashtable_itr.h"
 #include "pool.h"
 
-#define PAK_VERSION     1
+#define PAK_VERSION         1
+#define PAK_MAX_PLUGIN_LEN  32
 
 typedef struct pak_header_s
 {
@@ -56,10 +57,10 @@ typedef struct pak_iteminfo_s
 	
 	uvar64			_M_size;
 	uvar32			_M_crc32;
+
+    uvar64			_M_compress_size;
+	char			_M_compress_plugin[PAK_MAX_PLUGIN_LEN+1];
 	
-	var8			_M_compress_type;
-	uvar64			_M_compress_size;
-	uvar32			_M_compress_crc32;
 }pak_iteminfo;
 
 typedef struct pak

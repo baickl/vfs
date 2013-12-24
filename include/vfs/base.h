@@ -33,6 +33,7 @@
 #include "typedef.h"
 #include "version.h"
 #include <stdlib.h>
+#include <string.h>
 
 /************************************************************************/
 /* 函数导出定义 */

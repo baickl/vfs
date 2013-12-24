@@ -29,8 +29,8 @@
 ***********************************************************************************/
 #include <pak.h>
 #include <vfs/util.h>
+#include <vfs/vfs.h>
 #include <stdio.h>
-
 #include <string.h>
 #include <sys/types.h>
 #ifdef __linux__
@@ -44,6 +44,7 @@ static pak *g_pak = NULL;
 static var32  g_maxcount = 0;
 static char g_dir[VFS_MAX_FILENAME+1];
 static var32  g_dirlen = 0;
+static vfs_plugin* g_plugin = NULL;
 
 char g_file_header[VFS_MAX_FILENAME+1]={0};
 char g_file_iteminfo[VFS_MAX_FILENAME+1]={0};
@@ -209,13 +210,17 @@ var32 pak_item_foreach_for_write(pak* _pak,char*filename,pak_iteminfo* iteminfo,
     if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_crc32,sizeof(iteminfo->_M_crc32)))
         return VFS_FOREACH_PROC_ERROR;
 
-    if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_type,sizeof(iteminfo->_M_compress_type)))
+    len = strlen(iteminfo->_M_compress_plugin);
+    if( !VFS_CHECK_FWRITE(fp,&len,sizeof(len)))
         return VFS_FOREACH_PROC_ERROR;
 
+    if( len > 0 )
+    {
+        if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_plugin,len))
+            return VFS_FOREACH_PROC_ERROR;
+    }
+    
     if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_size,sizeof(iteminfo->_M_compress_size)))
-        return VFS_FOREACH_PROC_ERROR;
-
-    if( !VFS_CHECK_FWRITE(fp,&iteminfo->_M_compress_crc32,sizeof(iteminfo->_M_compress_crc32)))
         return VFS_FOREACH_PROC_ERROR;
 
     len = strlen(filename);
@@ -374,15 +379,16 @@ var32 pak_item_foreach_for_pack(pak* _pak,char *filename,pak_iteminfo* iteminfo,
     iteminfo->_M_size = file_getlen(fp);
     iteminfo->_M_offset = VFS_FTELL(fp_data);
 
+    
+
     if( iteminfo->_M_size <= 0 )
     {
         VFS_SAFE_FCLOSE(fp);
         iteminfo->_M_size = 0;
         iteminfo->_M_crc32 = 0;
 
-        iteminfo->_M_compress_type = VFS_COMPRESS_NONE;
+        memset(iteminfo->_M_compress_plugin,0,sizeof(iteminfo->_M_compress_plugin));
         iteminfo->_M_compress_size = 0;
-        iteminfo->_M_compress_crc32 = 0;
 
         printf("warning:dir_pack empty file %s\n",filename);
     }
@@ -404,15 +410,21 @@ var32 pak_item_foreach_for_pack(pak* _pak,char *filename,pak_iteminfo* iteminfo,
 
         iteminfo->_M_crc32 = vfs_util_calc_crc32(buf,(var32)iteminfo->_M_size);
 
-        compress_buf_size = vfs_util_compress_bound(VFS_COMPRESS_BZIP2,(var32)iteminfo->_M_size);
-        compress_buf = (void*)vfs_pool_malloc((size_t)compress_buf_size);
-
-        compress_result = vfs_util_compress(VFS_COMPRESS_BZIP2,buf,iteminfo->_M_size,compress_buf,compress_buf_size);
+        if( g_plugin )
+        {
+            compress_buf_size = g_plugin->plugin.compress.compress_bound((size_t)iteminfo->_M_size);
+            compress_buf = (void*)vfs_pool_malloc((size_t)compress_buf_size);
+            compress_result = g_plugin->plugin.compress.compress(buf,(size_t)iteminfo->_M_size,compress_buf,(size_t)compress_buf_size);
+        }
+        else
+        {
+            compress_result = 0;
+        }
+       
         if(compress_result == 0 || compress_result >= iteminfo->_M_size)
         {
-            iteminfo->_M_compress_type = VFS_COMPRESS_NONE;
+            memset(iteminfo->_M_compress_plugin,0,sizeof(iteminfo->_M_compress_plugin));
             iteminfo->_M_compress_size = 0;
-            iteminfo->_M_compress_crc32 = 0;
 
             VFS_SAFE_FREE(compress_buf);
             compress_buf_size = 0;
@@ -427,9 +439,8 @@ var32 pak_item_foreach_for_pack(pak* _pak,char *filename,pak_iteminfo* iteminfo,
         }
         else
         {
-            iteminfo->_M_compress_type = VFS_COMPRESS_BZIP2;
+            strcpy(iteminfo->_M_compress_plugin,g_plugin->info.get_plugin_name());
             iteminfo->_M_compress_size = compress_result;
-            iteminfo->_M_compress_crc32 = vfs_util_calc_crc32(compress_buf,(var32)compress_result);
 
             VFS_SAFE_FREE(buf);
 
@@ -449,9 +460,8 @@ var32 pak_item_foreach_for_pack(pak* _pak,char *filename,pak_iteminfo* iteminfo,
     printf("\tfile=%s\n",filename);
     printf("\tsize=" I64FMTU "\n",iteminfo->_M_size);
     printf("\tcrc32=%d\n",iteminfo->_M_crc32);
-    printf("\tcompress_type=%d\n",iteminfo->_M_compress_type);
+    printf("\tcompress_plugin=%s\n",iteminfo->_M_compress_plugin);
     printf("\tcompress_size=" I64FMTU "\n",iteminfo->_M_compress_size);
-    printf("\tcompress_crc32=%d\n",iteminfo->_M_compress_crc32);
     printf("\toffset=" I64FMTU "\n\n",iteminfo->_M_offset);
 
     return VFS_FOREACH_CONTINUE;
@@ -558,17 +568,39 @@ void pak_end( const char *path )
 
 int main( int argc,char *argv[] )
 {
+
+    vfs_plugin *plugin ;
+    char* compress_type;
+
+
 	char path[VFS_MAX_FILENAME+1] = {0};
 	char outfile[VFS_MAX_FILENAME+1] = {0};
 
 	int i;
 	int index;
 
-	if(argc != 2 )
+    vfs_create(VFS_SDK_VERSION,".");
+
+	if(argc < 2 )
 	{
-		printf("usage: pack_dir <directory> \n");
+        printf("usage: pack_dir <directory> [/compress=compress_type] \n");
 		return -1;
 	}
+
+    plugin = NULL;
+    if( argc >= 3 )
+    {
+        compress_type = strstr(argv[3],"/compress=");
+        if( compress_type != NULL )
+        {
+            compress_type += strlen("/compress=");
+            plugin = vfs_locate_plugin(compress_type);
+            printf("select compress plugin:%s\n",compress_type);
+        }
+    }
+
+
+    g_plugin = plugin;
 
 	if( !vfs_util_path_clone(path,argv[1]) )
 		return -1;
@@ -646,9 +678,11 @@ int main( int argc,char *argv[] )
 	}
 	
 	pak_end(path);
+    vfs_destroy();
 	return 0;
 
 LB_ERROR:
 	pak_end(path);
+    vfs_destroy();
 	return -1;
 }

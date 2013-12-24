@@ -81,9 +81,20 @@ VFS_EXTERN VFS_BOOL         vfs_create( const char *sdk_version,
 VFS_EXTERN void             vfs_destroy();
 
 /*****************************************************************************
+ * 定位vfs插件
+   
+ * @name                    vfs_locate_plugin
+ * @param     pluginname    插件名称
+ * @return    vfs_plugin*   如果返回值不为空，定位插件成功
+ *                          如果返回值为空，则没找到插件
+ *
+ */
+VFS_EXTERN vfs_plugin*      vfs_locate_plugin(const char* pluginname);
+
+/*****************************************************************************
  * 注册vfs插件
    
- * @name                    vfs_register_archive_plugin
+ * @name                    vfs_register_plugin
  * @param     pluginname    插件名称
  * @param     plugin        待注册的插件
  * @return    VFS_BOOK      ==VFS_TRUE  注册成功
@@ -95,12 +106,15 @@ VFS_EXTERN VFS_BOOL         vfs_register_plugin(const char*pluginname,vfs_plugin
 /*****************************************************************************
  * 反注册vfs插件
    
- * @name                    vfs_unregister_archive_plugin
+ * @name                    vfs_unregister_plugin
  * @param     pluginname    插件名称
  * @return    void          无返回值
  * 
  */
 VFS_EXTERN void             vfs_unregister_plugin(const char*pluginname );
+
+
+
 
 
 /*****************************************************************************

@@ -32,11 +32,11 @@
 
 #include <vfs/base.h>
 
-VFS_EXTERN VFS_BOOL    vfs_pool_init();
-VFS_EXTERN void        vfs_pool_release();
+VFS_EXTERN VFS_BOOL         vfs_pool_init();
+VFS_EXTERN VFS_VOID         vfs_pool_release();
 
-VFS_EXTERN void*       vfs_pool_malloc(size_t);
-VFS_EXTERN void*       vfs_pool_realloc(void*,size_t);
-VFS_EXTERN void        vfs_pool_free(void*);
+VFS_EXTERN VFS_VOID*        vfs_pool_malloc(VFS_SIZE);
+VFS_EXTERN VFS_VOID*        vfs_pool_realloc(VFS_VOID*,VFS_SIZE);
+VFS_EXTERN VFS_VOID         vfs_pool_free(VFS_VOID*);
 
 #endif

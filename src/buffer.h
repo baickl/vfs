@@ -35,17 +35,16 @@
 typedef struct vfs_buffer vfs_buffer;
 struct vfs_buffer
 {
-    void*    pThis;
+    VFS_VOID*               pThis;
 
-    void     (*cleanup)(vfs_buffer* pThis );
-    VFS_BOOL (*resize)( vfs_buffer* pThis ,size_t);
+    VFS_VOID                (*cleanup)(vfs_buffer* pThis );
+    VFS_BOOL                (*resize)( vfs_buffer* pThis ,VFS_SIZE);
     
-    size_t   (*get_size)(vfs_buffer* pThis );
-    void*    (*get_data)(vfs_buffer* pThis);
-
+    VFS_SIZE                (*get_size)(vfs_buffer* pThis );
+    VFS_VOID*               (*get_data)(vfs_buffer* pThis);
 };
 
-VFS_EXTERN vfs_buffer*      vfs_buffer_new( size_t );
-VFS_EXTERN void             vfs_buffer_delete( vfs_buffer* obj);
+VFS_EXTERN vfs_buffer*      vfs_buffer_new( VFS_SIZE );
+VFS_EXTERN VFS_VOID         vfs_buffer_delete( vfs_buffer* obj);
 
 #endif

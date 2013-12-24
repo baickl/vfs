@@ -32,34 +32,34 @@
 #include <vfs/util.h>
 #include <string.h>
 
-static const char* pak_plugin_archive_get_plugin_name()
+static const VFS_CHAR* pak_plugin_archive_get_plugin_name()
 {
     return "VFS_PLUGIN_PAK";
 }
 
-static const char* pak_plugin_archive_get_plugin_version()
+static const VFS_CHAR* pak_plugin_archive_get_plugin_version()
 {
     return "1.0.0.1";
 }
 
-static const char* pak_plugin_archive_get_plugin_description()
+static const VFS_CHAR* pak_plugin_archive_get_plugin_description()
 {
     return "VFS_PLUGIN_PAK";
 }
 
-static const char* pak_plugin_archive_get_plugin_copyright()
+static const VFS_CHAR* pak_plugin_archive_get_plugin_copyright()
 {
     return "Copyright(C) baickl(baickl@gmail.com)";
 }
 
-static const char* pak_plugin_archive_get_plugin_support()
+static const VFS_CHAR* pak_plugin_archive_get_plugin_support()
 {
     return "Email:baickl@gmail.com";
 }
 
-static VFS_BOOL pak_plugin_archive_check_type(const char* archive)
+static VFS_BOOL pak_plugin_archive_check_type(const VFS_CHAR* archive)
 {
-    const char* p;
+    const VFS_CHAR* p;
     if( !archive )
         return VFS_FALSE;
     
@@ -70,17 +70,17 @@ static VFS_BOOL pak_plugin_archive_check_type(const char* archive)
     return VFS_FALSE;
 }
 
-static vfs_archive pak_plugin_archive_open(const char* archive,const char* prefix,const char* passwd)
+static vfs_archive pak_plugin_archive_open(const VFS_CHAR* archive,const VFS_CHAR* prefix,const VFS_CHAR* passwd)
 {
     return (vfs_archive)pak_open(archive,prefix);
 }
 
-static void pak_plugin_archive_close( vfs_archive archive)
+static VFS_VOID pak_plugin_archive_close( vfs_archive archive)
 {
     pak_close((pak*)archive);
 }
 
-static const char* pak_plugin_archive_get_name(vfs_archive* archive)
+static const VFS_CHAR* pak_plugin_archive_get_name(vfs_archive* archive)
 {
     pak* _pak = (pak*)archive;
     if(_pak == NULL ) return NULL;
@@ -93,7 +93,7 @@ static VFS_INT32 pak_plugin_archive_item_get_count( vfs_archive archive)
     return pak_item_get_count((pak*)archive);
 }
 
-static VFS_INT32 pak_plugin_item_foreach_proc(pak*_pak ,char* filename, pak_iteminfo *iteminfo , int index, void*p )
+static VFS_INT32 pak_plugin_item_foreach_proc(pak*_pak ,VFS_CHAR* filename, pak_iteminfo *iteminfo , int index, VFS_VOID*p )
 {
     archive_item_foreach_proc proc;
     proc = (archive_item_foreach_proc)p;
@@ -105,7 +105,7 @@ static VFS_BOOL pak_plugin_archive_item_foreach( vfs_archive archive,archive_ite
     return pak_item_foreach((pak*)archive,pak_plugin_item_foreach_proc,proc);
 }
 
-static VFS_BOOL pak_plugin_archive_item_locate(vfs_archive archive,const char* filename,VFS_UINT64* osize)
+static VFS_BOOL pak_plugin_archive_item_locate(vfs_archive archive,const VFS_CHAR* filename,VFS_UINT64* osize)
 {
     pak_iteminfo* item;
     
@@ -118,7 +118,7 @@ static VFS_BOOL pak_plugin_archive_item_locate(vfs_archive archive,const char* f
     return VFS_TRUE;
 }
 
-static VFS_BOOL pak_plugin_archive_item_unpack_filename( vfs_archive archive, const char* filename, void* buf, VFS_UINT64 bufsize)
+static VFS_BOOL pak_plugin_archive_item_unpack_filename( vfs_archive archive, const VFS_CHAR* filename, VFS_VOID* buf, VFS_UINT64 bufsize)
 {
     return pak_item_unpack_filename((pak*)archive,filename,buf,bufsize);
 }

@@ -34,21 +34,21 @@ VFS_BOOL vfs_pool_init()
     return VFS_TRUE;
 }
 
-void vfs_pool_release()
+VFS_VOID vfs_pool_release()
 {
 }
 
-void* vfs_pool_malloc(size_t size )
+VFS_VOID* vfs_pool_malloc(VFS_SIZE size )
 {
     return malloc(size);
 }
 
-void* vfs_pool_realloc(void* p,size_t size )
+VFS_VOID* vfs_pool_realloc(VFS_VOID* p,VFS_SIZE size )
 {
     return realloc(p,size);
 }
 
-void vfs_pool_free(void* p)
+VFS_VOID vfs_pool_free(VFS_VOID* p)
 {
     free(p);
 }

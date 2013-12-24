@@ -50,13 +50,13 @@ typedef struct vfs_t
     VFS_INT32                   _M_plugins_maxcount;
     vfs_plugin**                _M_plugins;
 
-    char                        _M_workpath[VFS_MAX_FILENAME];
+    VFS_CHAR                    _M_workpath[VFS_MAX_FILENAME];
 }vfs;
 
-VFS_EXTERN vfs                  *g_vfs;
+VFS_EXTERN vfs                 *g_vfs;
 
 VFS_EXTERN VFS_INT32            vfs_get_archive_count();
 VFS_EXTERN vfs_archive_obj*     vfs_get_archive_index( VFS_INT32 );
-VFS_EXTERN vfs_archive_obj*     vfs_get_archive_name( const char* );
+VFS_EXTERN vfs_archive_obj*     vfs_get_archive_name( const VFS_CHAR* );
 
 #endif/*_VFS_VFS_PRIVATE_H_*/

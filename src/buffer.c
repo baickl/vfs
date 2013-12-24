@@ -32,12 +32,12 @@
 
 typedef struct vfs_buffer_data
 {
-    size_t _M_size;
-    void*  _M_buf;
+    VFS_SIZE _M_size;
+    VFS_VOID*  _M_buf;
 }vfs_buffer_data;
 
 
-static void vfs_buffer_cleanup(vfs_buffer* obj )
+static VFS_VOID vfs_buffer_cleanup(vfs_buffer* obj )
 {
     vfs_buffer_data* buf;
 
@@ -49,9 +49,9 @@ static void vfs_buffer_cleanup(vfs_buffer* obj )
     buf->_M_buf = 0;
 }
 
-static VFS_BOOL vfs_buffer_resize(vfs_buffer* obj ,size_t size)
+static VFS_BOOL vfs_buffer_resize(vfs_buffer* obj ,VFS_SIZE size)
 {
-    void*p;
+    VFS_VOID*p;
     vfs_buffer_data* buf;
 
     if( !obj )
@@ -64,7 +64,7 @@ static VFS_BOOL vfs_buffer_resize(vfs_buffer* obj ,size_t size)
 
     if( buf->_M_size == 0 )
     {
-        buf->_M_buf = (void*)vfs_pool_malloc(size);
+        buf->_M_buf = (VFS_VOID*)vfs_pool_malloc(size);
         if( buf->_M_buf )
         {
             buf->_M_size += size;
@@ -89,7 +89,7 @@ static VFS_BOOL vfs_buffer_resize(vfs_buffer* obj ,size_t size)
         else
         {
 
-            p = (void*)vfs_pool_realloc(buf->_M_buf,size);
+            p = (VFS_VOID*)vfs_pool_realloc(buf->_M_buf,size);
             if( !p )
                 return VFS_FALSE;
 
@@ -101,7 +101,7 @@ static VFS_BOOL vfs_buffer_resize(vfs_buffer* obj ,size_t size)
 }
 
 
-static size_t vfs_buffer_get_size(vfs_buffer* obj)
+static VFS_SIZE vfs_buffer_get_size(vfs_buffer* obj)
 {
     vfs_buffer_data* buf;
 
@@ -112,7 +112,7 @@ static size_t vfs_buffer_get_size(vfs_buffer* obj)
     return buf->_M_size;
 }
 
-static void* vfs_buffer_get_data(vfs_buffer*obj)
+static VFS_VOID* vfs_buffer_get_data(vfs_buffer*obj)
 {
     vfs_buffer_data* buf;
 
@@ -124,11 +124,11 @@ static void* vfs_buffer_get_data(vfs_buffer*obj)
 }
 
 
-vfs_buffer* vfs_buffer_new(size_t size )
+vfs_buffer* vfs_buffer_new(VFS_SIZE size )
 {
     vfs_buffer *obj;
     vfs_buffer_data*buf;
-    void* p;
+    VFS_VOID* p;
 
     obj = (vfs_buffer*)vfs_pool_malloc(size);
     if( obj == NULL )
@@ -146,7 +146,7 @@ vfs_buffer* vfs_buffer_new(size_t size )
 
     if( size !=  0 )
     {
-        p = (void*)vfs_pool_malloc(size);
+        p = (VFS_VOID*)vfs_pool_malloc(size);
         if( p == NULL )
         {
             vfs_buffer_delete(obj);
@@ -160,7 +160,7 @@ vfs_buffer* vfs_buffer_new(size_t size )
     return obj;
 }
 
-void vfs_buffer_delete( vfs_buffer* obj )
+VFS_VOID vfs_buffer_delete( vfs_buffer* obj )
 {
     vfs_buffer_data *buf;
     if(!obj)

@@ -47,9 +47,9 @@ typedef struct pak_header_s
 }pak_header;
 
 static const VFS_INT32 pak_header_size = sizeof(VFS_INT32)+ 
-									 sizeof(VFS_INT32)+ 
-									 sizeof(VFS_INT32)+
-									 sizeof(VFS_UINT64);
+									     sizeof(VFS_INT32)+ 
+									     sizeof(VFS_INT32)+
+									     sizeof(VFS_UINT64);
 
 typedef struct pak_iteminfo_s
 {
@@ -59,25 +59,25 @@ typedef struct pak_iteminfo_s
 	VFS_UINT32			_M_crc32;
 
     VFS_UINT64			_M_compress_size;
-	char			_M_compress_plugin[PAK_MAX_PLUGIN_LEN+1];
+	VFS_CHAR			_M_compress_plugin[PAK_MAX_PLUGIN_LEN+1];
 	
 }pak_iteminfo;
 
 typedef struct pak
 {
-	char			    _M_filename[VFS_MAX_FILENAME+1];
+	VFS_CHAR			_M_filename[VFS_MAX_FILENAME+1];
 	pak_header		    _M_header;
     struct hashtable   *_M_ht_iteminfos;
 }pak;
 
-static unsigned int pak_item_hashcode(void *k)  
+static unsigned int pak_item_hashcode(VFS_VOID *k)  
 {  
-    const unsigned char *name = (const unsigned char *)k;  
+    const VFS_BYTE *name = (const VFS_BYTE *)k;  
     unsigned long h = 0, g;  
     int i; 
     int len;
 
-    len = strlen((const char*)k);
+    len = strlen((const VFS_CHAR*)k);
   
     for(i=0;i<len;i++)  
     {  
@@ -91,17 +91,17 @@ static unsigned int pak_item_hashcode(void *k)
     return (unsigned int)h;  
 }
 
-static int pak_item_equalkeys(void *k1, void *k2)
+static int pak_item_equalkeys(VFS_VOID *k1, VFS_VOID *k2)
 {
-    char  *_k1,*_k2;
+    VFS_CHAR  *_k1,*_k2;
 
-    _k1 = (char*)k1;
-    _k2 = (char*)k2;
+    _k1 = (VFS_CHAR*)k1;
+    _k2 = (VFS_CHAR*)k2;
 
     return (0 == strcmp(_k1,_k2));
 }
 
-static void pak_item_key_free(void*key)
+static VFS_VOID pak_item_key_free(VFS_VOID*key)
 {
     if( key )
     {
@@ -109,7 +109,7 @@ static void pak_item_key_free(void*key)
     }
 }
 
-static void pak_item_value_free(void*key)
+static VFS_VOID pak_item_value_free(VFS_VOID*key)
 {
     if( key )
     {
@@ -117,9 +117,9 @@ static void pak_item_value_free(void*key)
     }
 }
 
-DEFINE_HASHTABLE_INSERT(pak_item_insert, char, pak_iteminfo)
-DEFINE_HASHTABLE_SEARCH(pak_item_search, char, pak_iteminfo)
-DEFINE_HASHTABLE_REMOVE(pak_item_remove, char, pak_iteminfo)
-DEFINE_HASHTABLE_ITERATOR_SEARCH(pak_item_iter_search, char)
+DEFINE_HASHTABLE_INSERT(pak_item_insert, VFS_CHAR, pak_iteminfo)
+DEFINE_HASHTABLE_SEARCH(pak_item_search, VFS_CHAR, pak_iteminfo)
+DEFINE_HASHTABLE_REMOVE(pak_item_remove, VFS_CHAR, pak_iteminfo)
+DEFINE_HASHTABLE_ITERATOR_SEARCH(pak_item_iter_search, VFS_CHAR)
 
 #endif/*_VFS_PAK_PRIVATE_H_*/

@@ -43,7 +43,7 @@ vfs *g_vfs = NULL;
 /************************************************************************/
 /* pak search and locate                                                */
 /************************************************************************/
-static VFS_INT32 vfs_archive_obj_sort_cmp(const void*a,const void*b)
+static VFS_INT32 vfs_archive_obj_sort_cmp(const VFS_VOID*a,const VFS_VOID*b)
 {
 	vfs_archive_obj* _a;
 	vfs_archive_obj* _b;
@@ -55,22 +55,22 @@ static VFS_INT32 vfs_archive_obj_sort_cmp(const void*a,const void*b)
                    _b->plugin->info.get_plugin_name(_b->archive));
 }
 
-static VFS_INT32 vfs_archive_obj_search_cmp(const void*key,const void*item)
+static VFS_INT32 vfs_archive_obj_search_cmp(const VFS_VOID*key,const VFS_VOID*item)
 {
-	char*_key;
+	VFS_CHAR*_key;
 	vfs_archive_obj* _item;
 
-	_key  = (char*)key;
+	_key  = (VFS_CHAR*)key;
 	_item = *(vfs_archive_obj**)item;
 	return stricmp(_key,_item->plugin->plugin.archive.archive_get_name(_item->archive));
 }
 
-static void vfs_archive_obj_sort()
+static VFS_VOID vfs_archive_obj_sort()
 {
-	qsort((void*)g_vfs->_M_archives,g_vfs->_M_count,sizeof(vfs_archive_obj*),vfs_archive_obj_sort_cmp);
+	qsort((VFS_VOID*)g_vfs->_M_archives,g_vfs->_M_count,sizeof(vfs_archive_obj*),vfs_archive_obj_sort_cmp);
 }
 
-static VFS_INT32 vfs_archive_obj_search(const char* archive)
+static VFS_INT32 vfs_archive_obj_search(const VFS_CHAR* archive)
 {
 	vfs_archive_obj** p=NULL;
 
@@ -88,7 +88,7 @@ static VFS_INT32 vfs_archive_obj_search(const char* archive)
 /************************************************************************/
 /* plugin search and locate                                             */
 /************************************************************************/
-static VFS_INT32 vfs_plugin_sort_cmp(const void*a,const void*b)
+static VFS_INT32 vfs_plugin_sort_cmp(const VFS_VOID*a,const VFS_VOID*b)
 {
     vfs_plugin* _a;
     vfs_plugin* _b;
@@ -99,22 +99,22 @@ static VFS_INT32 vfs_plugin_sort_cmp(const void*a,const void*b)
     return stricmp(_a->info.get_plugin_name(),_b->info.get_plugin_name());
 }
 
-static VFS_INT32 vfs_plugin_search_cmp(const void*key,const void*item)
+static VFS_INT32 vfs_plugin_search_cmp(const VFS_VOID*key,const VFS_VOID*item)
 {
-    char*_key;
+    VFS_CHAR*_key;
     vfs_plugin* _item;
 
-    _key  = (char*)key;
+    _key  = (VFS_CHAR*)key;
     _item = *(vfs_plugin**)item;
     return stricmp(_key,_item->info.get_plugin_name());
 }
 
-static void vfs_plugin_sort()
+static VFS_VOID vfs_plugin_sort()
 {
-    qsort((void*)g_vfs->_M_plugins,g_vfs->_M_plugins_count,sizeof(vfs_plugin*),vfs_plugin_sort_cmp);
+    qsort((VFS_VOID*)g_vfs->_M_plugins,g_vfs->_M_plugins_count,sizeof(vfs_plugin*),vfs_plugin_sort_cmp);
 }
 
-static VFS_INT32 vfs_plugin_search(const char* pluginname)
+static VFS_INT32 vfs_plugin_search(const VFS_CHAR* pluginname)
 {
     vfs_plugin** p=NULL;
 
@@ -128,7 +128,7 @@ static VFS_INT32 vfs_plugin_search(const char* pluginname)
     return (p - g_vfs->_M_plugins);
 }
 
-static vfs_plugin* vfs_plugin_check_archive_type(const char* archive)
+static vfs_plugin* vfs_plugin_check_archive_type(const VFS_CHAR* archive)
 {
     int i;
     vfs_plugin* plugin;
@@ -153,7 +153,7 @@ static vfs_plugin* vfs_plugin_check_archive_type(const char* archive)
 /* vfs implement                                                        */
 /************************************************************************/
 
-VFS_BOOL vfs_create(const char* sdk_version,const char* workpath)
+VFS_BOOL vfs_create(const VFS_CHAR* sdk_version,const VFS_CHAR* workpath)
 {
     vfs_plugin plugin;
 
@@ -200,7 +200,7 @@ VFS_BOOL vfs_create(const char* sdk_version,const char* workpath)
 	return VFS_TRUE;
 }
 
-void vfs_destroy()
+VFS_VOID vfs_destroy()
 {
 	VFS_INT32 i;
 
@@ -231,7 +231,7 @@ void vfs_destroy()
 }
 
 
-vfs_plugin* vfs_locate_plugin(const char*pluginname)
+vfs_plugin* vfs_locate_plugin(const VFS_CHAR*pluginname)
 {
     VFS_INT32 index;
     
@@ -246,7 +246,7 @@ vfs_plugin* vfs_locate_plugin(const char*pluginname)
 }
 
 
-VFS_BOOL vfs_register_plugin(const char*pluginname,vfs_plugin plugin)
+VFS_BOOL vfs_register_plugin(const VFS_CHAR*pluginname,vfs_plugin plugin)
 {
     vfs_plugin* _plugin;
     vfs_plugin** _plugins;
@@ -293,7 +293,7 @@ VFS_BOOL vfs_register_plugin(const char*pluginname,vfs_plugin plugin)
     return VFS_TRUE;
 }
 
-void vfs_unregister_plugin(const char*pluginname )
+VFS_VOID vfs_unregister_plugin(const VFS_CHAR*pluginname )
 {
     VFS_INT32 index;
     if( !g_vfs )
@@ -313,21 +313,21 @@ void vfs_unregister_plugin(const char*pluginname )
     vfs_plugin_sort();
 }
 
-VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
+VFS_BOOL vfs_add_archive( const VFS_CHAR* archive,const VFS_CHAR* passwd )
 {
 	vfs_archive_obj*  p;
 	vfs_archive_obj** _archives;
 
     vfs_plugin* plugin;
 
-    char* prefix = NULL;
-    char _filepath[VFS_MAX_FILENAME+1];
-    char _fullpath[VFS_MAX_FILENAME+1];
+    VFS_CHAR* prefix = NULL;
+    VFS_CHAR _filepath[VFS_MAX_FILENAME+1];
+    VFS_CHAR _fullpath[VFS_MAX_FILENAME+1];
 
     if( !g_vfs || !archive )
         return VFS_FALSE;
 
-    if( !vfs_util_path_clone(_filepath,(char*)archive) )
+    if( !vfs_util_path_clone(_filepath,(VFS_CHAR*)archive) )
         return VFS_FALSE;
 
     if( (prefix = strstr(_filepath,g_vfs->_M_workpath)) == NULL )
@@ -398,7 +398,7 @@ VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
 	return VFS_TRUE;
 }
 
-VFS_BOOL vfs_remove_archive(const char* archive )
+VFS_BOOL vfs_remove_archive(const VFS_CHAR* archive )
 {
 
 	VFS_INT32 index;
@@ -441,7 +441,7 @@ vfs_archive_obj* vfs_get_archive_index(VFS_INT32 idx )
 	return NULL;
 }
 
-vfs_archive_obj* vfs_get_archive_name(const char* archive)
+vfs_archive_obj* vfs_get_archive_name(const VFS_CHAR* archive)
 {	
 	vfs_archive_obj* p;
 	VFS_INT32 index;

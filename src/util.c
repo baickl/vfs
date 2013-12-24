@@ -45,23 +45,23 @@
 
 
 
-void bz_internal_error ( int errcode )
+VFS_VOID bz_internal_error ( int errcode )
 {
 }
 
-VFS_UINT32 vfs_util_calc_crc32(void*buf,VFS_INT32 size)
+VFS_UINT32 vfs_util_calc_crc32(VFS_VOID*buf,VFS_INT32 size)
 {
 	return calc_crc32(buf,size);
 }
 
 #ifdef __linux__
-VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc,void*p)
+VFS_BOOL vfs_util_dir_foreach(const VFS_CHAR* path,dir_foreach_item_proc proc,VFS_VOID*p)
 {
 	DIR* dir;
 	struct dirent *entry = NULL;
 
-	char find_full[VFS_MAX_FILENAME+1];
-	char path_temp[VFS_MAX_FILENAME+1];
+	VFS_CHAR find_full[VFS_MAX_FILENAME+1];
+	VFS_CHAR path_temp[VFS_MAX_FILENAME+1];
 
 	VFS_INT32 rt;
 
@@ -133,10 +133,10 @@ LB_ERROR:
 
 #else
 
-VFS_BOOL vfs_util_dir_foreach(const char* path,dir_foreach_item_proc proc,void*p)
+VFS_BOOL vfs_util_dir_foreach(const VFS_CHAR* path,dir_foreach_item_proc proc,VFS_VOID*p)
 {
-	char find_full[VFS_MAX_FILENAME+1] = {0};
-	char path_temp[VFS_MAX_FILENAME+1] = {0};
+	VFS_CHAR find_full[VFS_MAX_FILENAME+1] = {0};
+	VFS_CHAR path_temp[VFS_MAX_FILENAME+1] = {0};
 
 	VFS_INT32 rt;
 
@@ -213,9 +213,9 @@ LB_ERROR:
 
 #endif
 
-char* vfs_util_str_toupper(char* str)
+VFS_CHAR* vfs_util_str_toupper(VFS_CHAR* str)
 {
-    char* p;
+    VFS_CHAR* p;
 
     if( !str )
         return NULL;
@@ -230,9 +230,9 @@ char* vfs_util_str_toupper(char* str)
     return str;
 }
 
-char* vfs_util_str_tolower(char* str )
+VFS_CHAR* vfs_util_str_tolower(VFS_CHAR* str )
 {
-    char* p;
+    VFS_CHAR* p;
 
     if( !str )
         return NULL;
@@ -247,9 +247,9 @@ char* vfs_util_str_tolower(char* str )
     return str;
 }
 
-char* vfs_util_path_checkfix(char* path )
+VFS_CHAR* vfs_util_path_checkfix(VFS_CHAR* path )
 {
-	char*p;
+	VFS_CHAR*p;
 	if( !path )
 		return path;
 
@@ -266,7 +266,7 @@ char* vfs_util_path_checkfix(char* path )
 }
 
 
-char* vfs_util_path_clone(char*out_path,const char*path )
+VFS_CHAR* vfs_util_path_clone(VFS_CHAR*out_path,const VFS_CHAR*path )
 {
 	if( !out_path || !path )
 		return NULL;
@@ -278,9 +278,9 @@ char* vfs_util_path_clone(char*out_path,const char*path )
     return out_path;
 }
 
-char* vfs_util_path_append(char* path ,const char* append )
+VFS_CHAR* vfs_util_path_append(VFS_CHAR* path ,const VFS_CHAR* append )
 {
-	const char *p ;
+	const VFS_CHAR *p ;
 	if( !path || !append)
 		return NULL;
 
@@ -305,7 +305,7 @@ char* vfs_util_path_append(char* path ,const char* append )
     return path;
 }
 
-char* vfs_util_path_join(char* path ,const char* join )
+VFS_CHAR* vfs_util_path_join(VFS_CHAR* path ,const VFS_CHAR* join )
 {
 	if( !path || !join)
 		return NULL;
@@ -317,7 +317,7 @@ char* vfs_util_path_join(char* path ,const char* join )
 	return vfs_util_path_checkfix(path);
 }
 
-char* vfs_util_path_combine(char* path ,const char* dir ,const char* append )
+VFS_CHAR* vfs_util_path_combine(VFS_CHAR* path ,const VFS_CHAR* dir ,const VFS_CHAR* append )
 {
 	if( !path || !dir || !append )
 		return NULL;
@@ -328,7 +328,7 @@ char* vfs_util_path_combine(char* path ,const char* dir ,const char* append )
 	return vfs_util_path_append( path,append );
 }
 
-char* vfs_util_path_add_backslash(char* path )
+VFS_CHAR* vfs_util_path_add_backslash(VFS_CHAR* path )
 {
 	VFS_INT32 len;
 	if( !path )
@@ -345,7 +345,7 @@ char* vfs_util_path_add_backslash(char* path )
 
 }
 
-char* vfs_util_path_remove_backslash(char* path )
+VFS_CHAR* vfs_util_path_remove_backslash(VFS_CHAR* path )
 {
 	VFS_INT32 len;
 	if( !path )
@@ -365,7 +365,7 @@ char* vfs_util_path_remove_backslash(char* path )
 
 }
 
-char* vfs_util_path_remove_filename(char* path )
+VFS_CHAR* vfs_util_path_remove_filename(VFS_CHAR* path )
 {
     VFS_INT32 len;
     if( !path )
@@ -387,7 +387,7 @@ char* vfs_util_path_remove_filename(char* path )
 	return path;
 }
 
-char* vfs_util_path_remove_extension(char* path )
+VFS_CHAR* vfs_util_path_remove_extension(VFS_CHAR* path )
 {
     VFS_INT32 len;
     if( !path )
@@ -413,11 +413,11 @@ char* vfs_util_path_remove_extension(char* path )
 	return path;
 }
 
-const char* vfs_util_path_get_filename(const char* path )
+const VFS_CHAR* vfs_util_path_get_filename(const VFS_CHAR* path )
 {
     VFS_INT32 len;
     VFS_INT32 cursor;
-    const char* p = NULL;
+    const VFS_CHAR* p = NULL;
 
     if( !path )
         return p;
@@ -443,11 +443,11 @@ const char* vfs_util_path_get_filename(const char* path )
 }
 
 
-const char* vfs_util_path_get_extension(const char* path )
+const VFS_CHAR* vfs_util_path_get_extension(const VFS_CHAR* path )
 {
     VFS_INT32 len;
     VFS_INT32 cursor;
-    const char* p = NULL;
+    const VFS_CHAR* p = NULL;
 
     if( !path )
         return path;

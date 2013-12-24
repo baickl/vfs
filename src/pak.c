@@ -35,7 +35,7 @@
 #include <stdio.h>
 #include <memory.h>
 
-static FILE* sfopen(const char* filename,const char* mode)
+static FILE* sfopen(const VFS_CHAR* filename,const VFS_CHAR* mode)
 {
 #ifdef __linux__
 	return fopen(filename,mode);
@@ -56,7 +56,7 @@ static FILE* sfopen(const char* filename,const char* mode)
 }
 
 
-static vfs_plugin* vfs_plugin_get_compress_type(const char* compress_type)
+static vfs_plugin* vfs_plugin_get_compress_type(const VFS_CHAR* compress_type)
 {
     int i;
     vfs_plugin* plugin;
@@ -78,7 +78,7 @@ static vfs_plugin* vfs_plugin_get_compress_type(const char* compress_type)
 }
 
 
-pak* pak_open(const char* _pakfile,const char* _prefix)
+pak* pak_open(const VFS_CHAR* _pakfile,const VFS_CHAR* _prefix)
 {
 	VFS_INT32 i;
 	pak *_pak = NULL;
@@ -86,14 +86,14 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
 	pak_header header;
 	pak_iteminfo*iteminfos = NULL;
 	VFS_UINT16 filenamelen;
-    char filename[VFS_MAX_FILENAME+1];
+    VFS_CHAR filename[VFS_MAX_FILENAME+1];
 
     VFS_INT32 prefixlen  = 0;
     VFS_INT32 keylen = 0;
-    char* key = NULL;
+    VFS_CHAR* key = NULL;
 
     VFS_UINT16 compress_plugin_namelen;
-    char compress_plugin_name[PAK_MAX_PLUGIN_LEN+1];
+    VFS_CHAR compress_plugin_name[PAK_MAX_PLUGIN_LEN+1];
 
     struct hashtable *ht_iteminfos = NULL;
 
@@ -194,7 +194,7 @@ pak* pak_open(const char* _pakfile,const char* _prefix)
             goto ERROR;
 
         keylen = filenamelen + prefixlen;
-        key = (char*)vfs_pool_malloc(keylen+1);
+        key = (VFS_CHAR*)vfs_pool_malloc(keylen+1);
         if( !key )
             goto ERROR;
 		
@@ -261,7 +261,7 @@ ERROR:
 	return NULL;
 }
 
-void pak_close(pak* _pak)
+VFS_VOID pak_close(pak* _pak)
 {
     struct hashtable_itr *itr;
     pak_iteminfo * iteminfo;
@@ -308,12 +308,12 @@ VFS_INT32 pak_item_get_count(pak* _pak)
 }
 
 
-VFS_BOOL pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p )
+VFS_BOOL pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,VFS_VOID*p )
 {
     VFS_INT32 ret;
     int index;
     struct hashtable_itr *itr;
-    char *filename;
+    VFS_CHAR *filename;
     pak_iteminfo * iteminfo;
     if( !_pak || !_pak->_M_ht_iteminfos )
         return VFS_FALSE;
@@ -330,7 +330,7 @@ VFS_BOOL pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p )
     {
         do 
         {
-            filename = (char*)hashtable_iterator_key(itr);
+            filename = (VFS_CHAR*)hashtable_iterator_key(itr);
             iteminfo =(pak_iteminfo*) hashtable_iterator_value(itr);
             ret = proc(_pak,filename,iteminfo,index++,p);
             switch(ret)
@@ -353,10 +353,10 @@ VFS_BOOL pak_item_foreach( pak* _pak,pak_item_foreach_proc proc,void*p )
 
 }
 
-pak_iteminfo *pak_item_locate(pak*_pak,const char* _file)
+pak_iteminfo *pak_item_locate(pak*_pak,const VFS_CHAR* _file)
 {
 	pak_iteminfo* iteminfo=NULL;
-    char file[VFS_MAX_FILENAME+1];
+    VFS_CHAR file[VFS_MAX_FILENAME+1];
 
 	if( !_pak || !_file)
 		return NULL;
@@ -370,11 +370,11 @@ pak_iteminfo *pak_item_locate(pak*_pak,const char* _file)
 
 }
 
-VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,VFS_UINT64 _bufsize)
+VFS_BOOL pak_item_unpack_filename(pak*_pak,const VFS_CHAR*_file,VFS_VOID*_buf,VFS_UINT64 _bufsize)
 {
 	pak_iteminfo* iteminfo = NULL;
 	FILE* fp = NULL;
-	void* compress_buf = NULL;
+	VFS_VOID* compress_buf = NULL;
 
     vfs_plugin* plugin;
 
@@ -403,7 +403,7 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,VFS_UINT64
 
 	if( iteminfo->_M_compress_size == 0 )
     {
-		if( fread(_buf,1,(size_t)iteminfo->_M_size,fp) != iteminfo->_M_size)
+		if( fread(_buf,1,(VFS_SIZE)iteminfo->_M_size,fp) != iteminfo->_M_size)
 			goto ERROR;
 
 		VFS_SAFE_FCLOSE(fp);
@@ -423,14 +423,14 @@ VFS_BOOL pak_item_unpack_filename(pak*_pak,const char*_file,void*_buf,VFS_UINT64
         if( !plugin )
             return VFS_FALSE;
 
-		compress_buf = (void*)vfs_pool_malloc((size_t)iteminfo->_M_compress_size);
+		compress_buf = (VFS_VOID*)vfs_pool_malloc((VFS_SIZE)iteminfo->_M_compress_size);
 		if( !compress_buf )
 			goto ERROR;
 
-		if( fread(compress_buf,1,(size_t)iteminfo->_M_compress_size,fp) != iteminfo->_M_compress_size)
+		if( fread(compress_buf,1,(VFS_SIZE)iteminfo->_M_compress_size,fp) != iteminfo->_M_compress_size)
 			goto ERROR;
 
-		if( plugin->plugin.compress.decompress( compress_buf , (size_t)iteminfo->_M_compress_size , _buf,(size_t)_bufsize) != iteminfo->_M_size  )
+		if( plugin->plugin.compress.decompress( compress_buf , (VFS_SIZE)iteminfo->_M_compress_size , _buf,(VFS_SIZE)_bufsize) != iteminfo->_M_size  )
 			goto ERROR;
 
 		if(compress_buf){

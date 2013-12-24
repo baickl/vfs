@@ -30,7 +30,8 @@
 #include <vfs/vfs.h>
 #include <vfs/util.h>
 #include "vfs_private.h"
-#include "pak_plugin.h"
+#include "plugin/pak_plugin.h"
+#include "plugin/bz2compress_plugin.h"
 #include "pool.h"
 
 #include <stdio.h>
@@ -185,7 +186,14 @@ VFS_BOOL vfs_create(const char* sdk_version,const char* workpath)
     plugin = vfs_get_plugin_archive_pak();
 
 
-    /* 注册PAK组件 */
+    /* 注册组件 */
+    if( VFS_TRUE != vfs_register_plugin(plugin.info.get_plugin_name(),plugin) )
+    {
+        vfs_destroy();
+        return VFS_FALSE;
+    }
+
+    plugin = vfs_get_plugin_compress_bz2compress();
     if( VFS_TRUE != vfs_register_plugin(plugin.info.get_plugin_name(),plugin) )
     {
         vfs_destroy();

@@ -211,14 +211,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\pak_plugin.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\pak_plugin.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\pak_private.h"
 				>
 			</File>
@@ -327,6 +319,26 @@
 				</File>
 				<File
 					RelativePath=".\src\hashtable\hashtable_utility.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="plugin"
+				>
+				<File
+					RelativePath=".\src\plugin\bz2compress_plugin.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\plugin\bz2compress_plugin.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\plugin\pak_plugin.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\plugin\pak_plugin.h"
 					>
 				</File>
 			</Filter>

@@ -37,6 +37,26 @@ static const char* pak_plugin_archive_get_plugin_name()
     return "VFS_PLUGIN_PAK";
 }
 
+static const char* pak_plugin_archive_get_plugin_version()
+{
+    return "1.0.0.1";
+}
+
+static const char* pak_plugin_archive_get_plugin_description()
+{
+    return "VFS_PLUGIN_PAK";
+}
+
+static const char* pak_plugin_archive_get_plugin_copyright()
+{
+    return "(C)copyright baickl@gmail.com";
+}
+
+static const char* pak_plugin_archive_get_plugin_support()
+{
+    return "baickl@gmail.com";
+}
+
 static VFS_BOOL pak_plugin_archive_check_type(const char* archive)
 {
     const char* p;
@@ -75,12 +95,12 @@ static var32 pak_plugin_archive_item_get_count( vfs_archive archive)
 
 static var32 pak_plugin_item_foreach_proc(pak*_pak ,char* filename, pak_iteminfo *iteminfo , int index, void*p )
 {
-    plugin_item_foreach_proc proc;
-    proc = (plugin_item_foreach_proc)p;
+    archive_item_foreach_proc proc;
+    proc = (archive_item_foreach_proc)p;
     return proc((vfs_archive)_pak,filename,iteminfo->_M_size);
 }
 
-static VFS_BOOL pak_plugin_archive_item_foreach( vfs_archive archive,plugin_item_foreach_proc proc)
+static VFS_BOOL pak_plugin_archive_item_foreach( vfs_archive archive,archive_item_foreach_proc proc)
 {
     return pak_item_foreach((pak*)archive,pak_plugin_item_foreach_proc,proc);
 }
@@ -107,19 +127,28 @@ static VFS_BOOL pak_plugin_archive_item_unpack_filename( vfs_archive archive, co
 /************************************************************************/
 /* 导出函数                                                    */
 /************************************************************************/
-vfs_plugin g_plugin_pak= {
-    
-    pak_plugin_archive_get_plugin_name,
-    pak_plugin_archive_check_type,
-    
-    pak_plugin_archive_open,
-    pak_plugin_archive_close,
+vfs_plugin vfs_get_plugin_archive_pak()
+{
+    vfs_plugin plugin;
 
-    pak_plugin_archive_get_name,
+    memset(&plugin,0,sizeof(plugin));
+
+    plugin.type = PLUGIN_ARCHIVE;
+    plugin.info.get_plugin_name         = pak_plugin_archive_get_plugin_name;
+    plugin.info.get_plugin_version      = pak_plugin_archive_get_plugin_version;
+    plugin.info.get_plugin_description  = pak_plugin_archive_get_plugin_description;
+    plugin.info.get_plugin_copyright    = pak_plugin_archive_get_plugin_copyright;
+    plugin.info.get_plugin_support      = pak_plugin_archive_get_plugin_support;
     
-    pak_plugin_archive_item_get_count,
-    pak_plugin_archive_item_foreach,
-    pak_plugin_archive_item_locate,
-    
-    pak_plugin_archive_item_unpack_filename,
-};
+    plugin.plugin.archive.archive_check_suppert = pak_plugin_archive_check_type;
+
+    plugin.plugin.archive.archive_open                      = pak_plugin_archive_open;
+    plugin.plugin.archive.archive_close                     = pak_plugin_archive_close;
+    plugin.plugin.archive.archive_get_name                  = pak_plugin_archive_get_name;
+    plugin.plugin.archive.archive_get_item_count            = pak_plugin_archive_item_get_count;
+    plugin.plugin.archive.archive_foreach_item              = pak_plugin_archive_item_foreach;
+    plugin.plugin.archive.archive_locate_item               = pak_plugin_archive_item_locate;
+    plugin.plugin.archive.archive_unpack_item_by_filename   = pak_plugin_archive_item_unpack_filename;
+
+    return plugin;
+}

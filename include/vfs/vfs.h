@@ -90,7 +90,7 @@ VFS_EXTERN void             vfs_destroy();
  *                          ==VFS_FALSE 注册插件失败  
  *
  */
-VFS_EXTERN VFS_BOOL         vfs_register_archive_plugin(const char*pluginname,vfs_plugin plugin);
+VFS_EXTERN VFS_BOOL         vfs_register_plugin(const char*pluginname,vfs_plugin plugin);
 
 /*****************************************************************************
  * 反注册vfs插件
@@ -100,7 +100,7 @@ VFS_EXTERN VFS_BOOL         vfs_register_archive_plugin(const char*pluginname,vf
  * @return    void          无返回值
  * 
  */
-VFS_EXTERN void             vfs_unregister_archive_plugin(const char*pluginname );
+VFS_EXTERN void             vfs_unregister_plugin(const char*pluginname );
 
 
 /*****************************************************************************

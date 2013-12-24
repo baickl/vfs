@@ -50,8 +50,8 @@ static var32 vfs_archive_obj_sort_cmp(const void*a,const void*b)
 	_a = *(vfs_archive_obj**)a;
 	_b = *(vfs_archive_obj**)b;
 
-	return stricmp(_a->plugin->plugin_archive_get_name(_a->archive),
-                   _b->plugin->plugin_archive_get_name(_b->archive));
+	return stricmp(_a->plugin->info.get_plugin_name(_a->archive),
+                   _b->plugin->info.get_plugin_name(_b->archive));
 }
 
 static var32 vfs_archive_obj_search_cmp(const void*key,const void*item)
@@ -61,7 +61,7 @@ static var32 vfs_archive_obj_search_cmp(const void*key,const void*item)
 
 	_key  = (char*)key;
 	_item = *(vfs_archive_obj**)item;
-	return stricmp(_key,_item->plugin->plugin_archive_get_name(_item->archive));
+	return stricmp(_key,_item->plugin->plugin.archive.archive_get_name(_item->archive));
 }
 
 static void vfs_archive_obj_sort()
@@ -95,7 +95,7 @@ static var32 vfs_plugin_sort_cmp(const void*a,const void*b)
     _a = *(vfs_plugin**)a;
     _b = *(vfs_plugin**)b;
 
-    return stricmp(_a->plugin_archive_get_plugin_name(),_b->plugin_archive_get_plugin_name());
+    return stricmp(_a->info.get_plugin_name(),_b->info.get_plugin_name());
 }
 
 static var32 vfs_plugin_search_cmp(const void*key,const void*item)
@@ -105,7 +105,7 @@ static var32 vfs_plugin_search_cmp(const void*key,const void*item)
 
     _key  = (char*)key;
     _item = *(vfs_plugin**)item;
-    return stricmp(_key,_item->plugin_archive_get_plugin_name());
+    return stricmp(_key,_item->info.get_plugin_name());
 }
 
 static void vfs_plugin_sort()
@@ -138,7 +138,10 @@ static vfs_plugin* vfs_plugin_check_archive_type(const char* archive)
     for( i = 0; i<g_vfs->_M_plugins_count; ++i )
     {
         plugin = g_vfs->_M_plugins[i];
-        if( VFS_TRUE == plugin->plugin_archive_check_type(archive) )
+        if( plugin->type != PLUGIN_ARCHIVE)
+            continue;
+
+        if( VFS_TRUE == plugin->plugin.archive.archive_check_suppert(archive) )
             return plugin;
     }
 
@@ -151,6 +154,8 @@ static vfs_plugin* vfs_plugin_check_archive_type(const char* archive)
 
 VFS_BOOL vfs_create(const char* sdk_version,const char* workpath)
 {
+    vfs_plugin plugin;
+
 	if( g_vfs )
 		return VFS_TRUE;
 
@@ -176,8 +181,12 @@ VFS_BOOL vfs_create(const char* sdk_version,const char* workpath)
 
     strcpy(g_vfs->_M_workpath,workpath);
 
+
+    plugin = vfs_get_plugin_archive_pak();
+
+
     /* 注册PAK组件 */
-    if( VFS_TRUE != vfs_register_archive_plugin(g_plugin_pak.plugin_archive_get_plugin_name(),g_plugin_pak) )
+    if( VFS_TRUE != vfs_register_plugin(plugin.info.get_plugin_name(),plugin) )
     {
         vfs_destroy();
         return VFS_FALSE;
@@ -197,7 +206,7 @@ void vfs_destroy()
 	for( i = 0; i<g_vfs->_M_count; ++i )
 	{
 		archive = g_vfs->_M_archives[i];
-        archive->plugin->plugin_archive_close(archive->archive);
+        archive->plugin->plugin.archive.archive_close(archive->archive);
 	}
 
 	if(g_vfs->_M_archives){
@@ -217,7 +226,7 @@ void vfs_destroy()
 }
 
 
-VFS_BOOL vfs_register_archive_plugin(const char*pluginname,vfs_plugin plugin)
+VFS_BOOL vfs_register_plugin(const char*pluginname,vfs_plugin plugin)
 {
     vfs_plugin* _plugin;
     vfs_plugin** _plugins;
@@ -262,7 +271,7 @@ VFS_BOOL vfs_register_archive_plugin(const char*pluginname,vfs_plugin plugin)
     return VFS_TRUE;
 }
 
-void vfs_unregister_archive_plugin(const char*pluginname )
+void vfs_unregister_plugin(const char*pluginname )
 {
     var32 index;
     if( !g_vfs )
@@ -317,7 +326,7 @@ VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
         return VFS_FALSE;
 
     p->plugin = plugin;
-	p->archive = p->plugin->plugin_archive_open(_fullpath,prefix,passwd);
+	p->archive = p->plugin->plugin.archive.archive_open(_fullpath,prefix,passwd);
 	if( !p->archive)
     {
         vfs_pool_free(p);
@@ -333,7 +342,7 @@ VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
 			if( !g_vfs->_M_archives )
 			{
 				g_vfs->_M_maxcount = 0;
-                p->plugin->plugin_archive_close(p->archive);
+                p->plugin->plugin.archive.archive_close(p->archive);
                 vfs_pool_free(p);
 
 				return VFS_FALSE;
@@ -347,7 +356,7 @@ VFS_BOOL vfs_add_archive( const char* archive,const char* passwd )
 			{
 				g_vfs->_M_maxcount -= 16;
 				
-                p->plugin->plugin_archive_close(p->archive);
+                p->plugin->plugin.archive.archive_close(p->archive);
                 vfs_pool_free(p);
 
 				return VFS_FALSE;
@@ -384,7 +393,7 @@ VFS_BOOL vfs_remove_archive(const char* archive )
 		return VFS_FALSE;
 
     p = g_vfs->_M_archives[index];
-    p->plugin->plugin_archive_close(p->archive);
+    p->plugin->plugin.archive.archive_close(p->archive);
 	vfs_pool_free(p);
 
 	g_vfs->_M_archives[index]= g_vfs->_M_archives[g_vfs->_M_count -1];

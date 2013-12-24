@@ -32,6 +32,6 @@
 
 #include <vfs/plugin.h>
 
-VFS_EXTERN vfs_plugin g_plugin_pak;
+VFS_EXTERN vfs_plugin vfs_get_plugin_archive_pak();
 
 #endif/*_VFS_PAK_PLUGIN_H_*/

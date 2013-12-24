@@ -86,7 +86,7 @@ var32 vfs_file_exists( const char* file  )
     for( i = 0; i<count; ++i )
     {
         _archive = vfs_get_archive_index(i);
-        if( _archive && VFS_TRUE == _archive->plugin->plugin_archive_item_locate(_archive->archive,file,&size) )
+        if( _archive && VFS_TRUE == _archive->plugin->plugin.archive.archive_locate_item(_archive->archive,file,&size) )
             return VFS_FILE_EXISTS_IN_ARCHIVE;
     }
 
@@ -170,14 +170,14 @@ vfs_file* vfs_file_open(const char* file )
     for( i = 0; i<g_vfs->_M_count; ++i )
     {
         p = g_vfs->_M_archives[i];
-        if( VFS_TRUE != p->plugin->plugin_archive_item_locate(p->archive,file,&size) )
+        if( VFS_TRUE != p->plugin->plugin.archive.archive_locate_item(p->archive,file,&size) )
             continue;
 
         buf = (void*)vfs_pool_malloc((size_t)size);
         if( !buf )
             return NULL;
 
-        if( VFS_TRUE != p->plugin->plugin_archive_item_unpack_filename(p->archive,file,buf,size) ) 
+        if( VFS_TRUE != p->plugin->plugin.archive.archive_unpack_item_by_filename(p->archive,file,buf,size) ) 
         {
             vfs_pool_free(buf);
             return NULL;

@@ -61,7 +61,6 @@ typedef struct vfs_plugin_archive
     VFS_BOOL                (*archive_foreach_item)( vfs_archive archive,archive_item_foreach_proc proc);
     VFS_BOOL                (*archive_locate_item)(vfs_archive archive,const char* filename,uvar64* osize);
     VFS_BOOL                (*archive_unpack_item_by_filename)( vfs_archive archive, const char* filename, void* buf, uvar64 bufsize);
-
 }vfs_plugin_archive;
 
 typedef struct vfs_plugin_compress

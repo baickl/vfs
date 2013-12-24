@@ -14,8 +14,9 @@ OBJS=objs/pak.o 		\
 	 objs/file.o		\
 	 objs/pool.o		\
 	 objs/buffer.o		\
-	 objs/pak_plugin.o		\
-	 objs/hashtable.o	\
+	 objs/pak_plugin.o			\
+	 objs/bz2compress_plugin.o	\
+	 objs/hashtable.o			\
 	 objs/hashtable_itr.o		\
 	 objs/hashtable_utility.o	\
 	 objs/crc32.o		\
@@ -52,9 +53,12 @@ objs/pool.o:src/pool.c
 objs/buffer.o:src/buffer.c
 	$(CC) $(CFLAGS) -c src/buffer.c -o objs/buffer.o
 	
-objs/pak_plugin.o:src/pak_plugin.c
-	$(CC) $(CFLAGS) -c src/pak_plugin.c -o objs/pak_plugin.o
+objs/pak_plugin.o:src/plugin/pak_plugin.c
+	$(CC) $(CFLAGS) -c src/plugin/pak_plugin.c -o objs/pak_plugin.o
 
+objs/bz2compress_plugin.o:src/plugin/bz2compress_plugin.c
+	$(CC) $(CFLAGS) -c src/plugin/bz2compress_plugin.c -o objs/bz2compress_plugin.o
+	
 objs/hashtable.o:src/hashtable/hashtable.c
 	$(CC) $(CFLAGS) -c src/hashtable/hashtable.c -o objs/hashtable.o
 

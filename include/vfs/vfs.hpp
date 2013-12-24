@@ -49,13 +49,13 @@ public:
     {
     }
 
-    VFSFile( void*buf,size_t bufsize )
+    VFSFile( VFS_VOID*buf,VFS_SIZE bufsize )
         :_M_file(NULL)
     {
         Create(buf,bufsize);
     }
 
-    VFSFile( const char*file )
+    VFSFile( const VFS_CHAR*file )
         :_M_file(NULL)
     {
         Open(file);
@@ -68,7 +68,7 @@ public:
 
 public:
 
-    bool Create(void*buf,VFS_UINT64 bufsize)
+    bool Create(VFS_VOID*buf,VFS_UINT64 bufsize)
     {
         Close();
 
@@ -79,7 +79,7 @@ public:
             return false;
     }
 
-    bool Open(const char* file )
+    bool Open(const VFS_CHAR* file )
     {
         Close();
 
@@ -90,7 +90,7 @@ public:
             return false;
     }
 
-    void Close()
+    VFS_VOID Close()
     {
         if( _M_file )
         {
@@ -99,7 +99,7 @@ public:
         }
     }
 
-    bool Save(const char* file )
+    bool Save(const VFS_CHAR* file )
     {
         return vfs_file_save(file);
     }
@@ -126,17 +126,17 @@ public:
         return vfs_file_size(_M_file);
     }
 
-    const void* Data()const
+    const VFS_VOID* Data()const
     {
         return vfs_file_data(_M_file);
     }
 
-    size_t Read(void*buf,size_t size,size_t count )
+    VFS_SIZE Read(VFS_VOID*buf,VFS_SIZE size,VFS_SIZE count )
     {
         return vfs_file_read(buf,size,count,_M_file);
     }
 
-    size_t Write(void*buf,size_t size,size_t count )
+    VFS_SIZE Write(VFS_VOID*buf,VFS_SIZE size,VFS_SIZE count )
     {
         return vfs_file_write(buf,size,count,_M_file);
     }
@@ -169,7 +169,7 @@ public:
 
 public:
 
-    bool Create(const char*workpath)
+    bool Create(const VFS_CHAR*workpath)
     {
         if(VFS_TRUE == vfs_create(VFS_SDK_VERSION,workpath))
             return true;
@@ -177,12 +177,12 @@ public:
             return false;
     }
 
-    void Destroy()
+    VFS_VOID Destroy()
     {
         vfs_destroy();
     }
 
-    bool AddArchive(const char* path )
+    bool AddArchive(const VFS_CHAR* path )
     {
         if( VFS_TRUE == vfs_add_archive(path) )
             return true;
@@ -190,7 +190,7 @@ public:
             return false;
     }
 
-    bool FileExists(const char* file )
+    bool FileExists(const VFS_CHAR* file )
     {
         if( VFS_FILE_NOT_EXISTS != vfs_file_exists(file) )
             return true;

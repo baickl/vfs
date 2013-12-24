@@ -45,7 +45,7 @@
  *                      返回VFS_FOREACH_PROC_ERROR,通知遍历函数，处理函数处理时有错误，中断遍历
  *                      
  */
-typedef VFS_INT32           (*dir_foreach_item_proc)(const char*fullpath,VFS_INT32 dir,void*p);
+typedef VFS_INT32           (*dir_foreach_item_proc)(const VFS_CHAR*fullpath,VFS_INT32 dir,VFS_VOID*p);
 
 /*****************************************************************************
  * 计算一段内存的校验码
@@ -56,7 +56,7 @@ typedef VFS_INT32           (*dir_foreach_item_proc)(const char*fullpath,VFS_INT
  * @return    VFS_UINT32    返回计算出来的校验码
  *                      
  */
-VFS_EXTERN VFS_UINT32       vfs_util_calc_crc32( void *buf, VFS_INT32 bufsize );
+VFS_EXTERN VFS_UINT32       vfs_util_calc_crc32( VFS_VOID *buf, VFS_INT32 bufsize );
 
 
 /*****************************************************************************
@@ -70,42 +70,42 @@ VFS_EXTERN VFS_UINT32       vfs_util_calc_crc32( void *buf, VFS_INT32 bufsize );
  *                      返回VFS_FALSE   遍历目录失败
  *                      
  */
-VFS_EXTERN VFS_BOOL     vfs_util_dir_foreach(const char* dir, dir_foreach_item_proc proc,void *p);
+VFS_EXTERN VFS_BOOL     vfs_util_dir_foreach(const VFS_CHAR* dir, dir_foreach_item_proc proc,VFS_VOID *p);
 
 /*****************************************************************************
  * 将字符串里的小写字母转换成大写
    
  * @name                vfs_util_str_toupper
  * @param     str       待转换的字符串 
- * @return    char*     返回转换后的字符串str
+ * @return    VFS_CHAR*     返回转换后的字符串str
  *
  * 此函数会修改传入的参数str
  *                      
  */
-VFS_EXTERN char*        vfs_util_str_toupper(char *str);
+VFS_EXTERN VFS_CHAR*        vfs_util_str_toupper(VFS_CHAR *str);
 
 /*****************************************************************************
  * 将字符串里的大写字母转换成小写
    
  * @name                vfs_util_str_tolower
  * @param     str       待转换的字符串 
- * @return    char*     返回转换后的字符串str
+ * @return    VFS_CHAR*     返回转换后的字符串str
  *                      
  * 此函数会修改传入的参数str
  */
-VFS_EXTERN char*        vfs_util_str_tolower(char *str);
+VFS_EXTERN VFS_CHAR*        vfs_util_str_tolower(VFS_CHAR *str);
 
 /*****************************************************************************
  * 检查并修正路径
    
  * @name                vfs_util_path_checkfix
  * @param     path      待检查和修正的路径
- * @return    char*     返回修更后的path
+ * @return    VFS_CHAR*     返回修更后的path
  *
  * 此函数会修改传进去的path,并且会将目录中的'\\'转换成'/'
  *                      
  */
-VFS_EXTERN char*        vfs_util_path_checkfix(char *path);
+VFS_EXTERN VFS_CHAR*        vfs_util_path_checkfix(VFS_CHAR *path);
 
 /*****************************************************************************
  * 克隆一个路径
@@ -113,12 +113,12 @@ VFS_EXTERN char*        vfs_util_path_checkfix(char *path);
  * @name                vfs_util_path_clone
  * @param     path      克隆路径的输出
  * @param     clone     待克隆的路径
- * @return    char*     返回克隆的path
+ * @return    VFS_CHAR*     返回克隆的path
  *
  * 此函数会先拷贝要克隆的对象，然后调用vfs_util_path_checkfix对拷贝出来的数据进行检查修正
  *                      
  */
-VFS_EXTERN char*        vfs_util_path_clone(char *path,const char *clone);
+VFS_EXTERN VFS_CHAR*        vfs_util_path_clone(VFS_CHAR *path,const VFS_CHAR *clone);
 
 /*****************************************************************************
  * 路径追加
@@ -126,13 +126,13 @@ VFS_EXTERN char*        vfs_util_path_clone(char *path,const char *clone);
  * @name                vfs_util_path_append
  * @param     path      要追加路径，并存放追加结果,需要保证这个缓存有足够大小放置追加部分的数据
  * @param     append    待追加的路径
- * @return    char*     返回追加结果即path
+ * @return    VFS_CHAR*     返回追加结果即path
  *
  * 如果path没有以'/'结尾，那么和append组合的时候，会在中间添加'/'
  * 如果path原本就以'/'结尾，那么,path和append组合后不添加任何东西
  *
  * 此函数使用方法如下：
- * char path[VFS_MAX_FILENAME];
+ * VFS_CHAR path[VFS_MAX_FILENAME];
  *
  * strcpy(path,"/home/xxx/app")
  * vfs_util_path_append(path,"aaa/bin.txt");
@@ -142,7 +142,7 @@ VFS_EXTERN char*        vfs_util_path_clone(char *path,const char *clone);
  * /home/xxx/app/aaa/bin.txt
  *
  */
-VFS_EXTERN char*        vfs_util_path_append(char *path,const char *append);
+VFS_EXTERN VFS_CHAR*        vfs_util_path_append(VFS_CHAR *path,const VFS_CHAR *append);
 
 /*****************************************************************************
  * 路径连接
@@ -150,12 +150,12 @@ VFS_EXTERN char*        vfs_util_path_append(char *path,const char *append);
  * @name                vfs_util_path_join
  * @param     path      要连接路径，并存放连接结果,需要保证这个缓存有足够大小放置连接部分的数据
  * @param     join      待连接的部分
- * @return    char*     返回连接结果，即参数path
+ * @return    VFS_CHAR*     返回连接结果，即参数path
  *
  * 路径连接不会在path和join之间添加任何东西，只是单纯的连接
  *
  * 此函数使用方法如下：
- * char path[VFS_MAX_FILENAME];
+ * VFS_CHAR path[VFS_MAX_FILENAME];
  *
  * strcpy(path,"/home/xxx/app/bin")
  * vfs_util_path_append(path,".txt");
@@ -165,7 +165,7 @@ VFS_EXTERN char*        vfs_util_path_append(char *path,const char *append);
  * /home/xxx/app/bin.txt
  *
  */
-VFS_EXTERN char*        vfs_util_path_join(char *path,const char *join);
+VFS_EXTERN VFS_CHAR*        vfs_util_path_join(VFS_CHAR *path,const VFS_CHAR *join);
 
 /*****************************************************************************
  * 路径组合
@@ -174,12 +174,12 @@ VFS_EXTERN char*        vfs_util_path_join(char *path,const char *join);
  * @param     path      存放组合后的输出结果，需要保证足够大小
  * @param     a         待组合的路径前半部分a 
  * @param     b         待组合的路径后半部分b
- * @return    char*     返回组合结果，即参数path
+ * @return    VFS_CHAR*     返回组合结果，即参数path
  *
  * 路径组合的时候，如果a不是以'/'结尾，那么程序会在组合的时候加上'/'，然后再连接b 
  *
  * 此函数使用方法如下：
- * char path[VFS_MAX_FILENAME];
+ * VFS_CHAR path[VFS_MAX_FILENAME];
  *
  * vfs_util_path_combine(path,"/home/xxx/app","bin.txt");
  * printf(path); 
@@ -188,20 +188,20 @@ VFS_EXTERN char*        vfs_util_path_join(char *path,const char *join);
  * /home/xxx/app/bin.txt
  *
  */
-VFS_EXTERN char*        vfs_util_path_combine(char *path,const char *a,const char *b);
+VFS_EXTERN VFS_CHAR*        vfs_util_path_combine(VFS_CHAR *path,const VFS_CHAR *a,const VFS_CHAR *b);
 
 /*****************************************************************************
  * 在路径后面添加斜杠
    
  * @name                vfs_util_path_add_backslash
  * @param     path      待添加的路径，需要保证足够大小
- * @return    char*     返回结果，即参数path
+ * @return    VFS_CHAR*     返回结果，即参数path
  *
  * 如果路径结尾已经以'/'结尾，那么本函数，不对path做任何改变，
  * 如果路径结尾不是'/'，那么会在路径结尾添加'/'，然后返回结果
  *
  * 此函数使用方法如下：
- * char path[VFS_MAX_FILENAME];
+ * VFS_CHAR path[VFS_MAX_FILENAME];
  * strcpy(path,"home/xxx/app");
  * vfs_util_path_add_backslash(path)
  * printf(path); 
@@ -210,7 +210,7 @@ VFS_EXTERN char*        vfs_util_path_combine(char *path,const char *a,const cha
  * /home/xxx/app/
  *
  */
-VFS_EXTERN char*        vfs_util_path_add_backslash(char *path);
+VFS_EXTERN VFS_CHAR*        vfs_util_path_add_backslash(VFS_CHAR *path);
 
 
 
@@ -219,13 +219,13 @@ VFS_EXTERN char*        vfs_util_path_add_backslash(char *path);
    
  * @name                vfs_util_path_remove_backslash
  * @param     path      待处理的路径
- * @return    char*     返回结果，即参数path
+ * @return    VFS_CHAR*     返回结果，即参数path
  *
  * 如果路径结尾不是以'/'结尾，将不会做任何处理，并且直接返回
  * 如果路径结尾是以'/'结尾，，将会移除'/'，然后返回结果
  *
  * 此函数使用方法如下：
- * char path[VFS_MAX_FILENAME];
+ * VFS_CHAR path[VFS_MAX_FILENAME];
  * strcpy(path,"home/xxx/app/");
  * vfs_util_path_remove_backslash(path)
  * printf(path); 
@@ -234,17 +234,17 @@ VFS_EXTERN char*        vfs_util_path_add_backslash(char *path);
  * /home/xxx/app
  *
  */
-VFS_EXTERN char*        vfs_util_path_remove_backslash(char *path);
+VFS_EXTERN VFS_CHAR*        vfs_util_path_remove_backslash(VFS_CHAR *path);
 
 /*****************************************************************************
  * 移除路径中的文件名
    
  * @name                vfs_util_path_remove_filename
  * @param     path      待处理的路径
- * @return    char*     返回结果，即参数path
+ * @return    VFS_CHAR*     返回结果，即参数path
  *
  * 此函数使用方法如下：
- * char path[VFS_MAX_FILENAME];
+ * VFS_CHAR path[VFS_MAX_FILENAME];
  * strcpy(path,"home/xxx/app/bin.txt");
  * vfs_util_path_remove_filename(path)
  * printf(path); 
@@ -253,17 +253,17 @@ VFS_EXTERN char*        vfs_util_path_remove_backslash(char *path);
  * /home/xxx/app/
  *
  */
-VFS_EXTERN char*        vfs_util_path_remove_filename(char *path);
+VFS_EXTERN VFS_CHAR*        vfs_util_path_remove_filename(VFS_CHAR *path);
 
 /*****************************************************************************
  * 移除路径中的文件扩展名
    
  * @name                vfs_util_path_remove_extension
  * @param     path      待处理的路径
- * @return    char*     返回结果，即参数path
+ * @return    VFS_CHAR*     返回结果，即参数path
  *
  * 此函数使用方法如下：
- * char path[VFS_MAX_FILENAME];
+ * VFS_CHAR path[VFS_MAX_FILENAME];
  * strcpy(path,"home/xxx/app/bin.txt");
  * vfs_util_path_remove_extension(path)
  * printf(path); 
@@ -272,7 +272,7 @@ VFS_EXTERN char*        vfs_util_path_remove_filename(char *path);
  * /home/xxx/app/bin
  *
  */
-VFS_EXTERN char*        vfs_util_path_remove_extension(char *path);
+VFS_EXTERN VFS_CHAR*        vfs_util_path_remove_extension(VFS_CHAR *path);
 
 
 /*****************************************************************************
@@ -280,11 +280,11 @@ VFS_EXTERN char*        vfs_util_path_remove_extension(char *path);
    
  * @name                vfs_util_path_get_filename
  * @param     path      待处理的路径
- * @return    char*     返回结果，即参数path
+ * @return    VFS_CHAR*     返回结果，即参数path
  *
  * 此函数使用方法如下：
- * char* filename;
- * char path[VFS_MAX_FILENAME];
+ * VFS_CHAR* filename;
+ * VFS_CHAR path[VFS_MAX_FILENAME];
  * strcpy(path,"home/xxx/app/bin.txt");
  * filename = vfs_util_path_remove_filename(path)
  * printf(filename); 
@@ -293,7 +293,7 @@ VFS_EXTERN char*        vfs_util_path_remove_extension(char *path);
  * bin.txt
  *
  */
-VFS_EXTERN const char*  vfs_util_path_get_filename(const char *path);
+VFS_EXTERN const VFS_CHAR*  vfs_util_path_get_filename(const VFS_CHAR *path);
 
 
 /*****************************************************************************
@@ -301,11 +301,11 @@ VFS_EXTERN const char*  vfs_util_path_get_filename(const char *path);
    
  * @name                vfs_util_path_remove_extension
  * @param     path      待处理的路径
- * @return    char*     返回结果，即扩展名(.png)，如果没有找到则为NULL
+ * @return    VFS_CHAR*     返回结果，即扩展名(.png)，如果没有找到则为NULL
  *
  * 此函数使用方法如下：
- * char*ext;
- * char path[VFS_MAX_FILENAME];
+ * VFS_CHAR*ext;
+ * VFS_CHAR path[VFS_MAX_FILENAME];
  * strcpy(path,"home/xxx/app/bin.txt");
  * ext = vfs_util_path_get_extension(path)
  * printf(ext); 
@@ -314,6 +314,6 @@ VFS_EXTERN const char*  vfs_util_path_get_filename(const char *path);
  * .txt
  *
  */
-VFS_EXTERN const char*   vfs_util_path_get_extension(const char *path);
+VFS_EXTERN const VFS_CHAR*   vfs_util_path_get_extension(const VFS_CHAR *path);
 
 #endif/* _VFS_UTIL_H_ */

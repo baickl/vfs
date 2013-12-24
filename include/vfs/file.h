@@ -43,12 +43,12 @@ typedef struct vfs_file_t vfs_file;
    
  * @name                vfs_file_exists
  * @param   filename    待检测是否存在的文件
- * @return  VFS_INT32       -VFS_FILE_NOT_EXISTS        文件不存在
+ * @return  VFS_INT32   -VFS_FILE_NOT_EXISTS        文件不存在
  *                      -VFS_FILE_EXISTS_IN_ARCHIVE 文件存在于当前已经加载的ARCHIVE中
  *                      -VFS_FILE_EXISTS_IN_DIR     文件存在于当前程序运行的目录中
  *
  */
-VFS_EXTERN VFS_INT32        vfs_file_exists( const char *filename );
+VFS_EXTERN VFS_INT32    vfs_file_exists( const VFS_CHAR *filename );
 
 /*****************************************************************************
  * 创建一个读写的虚拟文件,可以指定初始化数据和大小
@@ -60,7 +60,7 @@ VFS_EXTERN VFS_INT32        vfs_file_exists( const char *filename );
  *                      失败返回NULL
  *
  */
-VFS_EXTERN vfs_file*    vfs_file_create( void *buf , VFS_UINT64 bufsize) ;
+VFS_EXTERN vfs_file*    vfs_file_create( VFS_VOID *buf , VFS_UINT64 bufsize) ;
 
 /*****************************************************************************
  * 打开文件
@@ -77,17 +77,17 @@ VFS_EXTERN vfs_file*    vfs_file_create( void *buf , VFS_UINT64 bufsize) ;
  * 然后才会是从目录中索引。
  *
  */
-VFS_EXTERN vfs_file*    vfs_file_open( const char *filename );
+VFS_EXTERN vfs_file*    vfs_file_open( const VFS_CHAR *filename );
 
 /*****************************************************************************
  * 关闭文件
    
  * @name                vfs_file_close
  * @param   _file       要关闭的文件指针对象
- * @return  void        无返回值 
+ * @return  VFS_VOID        无返回值 
  *
  */
-VFS_EXTERN void         vfs_file_close( vfs_file *_file );
+VFS_EXTERN VFS_VOID     vfs_file_close( vfs_file *_file );
 
 /*****************************************************************************
  * 保存文件
@@ -99,7 +99,7 @@ VFS_EXTERN void         vfs_file_close( vfs_file *_file );
  *                      返回VFS_FALSE  保存文件失败
  *
  */
-VFS_EXTERN VFS_BOOL     vfs_file_save( vfs_file  *_file ,const char *filename);
+VFS_EXTERN VFS_BOOL     vfs_file_save( vfs_file  *_file ,const VFS_CHAR *filename);
 
 /*****************************************************************************
  * 判断是否已到文件尾部 
@@ -120,7 +120,7 @@ VFS_EXTERN VFS_BOOL     vfs_file_eof( vfs_file *_file );
  * @return  VFS_UINT64      返回当前文件的位移量
  *
  */
-VFS_EXTERN VFS_UINT64       vfs_file_tell( vfs_file *_file );
+VFS_EXTERN VFS_UINT64   vfs_file_tell( vfs_file *_file );
 
 /*****************************************************************************
  * 移动到文件的指定位置 
@@ -135,7 +135,7 @@ VFS_EXTERN VFS_UINT64       vfs_file_tell( vfs_file *_file );
  * @return  VFS_UINT64      返回当前文件的位移量
  *
  */
-VFS_EXTERN VFS_UINT64       vfs_file_seek( vfs_file *_file , VFS_INT64 pos , VFS_INT32 mod );
+VFS_EXTERN VFS_UINT64   vfs_file_seek( vfs_file *_file , VFS_INT64 pos , VFS_INT32 mod );
 
 /*****************************************************************************
  * 获得文件的大小 
@@ -145,17 +145,17 @@ VFS_EXTERN VFS_UINT64       vfs_file_seek( vfs_file *_file , VFS_INT64 pos , VFS
  * @return  VFS_UINT64      返回当前文件的大小
  *
  */
-VFS_EXTERN VFS_UINT64       vfs_file_size( vfs_file *_file );
+VFS_EXTERN VFS_UINT64   vfs_file_size( vfs_file *_file );
 
 /*****************************************************************************
  * 获得文件的数据 
    
  * @name                vfs_file_data
  * @param   _file       文件指针对象
- * @return  const void* 返回当前文件的数据
+ * @return  const VFS_VOID* 返回当前文件的数据
  *
  */
-VFS_EXTERN const void*  vfs_file_data( vfs_file *_file );
+VFS_EXTERN const VFS_VOID*  vfs_file_data( vfs_file *_file );
 
 /*****************************************************************************
  * 读取文件数据 
@@ -165,10 +165,10 @@ VFS_EXTERN const void*  vfs_file_data( vfs_file *_file );
  * @param   size        要读的数据块的大小
  * @param   count       总共要读取多少数据块
  * @param   _file       文件指针对象
- * @return  size_t      返回实际读取了多少个数据块
+ * @return  VFS_SIZE    返回实际读取了多少个数据块
  *
  */
-VFS_EXTERN size_t       vfs_file_read( void *buf , size_t size , size_t count , vfs_file *_file);
+VFS_EXTERN VFS_SIZE     vfs_file_read( VFS_VOID *buf , VFS_SIZE size , VFS_SIZE count , vfs_file *_file);
 
 /*****************************************************************************
  * 写入文件数据 
@@ -178,9 +178,9 @@ VFS_EXTERN size_t       vfs_file_read( void *buf , size_t size , size_t count , 
  * @param   size        要写的数据块的大小
  * @param   count       总共要写入多少数据块
  * @param   _file       文件指针对象
- * @return  size_t      返回实际写入了多少个数据块
+ * @return  VFS_SIZE    返回实际写入了多少个数据块
  *
  */
-VFS_EXTERN size_t       vfs_file_write( void *buf , size_t size, size_t count, vfs_file *_file);
+VFS_EXTERN VFS_SIZE     vfs_file_write( VFS_VOID *buf , VFS_SIZE size, VFS_SIZE count, vfs_file *_file);
 
 #endif/*_VFS_FILE_H_*/

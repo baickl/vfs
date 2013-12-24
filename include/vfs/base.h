@@ -69,10 +69,10 @@
 /************************************************************************/
 /* 相关实用宏定义 */
 #define VFS_SAFE_FCLOSE(x)                          if(x){fclose(x);x=NULL;}
-#define VFS_SAFE_FREE(x)                            if(x){free((void*)x);x=NULL;}
+#define VFS_SAFE_FREE(x)                            if(x){free((VFS_VOID*)x);x=NULL;}
 
-#define VFS_CHECK_FREAD(f,b,l)                      (f ? (fread((void*)b,1,(size_t)l,f)        != l ? 0 : 1) : 0 )
-#define VFS_CHECK_FWRITE(f,b,l)                     (f ? (fwrite((const void*)b,1,(size_t)l,f) != l ? 0 : 1) : 0 )
+#define VFS_CHECK_FREAD(f,b,l)                      (f ? (fread((VFS_VOID*)b,1,(VFS_SIZE)l,f)        != l ? 0 : 1) : 0 )
+#define VFS_CHECK_FWRITE(f,b,l)                     (f ? (fwrite((const VFS_VOID*)b,1,(VFS_SIZE)l,f) != l ? 0 : 1) : 0 )
 
 #ifdef __linux__
     #define VFS_FSEEK                               fseeko

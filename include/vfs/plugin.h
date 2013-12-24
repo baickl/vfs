@@ -32,6 +32,58 @@
 
 #include "base.h"
 
+/************************************************************************/
+/* 插件信息定义                                                */
+/************************************************************************/
+typedef struct vfs_plugin_info
+{
+    const VFS_CHAR*           (*get_plugin_name)();
+    const VFS_CHAR*           (*get_plugin_version)();
+    const VFS_CHAR*           (*get_plugin_description)();
+    const VFS_CHAR*           (*get_plugin_copyright)();
+    const VFS_CHAR*           (*get_plugin_support)();
+}vfs_plugin_info;
+
+/************************************************************************/
+/* 压缩插件定义                                                */
+/************************************************************************/
+typedef struct vfs_plugin_compress
+{
+    VFS_SIZE                  (*compress_bound)(VFS_SIZE len );
+    VFS_SIZE                  (*compress)(const VFS_VOID *src, VFS_SIZE srclen ,VFS_VOID *dst, VFS_SIZE dstlen);
+    VFS_SIZE                  (*decompress)(const VFS_VOID *src, VFS_SIZE srclen ,VFS_VOID *dst, VFS_SIZE dstlen);
+}vfs_plugin_compress;
+
+/************************************************************************/
+/* 加密插件定义                                                */
+/************************************************************************/
+typedef struct vfs_plugin_encrypt
+{
+    VFS_SIZE                  (*encrypt)(const VFS_VOID*src,VFS_SIZE srclen,VFS_VOID*dst,VFS_SIZE dstlen );
+    VFS_SIZE                  (*decrypt)(const VFS_VOID*src,VFS_SIZE srclen,VFS_VOID*dst,VFS_SIZE dstlen );
+}vfs_plugin_encrypt;
+
+/************************************************************************/
+/* 文件包插件定义                                              */
+/************************************************************************/
+typedef VFS_VOID* vfs_archive;
+typedef VFS_INT32 (*archive_item_foreach_proc)(vfs_archive archive ,const VFS_CHAR* filename, VFS_UINT64 size);
+typedef struct vfs_plugin_archive
+{
+    VFS_BOOL                  (*archive_check_suppert)(const VFS_CHAR* archive);
+    vfs_archive               (*archive_open)(const VFS_CHAR* archive,const VFS_CHAR* prefix,const VFS_CHAR* passwd);
+    VFS_VOID                  (*archive_close)( vfs_archive archive);
+    const VFS_CHAR*           (*archive_get_name)( vfs_archive archive);
+    VFS_INT32                 (*archive_get_item_count)( vfs_archive archive);
+    VFS_BOOL                  (*archive_foreach_item)( vfs_archive archive,archive_item_foreach_proc proc);
+    VFS_BOOL                  (*archive_locate_item)(vfs_archive archive,const VFS_CHAR* filename,VFS_UINT64* osize);
+    VFS_BOOL                  (*archive_unpack_item_by_filename)( vfs_archive archive, const VFS_CHAR* filename, VFS_VOID* buf, VFS_UINT64 bufsize);
+}vfs_plugin_archive;
+
+
+/************************************************************************/
+/* 插件模块定义                                                */
+/************************************************************************/
 enum
 {
     PLUGIN_ARCHIVE,
@@ -39,56 +91,18 @@ enum
     PLUGIN_ENCRYPT
 };
 
-typedef void* vfs_archive;
-typedef VFS_INT32 (*archive_item_foreach_proc)(vfs_archive archive ,const char* filename, VFS_UINT64 size);
-
-
-typedef struct vfs_plugin_info
-{
-    const char*             (*get_plugin_name)();
-    const char*             (*get_plugin_version)();
-    const char*             (*get_plugin_description)();
-    const char*             (*get_plugin_copyright)();
-    const char*             (*get_plugin_support)();
-}vfs_plugin_info;
-
-typedef struct vfs_plugin_compress
-{
-    size_t                  (*compress_bound)(size_t len );
-    size_t                  (*compress)(const void *src, size_t srclen ,void *dst, size_t dstlen);
-    size_t                  (*decompress)(const void *src, size_t srclen ,void *dst, size_t dstlen);
-}vfs_plugin_compress;
-
-typedef struct vfs_plugin_encrypt
-{
-    size_t                  (*encrypt)(const void*src,size_t srclen,void*dst,size_t dstlen );
-    size_t                  (*decrypt)(const void*src,size_t srclen,void*dst,size_t dstlen );
-}vfs_plugin_encrypt;
-
-typedef struct vfs_plugin_archive
-{
-    VFS_BOOL                (*archive_check_suppert)(const char* archive);
-    vfs_archive             (*archive_open)(const char* archive,const char* prefix,const char* passwd);
-    void                    (*archive_close)( vfs_archive archive);
-    const char*             (*archive_get_name)( vfs_archive archive);
-    VFS_INT32                   (*archive_get_item_count)( vfs_archive archive);
-    VFS_BOOL                (*archive_foreach_item)( vfs_archive archive,archive_item_foreach_proc proc);
-    VFS_BOOL                (*archive_locate_item)(vfs_archive archive,const char* filename,VFS_UINT64* osize);
-    VFS_BOOL                (*archive_unpack_item_by_filename)( vfs_archive archive, const char* filename, void* buf, VFS_UINT64 bufsize);
-}vfs_plugin_archive;
-
-typedef union vfs_plugin_obj
-{
-    vfs_plugin_archive      archive;
-    vfs_plugin_compress     compress;
-    vfs_plugin_encrypt      encrypt;
-}vfs_plugin_obj;
-
 typedef struct vfs_plugin
 {
-    VFS_INT32               type;
-    vfs_plugin_info         info;
-    vfs_plugin_obj          plugin;
+    VFS_INT32                   type;
+    vfs_plugin_info             info;
+    
+    union
+    {
+        vfs_plugin_compress     compress;
+        vfs_plugin_encrypt      encrypt;
+        vfs_plugin_archive      archive;
+    }plugin;
+
 }vfs_plugin;
 
 #endif/*_VFS_PLUGIN_H_*/

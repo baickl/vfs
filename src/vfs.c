@@ -288,6 +288,8 @@ VFS_BOOL vfs_register_plugin(const char*pluginname,vfs_plugin plugin)
     memcpy(_plugin,&plugin,sizeof(vfs_plugin));
     g_vfs->_M_plugins[g_vfs->_M_plugins_count++] = _plugin;
 
+    vfs_plugin_sort();
+
     return VFS_TRUE;
 }
 

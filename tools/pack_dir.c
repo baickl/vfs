@@ -590,7 +590,7 @@ int main( int argc,char *argv[] )
     plugin = NULL;
     if( argc >= 3 )
     {
-        compress_type = strstr(argv[3],"/compress=");
+        compress_type = strstr(argv[2],"/compress=");
         if( compress_type != NULL )
         {
             compress_type += strlen("/compress=");

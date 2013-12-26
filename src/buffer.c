@@ -41,9 +41,6 @@ static VFS_VOID vfs_buffer_constructor(vfs_buffer* obj )
 
 static VFS_VOID vfs_buffer_destructor(vfs_buffer* obj )
 {
-    if( !obj )
-        return ;
-
     obj->cleanup(obj);
 }
 
@@ -148,7 +145,7 @@ VFS_VOID vfs_buffer_delete( vfs_buffer* obj )
     if(!obj)
         return;
     
-    obj->cleanup(obj);  
+    obj->destructor(obj);  
     vfs_pool_free(obj);
 }
 

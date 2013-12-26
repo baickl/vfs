@@ -37,10 +37,9 @@
 /************************************************************************/
 typedef struct vfs_stream
 {
-    VFS_UINT64		_M_size;
-    VFS_UINT64		_M_position;
-    VFS_VOID*		_M_buffer;
-
+    VFS_UINT64		            _M_size;
+    VFS_UINT64		            _M_position;
+    VFS_VOID*		            _M_buffer;
 
     /*****************************************************************************
      * 创建一个读写的虚拟文件,可以指定初始化数据和大小
@@ -48,8 +47,8 @@ typedef struct vfs_stream
      * @name                    stream_create
      * @param   buf             用来初始化虚拟文件的数据
      * @param   bufsize         用来初始化虚拟文件的数据大小
-     * @return  vfs_stream*     成功返回vfs_stream对象
-     *                          失败返回NULL
+     * @return  VFS_BOOL        成功返回VFS_TRUE
+     *                          失败返回VFS_FALSE
      *
      */
     VFS_BOOL                    (*stream_create)( struct vfs_stream *stream ,VFS_VOID *buf , VFS_UINT64 bufsize) ;
@@ -59,8 +58,8 @@ typedef struct vfs_stream
        
      * @name                    stream_open
      * @param   filename        要打开的文件名
-     * @return  vfs_stream*     成功返回vfs_stream对象
-     *                          失败返回NULL
+     * @return  VFS_BOOL        成功返回VFS_TRUE
+     *                          失败返回VFS_FALSE
      *
      * 当打开的文件在ARCHIVE包和目录中都同时存在时，优先从ARCHIVE包中读取，
      * 如果ARCHIVE包中没有，仅在目录中存在，那么将从目录中优先加载。
@@ -69,7 +68,7 @@ typedef struct vfs_stream
      * 然后才会是从目录中索引。
      *
      */
-    VFS_BOOL                   (*stream_open)(struct vfs_stream *stream , const VFS_CHAR *filename );
+    VFS_BOOL                    (*stream_open)(struct vfs_stream *stream , const VFS_CHAR *filename );
 
     
     /*****************************************************************************

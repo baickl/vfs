@@ -31,7 +31,6 @@
 #define _VFS_HPP_
 
 #include "vfs.h"
-#include "file.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,11 +71,17 @@ public:
     {
         Close();
 
-        _M_file == vfs_file_create(buf,bufsize);
-        if( _M_file )
-            return true;
-        else
+        _M_file == vfs_stream_new();
+        if( !_M_file )
             return false;
+        
+        if( VFS_FALSE == _M_file->stream_create(_M_file,buf,bufsize) )
+        {
+            Close();
+            return false;
+        }
+
+        return true;
     }
 
     bool Open(const VFS_CHAR* file )
@@ -94,56 +99,80 @@ public:
     {
         if( _M_file )
         {
-            vfs_file_close(_M_file);
+            vfs_stream_delete(_M_file);
             _M_file = NULL;
         }
     }
 
     bool Save(const VFS_CHAR* file )
     {
-        return vfs_file_save(file);
+        if( !_M_file || !file )
+            return false;
+
+        return VFS_TRUE == _M_file->stream_save(file);
     }
 
 public:
 
     bool Eof()const 
     {
-        return vfs_file_eof(_M_file);
+        if( !_M_file )
+            return true;
+
+        return _M_file->stream_eof(_M_file);
     }
 
     VFS_UINT64 Tell()const 
     {
-        return vfs_file_tell(_M_file);
+        if( !_M_file )
+            return 0;
+
+        return _M_file->stream_tell(_M_file);
     }
 
     VFS_UINT64 Seek(VFS_UINT64 pos,int mod = SEEK_SET)
     {
-        return vfs_file_seek(_M_file,pos,SEEK_SET);
+        if( !_M_file )
+            return 0;
+
+        return _M_file->stream_seek(_M_file,pos,mod);
     }
 
     VFS_UINT64 Size()const 
     {
-        return vfs_file_size(_M_file);
+        if( !_M_file )
+            return 0;
+
+        return _M_file->stream_size(_M_file);
     }
 
     const VFS_VOID* Data()const
     {
-        return vfs_file_data(_M_file);
+        if( !_M_file )
+            return 0;
+
+        return _M_file->stream_data(_M_file);
     }
 
     VFS_SIZE Read(VFS_VOID*buf,VFS_SIZE size,VFS_SIZE count )
     {
-        return vfs_file_read(buf,size,count,_M_file);
+        if( !_M_file )
+            return 0;
+
+        return _M_file->stream_read(_M_file,buf,size,count);
     }
 
     VFS_SIZE Write(VFS_VOID*buf,VFS_SIZE size,VFS_SIZE count )
     {
-        return vfs_file_write(buf,size,count,_M_file);
+        if( !_M_file )
+            return 0;
+
+        return _M_file->stream_write(_M_file,buf,size,count);
     }
 
 private:
 
-    vfs_file *_M_file;
+    vfs_stream *_M_file;
 };
 
 

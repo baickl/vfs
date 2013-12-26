@@ -158,11 +158,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\include\vfs\file.h"
+					RelativePath=".\include\vfs\plugin.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\vfs\plugin.h"
+					RelativePath=".\include\vfs\stream.h"
 					>
 				</File>
 				<File
@@ -199,10 +199,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\file.c"
-				>
-			</File>
-			<File
 				RelativePath=".\src\pak.c"
 				>
 			</File>
@@ -220,6 +216,10 @@
 			</File>
 			<File
 				RelativePath=".\src\pool.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\stream.c"
 				>
 			</File>
 			<File

@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
-#include <vfs/file.h>
+#include <vfs/stream.h>
 #include <vfs/vfs.h>
 #include <vfs/util.h>
 #include "vfs_private.h"
@@ -63,7 +63,7 @@ static FILE* sfopen(const VFS_CHAR* filename,const VFS_CHAR* mode)
 static VFS_BOOL vfs_stream_create(vfs_stream* stream ,VFS_VOID *buf,VFS_UINT64 size)
 {
     if( !stream )
-        return NULL;
+        return VFS_FALSE;
     
     if( stream->_M_size > 0 )
         stream->stream_close(stream);
@@ -91,7 +91,6 @@ static VFS_BOOL vfs_stream_open(vfs_stream* stream ,const VFS_CHAR* file )
 	VFS_INT64 size;
 	VFS_VOID* buf;
     vfs_archive_obj* p;
-	vfs_stream* vff;
 
 	FILE* fp;
 
@@ -99,7 +98,7 @@ static VFS_BOOL vfs_stream_open(vfs_stream* stream ,const VFS_CHAR* file )
     VFS_CHAR filepath[VFS_MAX_FILENAME+1];
 
 	if( !stream )
-		return NULL;
+		return VFS_FALSE;
 
      stream->stream_close(stream);
 
@@ -146,7 +145,7 @@ static VFS_BOOL vfs_stream_open(vfs_stream* stream ,const VFS_CHAR* file )
 			if( !buf )
 			{
 				VFS_SAFE_FCLOSE(fp);
-				return NULL;
+				return VFS_FALSE;
 			}
 
 			if( !VFS_CHECK_FREAD(fp,buf,size) )
@@ -157,7 +156,7 @@ static VFS_BOOL vfs_stream_open(vfs_stream* stream ,const VFS_CHAR* file )
                     vfs_pool_free(buf);
                     buf = NULL;
                 }
-				return NULL;
+				return VFS_FALSE;
 			}
 
 			VFS_SAFE_FCLOSE(fp);
@@ -261,7 +260,7 @@ static VFS_SIZE vfs_stream_read(vfs_stream*stream, VFS_VOID* buf , VFS_SIZE size
     realcount = realcount<count?realcount:count;
 
     p = (VFS_CHAR*)buf;
-    cursor = &((VFS_CHAR*)stream->stream_data(stream)))[stream->stream_tell(stream)];
+    cursor = &((VFS_CHAR*)stream->stream_data(stream))[stream->stream_tell(stream)];
     realsize = realcount* size;
     stream->_M_position += realsize;
     memcpy(p,cursor,(VFS_SIZE)realsize);
@@ -282,7 +281,7 @@ static VFS_SIZE vfs_stream_write( vfs_stream*stream, VFS_VOID* buf , VFS_SIZE si
     if(realcount < count )
     {
         needsize = (count - realcount)*size;
-        if( fp->_M_size == 0 )
+        if( stream->_M_size == 0 )
         {
             tmp = (VFS_VOID*)vfs_pool_malloc(needsize );
             if( tmp )
@@ -394,49 +393,4 @@ void vfs_stream_delete( vfs_stream* stream )
         stream->stream_close(stream);
         vfs_pool_free(stream);
     }
-}
-
-VFS_INT32 vfs_file_exists( const VFS_CHAR* file  )
-{
-    int i,count;
-    vfs_archive_obj* _archive;
-    VFS_UINT64 size;
-
-    const VFS_CHAR*filefullpath;
-    VFS_CHAR filepath[VFS_MAX_FILENAME+1];
-
-    FILE* fp;
-
-    /************************************************************************/
-
-    if( !file)
-        return VFS_FILE_NOT_EXISTS;
-
-    /* 先尝试在包里查找 */
-    count = vfs_get_archive_count();
-    for( i = 0; i<count; ++i )
-    {
-        _archive = vfs_get_archive_index(i);
-        if( _archive && VFS_TRUE == _archive->plugin->plugin.archive.archive_locate_item(_archive->archive,file,&size) )
-            return VFS_FILE_EXISTS_IN_ARCHIVE;
-    }
-
-
-    /* 判断是否在本地 */
-    memset(filepath,0,sizeof(filepath));
-    filefullpath = file;
-    if( vfs_util_path_combine(filepath,g_vfs->_M_workpath,file) )
-    {
-        filefullpath = filepath;
-    }
-
-    fp = sfopen(filefullpath,"rb");
-    if( fp )
-    {
-        VFS_SAFE_FCLOSE(fp);
-        return VFS_FILE_EXISTS_IN_DIR;
-    }
-
-    /* 不存在文件 */
-    return VFS_FILE_NOT_EXISTS;
 }

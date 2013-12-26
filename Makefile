@@ -11,7 +11,7 @@ CFLAGS = $(WARN) $(INCS) $(DEFINES)
 OBJS=objs/pak.o 		\
 	 objs/util.o		\
 	 objs/vfs.o			\
-	 objs/file.o		\
+	 objs/stream.o		\
 	 objs/pool.o		\
 	 objs/buffer.o		\
 	 objs/pak_plugin.o			\
@@ -44,8 +44,8 @@ objs/util.o:src/util.c
 objs/vfs.o:src/vfs.c
 	$(CC) $(CFLAGS) -c src/vfs.c -o objs/vfs.o
 	
-objs/file.o:src/file.c
-	$(CC) $(CFLAGS) -c src/file.c -o objs/file.o
+objs/stream.o:src/stream.c
+	$(CC) $(CFLAGS) -c src/stream.c -o objs/stream.o
 	
 objs/pool.o:src/pool.c
 	$(CC) $(CFLAGS) -c src/pool.c -o objs/pool.o

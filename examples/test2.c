@@ -28,14 +28,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
 #include <vfs/vfs.h>
-#include <vfs/file.h>
+#include <vfs/stream.h>
 #include <stdio.h>
 
 int main( void )
 {
 
-	vfs_file *vf;
-    vfs_file *out;
+	vfs_stream *vf;
+    vfs_stream *out;
 
 	size_t realsize ;
 	char buf[VFS_MAX_FILENAME+1];
@@ -56,17 +56,17 @@ int main( void )
 		goto ERROR;
     }
 
-    out = vfs_file_create(0,0);
+    out = vfs_stream_new();
 
-	while( !vfs_file_eof(vf) )
+	while( !vf->stream_eof(vf) )
 	{
-		realsize = vfs_file_read(buf,1,(size_t)VFS_MAX_FILENAME,vf);
+		realsize = vf->stream_read(vf,buf,1,(size_t)VFS_MAX_FILENAME);
 		if( realsize > 0 )
 		{
 			buf[realsize] = 0;
 			printf(buf);
 
-            if( vfs_file_write(buf,1,realsize,out) != realsize )
+            if( out->stream_write(out,buf,1,realsize) != realsize )
             {
                 printf("Write Error!\n");
             }
@@ -74,10 +74,11 @@ int main( void )
 	}
 
     /* ±£´æÒ»ÏÂ */
-    vfs_file_save(out,"./randtable.c");
-    vfs_file_close(out);
+    out->stream_save(out,"./randtable.c");
 
-	vfs_file_close(vf);
+    vfs_stream_delete(out);
+	vfs_stream_delete(vf);
+
 	vfs_destroy();
 	return 0;
 

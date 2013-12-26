@@ -40,6 +40,28 @@
 vfs *g_vfs = NULL;
 
 
+static FILE* sfopen(const VFS_CHAR* filename,const VFS_CHAR* mode)
+{
+#ifdef __linux__
+    return fopen(filename,mode);
+#else
+    FILE* fp = NULL;
+    VFS_INT32 err;
+
+    err = fopen_s(&fp,filename,mode);
+    if( err == 0 )
+    {
+        return fp;
+    }
+    else
+    {
+        return NULL;
+    }
+#endif
+}
+
+
+
 /************************************************************************/
 /* pak search and locate                                                */
 /************************************************************************/
@@ -452,4 +474,73 @@ vfs_archive_obj* vfs_get_archive_name(const VFS_CHAR* archive)
 
 	p = g_vfs->_M_archives[index];
 	return p;
+}
+
+
+VFS_INT32 vfs_file_exists( const VFS_CHAR* file  )
+{
+    int i,count;
+    vfs_archive_obj* _archive;
+    VFS_UINT64 size;
+
+    const VFS_CHAR*filefullpath;
+    VFS_CHAR filepath[VFS_MAX_FILENAME+1];
+
+    FILE* fp;
+
+    /************************************************************************/
+
+    if( !file)
+        return VFS_FILE_NOT_EXISTS;
+
+    /* 先尝试在包里查找 */
+    count = vfs_get_archive_count();
+    for( i = 0; i<count; ++i )
+    {
+        _archive = vfs_get_archive_index(i);
+        if( _archive && VFS_TRUE == _archive->plugin->plugin.archive.archive_locate_item(_archive->archive,file,&size) )
+            return VFS_FILE_EXISTS_IN_ARCHIVE;
+    }
+
+
+    /* 判断是否在本地 */
+    memset(filepath,0,sizeof(filepath));
+    filefullpath = file;
+    if( vfs_util_path_combine(filepath,g_vfs->_M_workpath,file) )
+    {
+        filefullpath = filepath;
+    }
+
+    fp = sfopen(filefullpath,"rb");
+    if( fp )
+    {
+        VFS_SAFE_FCLOSE(fp);
+        return VFS_FILE_EXISTS_IN_DIR;
+    }
+
+    /* 不存在文件 */
+    return VFS_FILE_NOT_EXISTS;
+}
+
+vfs_stream* vfs_file_open( const VFS_CHAR *filename )
+{
+    vfs_stream * stream;
+
+    if( !filename )
+        return NULL;
+
+    if( VFS_FILE_NOT_EXISTS == vfs_file_exists(filename))
+        return NULL;
+
+    stream = vfs_stream_new();
+    if( !stream )
+        return NULL;
+
+    if( VFS_FALSE == stream->stream_open(stream,filename) )
+    {
+        vfs_stream_delete(stream);
+        return NULL;
+    }
+
+    return stream;
 }

@@ -30,6 +30,24 @@
 #include "buffer.h"
 #include "pool.h"
 
+static VFS_VOID vfs_buffer_constructor(vfs_buffer* obj )
+{
+    if( !obj )
+        return ;
+
+    obj->_M_size = 0;
+    obj->_M_buf = 0;
+}
+
+static VFS_VOID vfs_buffer_destructor(vfs_buffer* obj )
+{
+    if( !obj )
+        return ;
+
+    obj->cleanup(obj);
+}
+
+
 static VFS_VOID vfs_buffer_cleanup(vfs_buffer* obj )
 {
     if( !obj )
@@ -105,35 +123,22 @@ static VFS_VOID* vfs_buffer_get_data(vfs_buffer*obj)
 }
 
 
-vfs_buffer* vfs_buffer_new(VFS_SIZE size )
+vfs_buffer* vfs_buffer_new()
 {
     vfs_buffer *obj;
-    VFS_VOID* p;
-
-    obj = (vfs_buffer*)vfs_pool_malloc(size);
+    obj = (vfs_buffer*)vfs_pool_malloc(sizeof(vfs_buffer));
     if( obj == NULL )
         return NULL;
+
+    obj->constructor = vfs_buffer_constructor;
+    obj->destructor = vfs_buffer_destructor;
 
     obj->cleanup  = vfs_buffer_cleanup;
     obj->resize   = vfs_buffer_resize;
     obj->get_size = vfs_buffer_get_size;
     obj->get_data = vfs_buffer_get_data;
-    obj->_M_size = 0;
-    obj->_M_buf = 0;
-    
-
-    if( size !=  0 )
-    {
-        p = (VFS_VOID*)vfs_pool_malloc(size);
-        if( p == NULL )
-        {
-            vfs_buffer_delete(obj);
-            return NULL;
-        }
-
-        obj->_M_size = size;
-        obj->_M_buf = p;
-    }
+  
+    obj->constructor(obj);
 
     return obj;
 }
@@ -143,12 +148,7 @@ VFS_VOID vfs_buffer_delete( vfs_buffer* obj )
     if(!obj)
         return;
     
-    obj->_M_size = 0;
-    if( obj->_M_buf ){
-        vfs_pool_free(obj->_M_buf);
-        obj->_M_buf = NULL;
-    }    
-
+    obj->cleanup(obj);  
     vfs_pool_free(obj);
 }
 

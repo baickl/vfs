@@ -60,7 +60,7 @@ static FILE* sfopen(const VFS_CHAR* filename,const VFS_CHAR* mode)
 #endif
 }
 
-static void vfs_stream_constructor(vfs_stream* stream )
+static VFS_VOID vfs_stream_constructor(vfs_stream* stream )
 {
     stream->_M_buffer = 0;
     stream->_M_position = 0;
@@ -400,7 +400,7 @@ vfs_stream* vfs_stream_new()
     return stream;
 }
 
-void vfs_stream_delete( vfs_stream* stream )
+VFS_VOID vfs_stream_delete( vfs_stream* stream )
 {
     if( stream )
     {

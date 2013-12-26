@@ -37,6 +37,9 @@ typedef struct vfs_buffer
     VFS_SIZE                _M_size;
     VFS_VOID*               _M_buf;
 
+    VFS_VOID                (*constructor)(struct vfs_buffer* stream);
+    VFS_VOID                (*destructor)(struct vfs_buffer* stream);
+
     VFS_VOID                (*cleanup)(struct vfs_buffer* obj );
     VFS_BOOL                (*resize)(struct vfs_buffer* obj ,VFS_SIZE);
     
@@ -44,7 +47,7 @@ typedef struct vfs_buffer
     VFS_VOID*               (*get_data)(struct vfs_buffer* obj);
 }vfs_buffer;
 
-VFS_EXTERN vfs_buffer*      vfs_buffer_new( VFS_SIZE );
+VFS_EXTERN vfs_buffer*      vfs_buffer_new();
 VFS_EXTERN VFS_VOID         vfs_buffer_delete( vfs_buffer* obj);
 
 #endif

@@ -54,14 +54,14 @@
 
 /************************************************************************/
 /* 检查文件存在的结果 */
-#define VFS_FILE_NOT_EXISTS	                        (0)
+#define VFS_FILE_NOT_EXISTS                         (0)
 #define VFS_FILE_EXISTS_IN_ARCHIVE                  (1)
 #define VFS_FILE_EXISTS_IN_DIR                      (2)
 
 
 /************************************************************************/
 /* MAKE_CC  */
-#define MAKE_CC_ID(c0, c1, c2, c3)                                      \
+#define MAKE_CC_ID(c0, c1, c2, c3)                                                      \
         ((VFS_UINT32)(VFS_UINT8)(c0) | ((VFS_UINT32)(VFS_UINT8)(c1) << 8) |             \
         ((VFS_UINT32)(VFS_UINT8)(c2) << 16) | ((VFS_UINT32)(VFS_UINT8)(c3) << 24 ))
 

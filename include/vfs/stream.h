@@ -46,20 +46,20 @@ typedef struct vfs_stream
        
      * @name                    constructor
      * @param   stream          待构造的对象
-     * @return  void            无
+     * @return  VFS_VOID        无
      *
      */
-    void                        (*constructor)(struct vfs_stream* stream);
+    VFS_VOID                    (*constructor)(struct vfs_stream* stream);
 
      /*****************************************************************************
      * 析构函数
        
      * @name                    destructor
      * @param   stream          待析构的对象
-     * @return  void            无
+     * @return  VFS_VOID        无
      *
      */
-    void                        (*destructor)(struct vfs_stream* stream);
+    VFS_VOID                    (*destructor)(struct vfs_stream* stream);
 
     /*****************************************************************************
      * 创建一个读写的虚拟文件,可以指定初始化数据和大小
@@ -216,10 +216,10 @@ VFS_EXTERN vfs_stream*          vfs_stream_new();
   
  * @name                        vfs_stream_new
  * @param   stream              待销毁的流
- * @return  void                无
+ * @return  VFS_VOID            无
  *
  */
-VFS_EXTERN void                 vfs_stream_delete(vfs_stream* stream);
+VFS_EXTERN VFS_VOID             vfs_stream_delete(vfs_stream* stream);
 
 
 

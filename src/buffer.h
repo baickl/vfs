@@ -32,17 +32,17 @@
 
 #include <vfs/base.h>
 
-typedef struct vfs_buffer vfs_buffer;
-struct vfs_buffer
+typedef struct vfs_buffer
 {
-    VFS_VOID*               pThis;
+    VFS_SIZE                _M_size;
+    VFS_VOID*               _M_buf;
 
-    VFS_VOID                (*cleanup)(vfs_buffer* pThis );
-    VFS_BOOL                (*resize)( vfs_buffer* pThis ,VFS_SIZE);
+    VFS_VOID                (*cleanup)(struct vfs_buffer* obj );
+    VFS_BOOL                (*resize)(struct vfs_buffer* obj ,VFS_SIZE);
     
-    VFS_SIZE                (*get_size)(vfs_buffer* pThis );
-    VFS_VOID*               (*get_data)(vfs_buffer* pThis);
-};
+    VFS_SIZE                (*get_size)(struct vfs_buffer* obj );
+    VFS_VOID*               (*get_data)(struct vfs_buffer* obj);
+}vfs_buffer;
 
 VFS_EXTERN vfs_buffer*      vfs_buffer_new( VFS_SIZE );
 VFS_EXTERN VFS_VOID         vfs_buffer_delete( vfs_buffer* obj);

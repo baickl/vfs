@@ -38,12 +38,7 @@
 /************************************************************************/
 /* VFS文件结构                                                  */
 /************************************************************************/
-struct vfs_file_t
-{
-    VFS_UINT64		_M_size;
-    VFS_UINT64		_M_position;
-    VFS_VOID*		_M_buffer;
-};
+
 
 static FILE* sfopen(const VFS_CHAR* filename,const VFS_CHAR* mode)
 {
@@ -63,6 +58,342 @@ static FILE* sfopen(const VFS_CHAR* filename,const VFS_CHAR* mode)
 		return NULL;
 	}
 #endif
+}
+
+static VFS_BOOL vfs_stream_create(vfs_stream* stream ,VFS_VOID *buf,VFS_UINT64 size)
+{
+    if( !stream )
+        return NULL;
+    
+    if( stream->_M_size > 0 )
+        stream->stream_close(stream);
+
+	if( size)
+	{
+		stream->_M_buffer = (VFS_VOID*)vfs_pool_malloc((VFS_SIZE)size);
+		if( !stream->_M_buffer )
+		{
+			return VFS_FALSE;
+		}
+		stream->_M_position = 0;
+		stream->_M_size = size;
+
+		if( buf )
+			memcpy(stream->_M_buffer,buf,(VFS_SIZE)size);
+	}
+	
+	return VFS_TRUE;
+}
+
+static VFS_BOOL vfs_stream_open(vfs_stream* stream ,const VFS_CHAR* file )
+{
+	VFS_INT32 i ;
+	VFS_INT64 size;
+	VFS_VOID* buf;
+    vfs_archive_obj* p;
+	vfs_stream* vff;
+
+	FILE* fp;
+
+    const VFS_CHAR*filefullpath;
+    VFS_CHAR filepath[VFS_MAX_FILENAME+1];
+
+	if( !stream )
+		return NULL;
+
+     stream->stream_close(stream);
+
+	/* 先尝试从包里读取 */
+    for( i = 0; i<g_vfs->_M_count; ++i )
+    {
+        p = g_vfs->_M_archives[i];
+        if( VFS_TRUE != p->plugin->plugin.archive.archive_locate_item(p->archive,file,&size) )
+            continue;
+
+        buf = (VFS_VOID*)vfs_pool_malloc((VFS_SIZE)size);
+        if( !buf )
+            return VFS_FALSE;
+
+        if( VFS_TRUE != p->plugin->plugin.archive.archive_unpack_item_by_filename(p->archive,file,buf,size) ) 
+        {
+            return VFS_FALSE;
+        }
+
+        return stream->stream_create(stream,buf,size);
+    }
+
+
+	/* 包里读取不出来，在本地读取 */
+    memset(filepath,0,sizeof(filepath));
+    filefullpath = file;
+    if( vfs_util_path_combine(filepath,g_vfs->_M_workpath,file) )
+    {
+        filefullpath = filepath;
+    }
+
+
+	fp = sfopen(filefullpath,"rb");
+	if( fp )
+	{
+		VFS_FSEEK(fp,0,SEEK_END);
+		size = VFS_FTELL(fp);
+		VFS_FSEEK(fp,0,SEEK_SET);
+		buf = NULL;
+
+		if( size > 0 )
+		{
+			buf = (VFS_VOID*)vfs_pool_malloc((VFS_SIZE)size);
+			if( !buf )
+			{
+				VFS_SAFE_FCLOSE(fp);
+				return NULL;
+			}
+
+			if( !VFS_CHECK_FREAD(fp,buf,size) )
+			{
+				VFS_SAFE_FCLOSE(fp);
+				if(buf)
+                {
+                    vfs_pool_free(buf);
+                    buf = NULL;
+                }
+				return NULL;
+			}
+
+			VFS_SAFE_FCLOSE(fp);
+		}
+
+		return stream->stream_create(stream,buf,size);
+	}
+
+	return VFS_FALSE;
+}
+
+static VFS_VOID vfs_stream_close(vfs_stream* stream)
+{
+	if( stream )
+	{
+		if(stream->_M_buffer)
+        {
+            vfs_pool_free(stream->_M_buffer);
+            stream->_M_buffer = NULL;
+        }
+
+        stream->_M_position = 0;
+        stream->_M_size = 0;
+	}
+}
+
+
+static VFS_BOOL vfs_stream_eof(vfs_stream* stream )
+{
+	if( stream && stream->_M_position >= stream->_M_size )
+		return VFS_TRUE;
+	else
+		return VFS_FALSE;
+}
+
+static VFS_UINT64 vfs_stream_tell(vfs_stream* stream)
+{
+	if( stream )
+		return stream->_M_position;
+
+	return 0;
+}
+
+static VFS_UINT64 vfs_stream_size( vfs_stream* stream )
+{
+	if( !stream )
+		return 0;
+
+	return stream->_M_size;
+}
+
+static const VFS_VOID* vfs_stream_data( vfs_stream* stream )
+{
+    if( !stream )
+        return 0;
+
+    return stream->_M_buffer;
+}
+
+static VFS_UINT64 vfs_stream_seek(vfs_stream* stream,VFS_INT64 pos, VFS_INT32 mod )
+{
+	VFS_UINT64 _pos;
+	if( !stream )
+		return -1;
+
+	if( mod == SEEK_CUR )
+	{
+		_pos = stream->_M_position + pos;
+		if( _pos >= 0 && _pos < stream->_M_size  )
+			stream->_M_position = pos;
+	}
+	else if( mod == SEEK_END )
+	{
+		_pos = stream->_M_size -1 + pos;
+		if( _pos >= 0 && _pos < stream->_M_size )
+			stream->_M_position = _pos;
+	}
+	else
+	{
+		if( pos >= 0 && pos < (VFS_INT64)stream->_M_size  )
+			stream->_M_position = pos;
+	}
+
+	return stream->stream_tell(stream);
+}
+
+static VFS_SIZE vfs_stream_read(vfs_stream*stream, VFS_VOID* buf , VFS_SIZE size , VFS_SIZE count)
+{
+	VFS_SIZE realsize;
+    VFS_SIZE realcount;
+	VFS_CHAR* p;
+    VFS_CHAR* cursor;
+
+	if(!stream || !buf || !size || !count)
+		return 0;
+    
+    realcount = (VFS_SIZE)((stream->stream_size(stream) - stream->stream_tell(stream))/size);
+    if( realcount <= 0  )
+        return 0;
+
+    realcount = realcount<count?realcount:count;
+
+    p = (VFS_CHAR*)buf;
+    cursor = &((VFS_CHAR*)stream->stream_data(stream)))[stream->stream_tell(stream)];
+    realsize = realcount* size;
+    stream->_M_position += realsize;
+    memcpy(p,cursor,(VFS_SIZE)realsize);
+    return realcount;
+}
+
+static VFS_SIZE vfs_stream_write( vfs_stream*stream, VFS_VOID* buf , VFS_SIZE size , VFS_SIZE count )
+{
+	VFS_SIZE realwrite;
+    VFS_SIZE realcount;
+    VFS_SIZE needsize;
+	VFS_CHAR* p,*tmp;
+	
+	if( !stream || !buf || !size || !count )
+		return 0;
+
+    realcount = (VFS_SIZE)((stream->stream_size(stream) - stream->stream_tell(stream))/size);
+    if(realcount < count )
+    {
+        needsize = (count - realcount)*size;
+        if( fp->_M_size == 0 )
+        {
+            tmp = (VFS_VOID*)vfs_pool_malloc(needsize );
+            if( tmp )
+            {
+                stream->_M_buffer = tmp;
+                stream->_M_size = needsize;
+
+                realcount = count;
+            }
+        }
+        else
+        {
+            tmp = (VFS_VOID*)vfs_pool_realloc(stream->_M_buffer,(VFS_SIZE)(stream->_M_size + needsize) );
+            if( tmp )
+            {
+                stream->_M_buffer = tmp;
+                stream->_M_size += needsize;
+
+                realcount = count;
+            }
+        }
+    }
+
+    if( realcount == 0 )
+        return 0;
+
+    p = (VFS_CHAR*)buf;
+    realwrite = realcount*size;
+
+	memcpy(&((VFS_CHAR*)stream->_M_buffer)[stream->_M_position],p,(VFS_SIZE)realwrite);
+	stream->_M_position += realwrite;
+	return realcount;
+}
+
+
+static VFS_BOOL vfs_stream_save(vfs_stream* stream,const VFS_CHAR* saveas)
+{
+
+	FILE* fp;
+	VFS_UINT64 offset;
+
+	VFS_UINT64 realsize ;
+	VFS_CHAR buf[512+1];
+
+	if( !stream || !saveas  )
+		return VFS_FALSE;
+	
+	fp = sfopen(saveas,"wb+");
+	if( !fp )
+		return VFS_FALSE;
+
+	offset = stream->stream_tell(stream);
+    stream->stream_seek(stream,0,SEEK_SET);
+	while( !stream->stream_eof(stream) )
+	{
+		realsize = stream->stream_read(stream,buf,1,512);
+		if( realsize > 0 )
+		{
+			buf[realsize] = 0;
+			if( fwrite(buf,1,(VFS_SIZE)realsize,fp) != realsize )
+			{
+				VFS_SAFE_FCLOSE(fp);
+				stream->stream_seek(stream,offset,SEEK_SET);
+				remove(saveas);
+				return VFS_FALSE;
+			}
+		}
+	}
+
+    VFS_SAFE_FCLOSE(fp);
+    stream->stream_seek(stream,offset,SEEK_SET);
+	return VFS_TRUE;
+}
+
+
+
+vfs_stream* vfs_stream_new()
+{
+    vfs_stream *p;
+
+    p = (vfs_stream *)vfs_pool_malloc(sizeof(vfs_stream));
+    if( !p )
+        return NULL;
+
+    p->_M_buffer = 0;
+    p->_M_position = 0;
+    p->_M_size = 0;
+
+    p->stream_create = vfs_stream_create;
+    p->stream_open = vfs_stream_open;
+    p->stream_close = vfs_stream_close;
+    p->stream_save = vfs_stream_save;
+
+    p->stream_eof = vfs_stream_eof;
+    p->stream_tell = vfs_stream_tell;
+    p->stream_seek = vfs_stream_seek;
+    p->stream_size = vfs_stream_size;
+    p->stream_data = vfs_stream_data;
+    p->stream_read = vfs_stream_read;
+    p->stream_write = vfs_stream_write;
+
+    return p;
+}
+
+void vfs_stream_delete( vfs_stream* stream )
+{
+    if( stream )
+    {
+        stream->stream_close(stream);
+        vfs_pool_free(stream);
+    }
 }
 
 VFS_INT32 vfs_file_exists( const VFS_CHAR* file  )
@@ -108,342 +439,4 @@ VFS_INT32 vfs_file_exists( const VFS_CHAR* file  )
 
     /* 不存在文件 */
     return VFS_FILE_NOT_EXISTS;
-}
-
-vfs_file* vfs_file_create(VFS_VOID *buf,VFS_UINT64 size)
-{
-	vfs_file* vff;
-
-    if( !g_vfs )
-        return NULL;
-
-	vff = (vfs_file*)vfs_pool_malloc(sizeof(vfs_file));
-	if( !vff )
-	{
-		return NULL;
-	}
-
-	if( !size)
-	{
-		vff->_M_buffer = 0;
-		vff->_M_size = 0;
-		vff->_M_position = 0;
-	}
-	else
-	{
-		vff->_M_buffer = (VFS_VOID*)vfs_pool_malloc((VFS_SIZE)size);
-		if( !vff->_M_buffer )
-		{
-            vfs_pool_free(vff);
-			return NULL;
-		}
-		vff->_M_position = 0;
-		vff->_M_size = size;
-
-		if( buf )
-			memcpy(vff->_M_buffer,buf,(VFS_SIZE)size);
-	}
-	
-	return vff;
-}
-
-vfs_file* vfs_file_open(const VFS_CHAR* file )
-{
-	VFS_INT32 i ;
-	VFS_INT64 size;
-	VFS_VOID* buf;
-    vfs_archive_obj* p;
-	vfs_file* vff;
-
-	FILE* fp;
-
-    const VFS_CHAR*filefullpath;
-    VFS_CHAR filepath[VFS_MAX_FILENAME+1];
-
-    if( !g_vfs )
-        return NULL;
-
-	if( !file )
-		return NULL;
-
-	/* 先尝试从包里读取 */
-    for( i = 0; i<g_vfs->_M_count; ++i )
-    {
-        p = g_vfs->_M_archives[i];
-        if( VFS_TRUE != p->plugin->plugin.archive.archive_locate_item(p->archive,file,&size) )
-            continue;
-
-        buf = (VFS_VOID*)vfs_pool_malloc((VFS_SIZE)size);
-        if( !buf )
-            return NULL;
-
-        if( VFS_TRUE != p->plugin->plugin.archive.archive_unpack_item_by_filename(p->archive,file,buf,size) ) 
-        {
-            vfs_pool_free(buf);
-            return NULL;
-        }
-
-        vff = vfs_file_create(0,0);
-        if( !vff )
-        {
-            if(buf)
-            {
-                vfs_pool_free(buf);
-                buf = NULL;
-            }
-            return NULL;
-        }
-        vff->_M_buffer = buf;
-        vff->_M_size = size;
-        vff->_M_position = 0;
-
-        return vff;
-    }
-
-
-	/* 包里读取不出来，在本地读取 */
-    memset(filepath,0,sizeof(filepath));
-    filefullpath = file;
-    if( vfs_util_path_combine(filepath,g_vfs->_M_workpath,file) )
-    {
-        filefullpath = filepath;
-    }
-
-
-	fp = sfopen(filefullpath,"rb");
-	if( fp )
-	{
-		VFS_FSEEK(fp,0,SEEK_END);
-		size = VFS_FTELL(fp);
-		VFS_FSEEK(fp,0,SEEK_SET);
-		buf = NULL;
-
-		if( size > 0 )
-		{
-			buf = (VFS_VOID*)vfs_pool_malloc((VFS_SIZE)size);
-			if( !buf )
-			{
-				VFS_SAFE_FCLOSE(fp);
-				return NULL;
-			}
-
-			if( !VFS_CHECK_FREAD(fp,buf,size) )
-			{
-				VFS_SAFE_FCLOSE(fp);
-				if(buf)
-                {
-                    vfs_pool_free(buf);
-                    buf = NULL;
-                }
-				return NULL;
-			}
-
-			VFS_SAFE_FCLOSE(fp);
-		}
-
-		vff = vfs_file_create(0,0);
-		if( !vff )
-		{
-			if(buf){
-                vfs_pool_free(buf);
-                buf = NULL;
-            }
-			return NULL;
-		}
-		vff->_M_buffer = buf;
-		vff->_M_size = size;
-		vff->_M_position = 0;
-
-		return vff;
-	}
-
-	return NULL;
-}
-
-VFS_VOID vfs_file_close(vfs_file* file)
-{
-	if( file )
-	{
-		if(file->_M_buffer)
-        {
-            vfs_pool_free(file->_M_buffer);
-            file->_M_buffer = NULL;
-        }
-		vfs_pool_free(file);
-        file = NULL;
-	}
-}
-
-
-VFS_BOOL vfs_file_eof(vfs_file* file )
-{
-	if( file && file->_M_position >= file->_M_size )
-		return VFS_TRUE;
-	else
-		return VFS_FALSE;
-}
-
-VFS_UINT64 vfs_file_tell(vfs_file* file)
-{
-	if( file )
-		return file->_M_position;
-
-	return 0;
-}
-
-VFS_UINT64 vfs_file_size( vfs_file* file )
-{
-	if( !file )
-		return 0;
-
-	return file->_M_size;
-}
-
-const VFS_VOID* vfs_file_data( vfs_file* file )
-{
-    if( !file )
-        return 0;
-
-    return file->_M_buffer;
-}
-
-VFS_UINT64 vfs_file_seek(vfs_file* file,VFS_INT64 pos, VFS_INT32 mod )
-{
-	VFS_UINT64 _pos;
-	if( !file )
-		return -1;
-
-	if( mod == SEEK_CUR )
-	{
-		_pos = file->_M_position + pos;
-		if( _pos >= 0 && _pos < file->_M_size  )
-			file->_M_position = pos;
-	}
-	else if( mod == SEEK_END )
-	{
-		_pos = file->_M_size -1 + pos;
-		if( _pos >= 0 && _pos < file->_M_size )
-			file->_M_position = _pos;
-	}
-	else
-	{
-		if( pos >= 0 && pos < (VFS_INT64)file->_M_size  )
-			file->_M_position = pos;
-	}
-
-	return vfs_file_tell(file);
-}
-
-VFS_SIZE vfs_file_read( VFS_VOID* buf , VFS_SIZE size , VFS_SIZE count , vfs_file*fp )
-{
-	VFS_SIZE realsize;
-    VFS_SIZE realcount;
-	VFS_CHAR* p;
-    VFS_CHAR* cursor;
-
-	if(!fp || !buf || !size || !count)
-		return 0;
-    
-    realcount = (VFS_SIZE)((fp->_M_size - fp->_M_position)/size);
-    if( realcount <= 0  )
-        return 0;
-
-    realcount = realcount<count?realcount:count;
-
-    p = (VFS_CHAR*)buf;
-    cursor = &((VFS_CHAR*)fp->_M_buffer)[fp->_M_position];
-    realsize = realcount* size;
-    fp->_M_position += realsize;
-    memcpy(p,cursor,(VFS_SIZE)realsize);
-    return realcount;
-}
-
-VFS_SIZE vfs_file_write(VFS_VOID* buf , VFS_SIZE size , VFS_SIZE count , vfs_file*fp )
-{
-	VFS_SIZE realwrite;
-    VFS_SIZE realcount;
-    VFS_SIZE needsize;
-	VFS_CHAR* p,*tmp;
-	
-	if( !fp || !buf || !size || !count )
-		return 0;
-
-    realcount = (VFS_SIZE)((fp->_M_size - fp->_M_position)/size);
-    if(realcount < count )
-    {
-        needsize = (count - realcount)*size;
-        if( fp->_M_size == 0 )
-        {
-            tmp = (VFS_VOID*)vfs_pool_malloc(needsize );
-            if( tmp )
-            {
-                fp->_M_buffer = tmp;
-                fp->_M_size = needsize;
-
-                realcount = count;
-            }
-        }
-        else
-        {
-            tmp = (VFS_VOID*)vfs_pool_realloc(fp->_M_buffer,(VFS_SIZE)(fp->_M_size + needsize) );
-            if( tmp )
-            {
-                fp->_M_buffer = tmp;
-                fp->_M_size += needsize;
-
-                realcount = count;
-            }
-        }
-        
-    }
-
-    if( realcount == 0 )
-        return 0;
-
-    p = (VFS_CHAR*)buf;
-    realwrite = realcount*size;
-
-	memcpy(&((VFS_CHAR*)fp->_M_buffer)[fp->_M_position],p,(VFS_SIZE)realwrite);
-	fp->_M_position += realwrite;
-	return realcount;
-}
-
-
-VFS_BOOL vfs_file_save(vfs_file* file,const VFS_CHAR* saveas)
-{
-
-	FILE* fp;
-	VFS_UINT64 offset;
-
-	VFS_UINT64 realsize ;
-	VFS_CHAR buf[512+1];
-
-	if( !file || !saveas  )
-		return VFS_FALSE;
-	
-	fp = sfopen(saveas,"wb+");
-	if( !fp )
-		return VFS_FALSE;
-
-	offset = vfs_file_tell(file);
-    vfs_file_seek(file,0,SEEK_SET);
-	while( !vfs_file_eof(file) )
-	{
-		realsize = vfs_file_read(buf,1,512,file);
-		if( realsize > 0 )
-		{
-			buf[realsize] = 0;
-			if( fwrite(buf,1,(VFS_SIZE)realsize,fp) != realsize )
-			{
-				VFS_SAFE_FCLOSE(fp);
-				vfs_file_seek(file,offset,SEEK_SET);
-				remove(saveas);
-				return VFS_FALSE;
-			}
-		}
-	}
-
-    VFS_SAFE_FCLOSE(fp);
-    vfs_file_seek(file,offset,SEEK_SET);
-	return VFS_TRUE;
 }

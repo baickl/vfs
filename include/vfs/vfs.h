@@ -71,14 +71,14 @@ VFS_EXTERN VFS_BOOL         vfs_create( const VFS_CHAR *sdk_version,
  * vfs系统销毁
    
  * @name                    vfs_destroy
- * @return    VFS_VOID          无返回值
+ * @return    VFS_VOID      无返回值
  *                      
  *
  * 销毁VFS系统，此函数不返回任何值，调用即销毁了，
  * 注意，销毁以后，之前通过vfs_add_archive加载的archive，将全部被清除
  * 此函数的调用时期，一般是程序要结束的时候，释放资源的时候调用
  */
-VFS_EXTERN VFS_VOID             vfs_destroy();
+VFS_EXTERN VFS_VOID         vfs_destroy();
 
 /*****************************************************************************
  * 定位vfs插件
@@ -108,10 +108,10 @@ VFS_EXTERN VFS_BOOL         vfs_register_plugin(const VFS_CHAR*pluginname,vfs_pl
    
  * @name                    vfs_unregister_plugin
  * @param     pluginname    插件名称
- * @return    VFS_VOID          无返回值
+ * @return    VFS_VOID      无返回值
  * 
  */
-VFS_EXTERN VFS_VOID             vfs_unregister_plugin(const VFS_CHAR*pluginname );
+VFS_EXTERN VFS_VOID         vfs_unregister_plugin(const VFS_CHAR*pluginname );
 
 /*****************************************************************************
  * 添加archive到vfs系统中

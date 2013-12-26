@@ -60,6 +60,20 @@ static FILE* sfopen(const VFS_CHAR* filename,const VFS_CHAR* mode)
 #endif
 }
 
+static void vfs_stream_constructor(vfs_stream* stream )
+{
+    stream->_M_buffer = 0;
+    stream->_M_position = 0;
+    stream->_M_size = 0;
+}
+
+static VFS_BOOL vfs_stream_destructor(vfs_stream* stream )
+{
+    if( stream )
+        stream->stream_close(stream);
+}
+
+
 static VFS_BOOL vfs_stream_create(vfs_stream* stream ,VFS_VOID *buf,VFS_UINT64 size)
 {
     if( !stream )
@@ -360,37 +374,37 @@ static VFS_BOOL vfs_stream_save(vfs_stream* stream,const VFS_CHAR* saveas)
 
 vfs_stream* vfs_stream_new()
 {
-    vfs_stream *p;
+    vfs_stream *stream;
 
-    p = (vfs_stream *)vfs_pool_malloc(sizeof(vfs_stream));
-    if( !p )
+    stream = (vfs_stream *)vfs_pool_malloc(sizeof(vfs_stream));
+    if( !stream )
         return NULL;
 
-    p->_M_buffer = 0;
-    p->_M_position = 0;
-    p->_M_size = 0;
+    stream->constructor = vfs_stream_constructor;
+    stream->destructor = vfs_stream_destructor;
 
-    p->stream_create = vfs_stream_create;
-    p->stream_open = vfs_stream_open;
-    p->stream_close = vfs_stream_close;
-    p->stream_save = vfs_stream_save;
+    stream->stream_create = vfs_stream_create;
+    stream->stream_open = vfs_stream_open;
+    stream->stream_close = vfs_stream_close;
+    stream->stream_save = vfs_stream_save;
 
-    p->stream_eof = vfs_stream_eof;
-    p->stream_tell = vfs_stream_tell;
-    p->stream_seek = vfs_stream_seek;
-    p->stream_size = vfs_stream_size;
-    p->stream_data = vfs_stream_data;
-    p->stream_read = vfs_stream_read;
-    p->stream_write = vfs_stream_write;
+    stream->stream_eof = vfs_stream_eof;
+    stream->stream_tell = vfs_stream_tell;
+    stream->stream_seek = vfs_stream_seek;
+    stream->stream_size = vfs_stream_size;
+    stream->stream_data = vfs_stream_data;
+    stream->stream_read = vfs_stream_read;
+    stream->stream_write = vfs_stream_write;
 
-    return p;
+    stream->constructor(stream);
+    return stream;
 }
 
 void vfs_stream_delete( vfs_stream* stream )
 {
     if( stream )
     {
-        stream->stream_close(stream);
+        stream->destructor(stream);
         vfs_pool_free(stream);
     }
 }

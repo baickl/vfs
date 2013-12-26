@@ -41,6 +41,26 @@ typedef struct vfs_stream
     VFS_UINT64		            _M_position;
     VFS_VOID*		            _M_buffer;
 
+     /*****************************************************************************
+     * 构造函数
+       
+     * @name                    constructor
+     * @param   stream          待构造的对象
+     * @return  void            无
+     *
+     */
+    void                        (*constructor)(struct vfs_stream* stream);
+
+     /*****************************************************************************
+     * 析构函数
+       
+     * @name                    destructor
+     * @param   stream          待析构的对象
+     * @return  void            无
+     *
+     */
+    void                        (*destructor)(struct vfs_stream* stream);
+
     /*****************************************************************************
      * 创建一个读写的虚拟文件,可以指定初始化数据和大小
        
@@ -85,7 +105,7 @@ typedef struct vfs_stream
      * 保存文件
        
      * @name                    stream_save
-     * @param   stream           要保存的文件指针对象
+     * @param   stream          要保存的文件指针对象
      * @param   filename        目标文件名称
      * @return  VFS_BOOL        返回VFS_TRUE   保存文件成功
      *                          返回VFS_FALSE  保存文件失败
@@ -97,7 +117,7 @@ typedef struct vfs_stream
      * 判断是否已到文件尾部 
        
      * @name                    stream_eof
-     * @param   stream           文件指针对象
+     * @param   stream          文件指针对象
      * @return  VFS_BOOL        返回VFS_TRUE   已经抵达文件尾部
      *                          返回VFS_FALSE  没有抵达文件尾部
      *
@@ -145,7 +165,7 @@ typedef struct vfs_stream
      * 获得文件的数据 
        
      * @name                    stream_data
-     * @param   stream           文件指针对象
+     * @param   stream          文件指针对象
      * @return  const VFS_VOID* 返回当前文件的数据
      *
      */

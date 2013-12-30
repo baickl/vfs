@@ -38,12 +38,17 @@
 
   开发的时候，我们用相对路径来读取数据，例如script目录中有一个_init_.lua脚本,那么我们的读取函数为  
 
-    vfs_file *file = vfs_file_open("script/_init_.lua");  
-    if( file )  
+    vfs_stream *stream = new_vfs_stream();
+	if( !stream )
+		return VFS_FALSE;
+		
+    if( VFS_TRUE == stream->ops->stream_open(stream,"script/_init_.lua")  
     {  
       /* 你的读取处理 */  
-      vfs_file_close(file);  
-    }  
+	  stream->ops->stream_read(....);
+      
+    }
+    delete_vfs_stream(stream);  
 
   当读取的时候，如果只有script目录，没有script.pak那么我们会从script目录中读取数据，这就是通常中所说的开发模式  
   在开发模式的时候，完全不需要对任何目录进行打包处理。  

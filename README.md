@@ -4,7 +4,9 @@
     适用于发行软件或是服务器端对第三方提供布置环境时，对自己的文件资源进行打包管理进行加密的一项重要措施。  
     文件系统本身采用纯C语言开发，能适应各种项目和平台的平移。
 	
-	网址[github](https://github.com/baickl/vfs.git) ,[oschina](https://git.oschina.net/baickl/vfs.git) 
+#网址：
+1.[点击访问github](http://github.com/baickl/vfs)<br/>
+2.[点击访问oschina](http://git.oschina.net/baickl/vfs)<br/> 
 
 #用法说明
 ##第一步：

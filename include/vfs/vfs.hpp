@@ -88,11 +88,18 @@ public:
     {
         Close();
 
-        _M_file = vfs_file_open(file);
-        if( _M_file )
-            return true;
-        else
+
+        _M_file = new_vfs_stream();
+        if( !_M_file )
             return false;
+
+        if(VFS_FALSE == _M_file->ops->stream_open(_M_file,file))
+        {
+            Close();
+            return false;
+        }
+
+        return true;
     }
 
     VFS_VOID Close()

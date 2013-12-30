@@ -532,13 +532,13 @@ vfs_stream* vfs_file_open( const VFS_CHAR *filename )
     if( VFS_FILE_NOT_EXISTS == vfs_file_exists(filename))
         return NULL;
 
-    stream = vfs_stream_new();
+    stream = new_vfs_stream();
     if( !stream )
         return NULL;
 
-    if( VFS_FALSE == stream->stream_open(stream,filename) )
+    if( VFS_FALSE == stream->ops->stream_open(stream,filename) )
     {
-        vfs_stream_delete(stream);
+        delete_vfs_stream(stream);
         return NULL;
     }
 

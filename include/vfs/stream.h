@@ -32,16 +32,18 @@
 
 #include "base.h"
 
-/************************************************************************/
-/* 定义文件对象                                                */
-/************************************************************************/
-typedef struct vfs_stream
+struct vfs_stream;
+
+typedef struct vfs_stream_buf
 {
     VFS_UINT64		            _M_size;
     VFS_UINT64		            _M_position;
     VFS_VOID*		            _M_buffer;
+}vfs_stream_buf;
 
-     /*****************************************************************************
+typedef struct vfs_stream_ops
+{
+    /*****************************************************************************
      * 构造函数
        
      * @name                    constructor
@@ -197,29 +199,36 @@ typedef struct vfs_stream
      */
     VFS_SIZE                    (*stream_write)(struct vfs_stream *stream , VFS_VOID *buf , VFS_SIZE size, VFS_SIZE count);
 
+}vfs_stream_ops;
+
+/************************************************************************/
+/* 定义文件对象                                                */
+/************************************************************************/
+typedef struct vfs_stream
+{
+    vfs_stream_buf              buf;
+    vfs_stream_ops            * ops;
 }vfs_stream;
-
-
 
 /*****************************************************************************
  * 创建vfs_stream对象
   
- * @name                        vfs_stream_new
+ * @name                        new_vfs_stream
  * @return  vfs_stream*         成功返回vfs_stream对象
  *                              失败返回NULL
  *
  */
-VFS_EXTERN vfs_stream*          vfs_stream_new();
+VFS_EXTERN vfs_stream*          new_vfs_stream();
 
 /*****************************************************************************
  * 销毁vfs_stream对象
   
- * @name                        vfs_stream_new
+ * @name                        delete_vfs_stream
  * @param   stream              待销毁的流
  * @return  VFS_VOID            无
  *
  */
-VFS_EXTERN VFS_VOID             vfs_stream_delete(vfs_stream* stream);
+VFS_EXTERN VFS_VOID             delete_vfs_stream(vfs_stream* stream);
 
 
 

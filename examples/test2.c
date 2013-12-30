@@ -56,17 +56,17 @@ int main( void )
 		goto ERROR;
     }
 
-    out = vfs_stream_new();
+    out = new_vfs_stream();
 
-	while( !vf->stream_eof(vf) )
+	while( !vf->ops->stream_eof(vf) )
 	{
-		realsize = vf->stream_read(vf,buf,1,(size_t)VFS_MAX_FILENAME);
+		realsize = vf->ops->stream_read(vf,buf,1,(size_t)VFS_MAX_FILENAME);
 		if( realsize > 0 )
 		{
 			buf[realsize] = 0;
 			printf(buf);
 
-            if( out->stream_write(out,buf,1,realsize) != realsize )
+            if( out->ops->stream_write(out,buf,1,realsize) != realsize )
             {
                 printf("Write Error!\n");
             }
@@ -74,10 +74,10 @@ int main( void )
 	}
 
     /* ±£´æÒ»ÏÂ */
-    out->stream_save(out,"./randtable.c");
+    out->ops->stream_save(out,"./randtable.c");
 
-    vfs_stream_delete(out);
-	vfs_stream_delete(vf);
+    delete_vfs_stream(out);
+	delete_vfs_stream(vf);
 
 	vfs_destroy();
 	return 0;

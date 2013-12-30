@@ -62,15 +62,18 @@ static FILE* sfopen(const VFS_CHAR* filename,const VFS_CHAR* mode)
 
 static VFS_VOID vfs_stream_constructor(vfs_stream* stream )
 {
-    stream->_M_buffer = 0;
-    stream->_M_position = 0;
-    stream->_M_size = 0;
+    if( !stream )
+        return ;
+
+    stream->buf._M_buffer = 0;
+    stream->buf._M_position = 0;
+    stream->buf._M_size = 0;
 }
 
-static VFS_BOOL vfs_stream_destructor(vfs_stream* stream )
+static VFS_VOID vfs_stream_destructor(vfs_stream* stream )
 {
     if( stream )
-        stream->stream_close(stream);
+        stream->ops->stream_close(stream);
 }
 
 
@@ -79,21 +82,21 @@ static VFS_BOOL vfs_stream_create(vfs_stream* stream ,VFS_VOID *buf,VFS_UINT64 s
     if( !stream )
         return VFS_FALSE;
     
-    if( stream->_M_size > 0 )
-        stream->stream_close(stream);
+    if( stream->buf._M_size > 0 )
+        stream->ops->stream_close(stream);
 
 	if( size)
 	{
-		stream->_M_buffer = (VFS_VOID*)vfs_pool_malloc((VFS_SIZE)size);
-		if( !stream->_M_buffer )
+		stream->buf._M_buffer = (VFS_VOID*)vfs_pool_malloc((VFS_SIZE)size);
+		if( !stream->buf._M_buffer )
 		{
 			return VFS_FALSE;
 		}
-		stream->_M_position = 0;
-		stream->_M_size = size;
+		stream->buf._M_position = 0;
+		stream->buf._M_size = size;
 
 		if( buf )
-			memcpy(stream->_M_buffer,buf,(VFS_SIZE)size);
+			memcpy(stream->buf._M_buffer,buf,(VFS_SIZE)size);
 	}
 	
 	return VFS_TRUE;
@@ -114,7 +117,7 @@ static VFS_BOOL vfs_stream_open(vfs_stream* stream ,const VFS_CHAR* file )
 	if( !stream )
 		return VFS_FALSE;
 
-     stream->stream_close(stream);
+     stream->ops->stream_close(stream);
 
 	/* 先尝试从包里读取 */
     for( i = 0; i<g_vfs->_M_count; ++i )
@@ -132,7 +135,7 @@ static VFS_BOOL vfs_stream_open(vfs_stream* stream ,const VFS_CHAR* file )
             return VFS_FALSE;
         }
 
-        return stream->stream_create(stream,buf,size);
+        return stream->ops->stream_create(stream,buf,size);
     }
 
 
@@ -176,7 +179,7 @@ static VFS_BOOL vfs_stream_open(vfs_stream* stream ,const VFS_CHAR* file )
 			VFS_SAFE_FCLOSE(fp);
 		}
 
-		return stream->stream_create(stream,buf,size);
+		return stream->ops->stream_create(stream,buf,size);
 	}
 
 	return VFS_FALSE;
@@ -184,23 +187,26 @@ static VFS_BOOL vfs_stream_open(vfs_stream* stream ,const VFS_CHAR* file )
 
 static VFS_VOID vfs_stream_close(vfs_stream* stream)
 {
-	if( stream )
-	{
-		if(stream->_M_buffer)
-        {
-            vfs_pool_free(stream->_M_buffer);
-            stream->_M_buffer = NULL;
-        }
+	if( !stream )
+        return;
 
-        stream->_M_position = 0;
-        stream->_M_size = 0;
-	}
+	if(stream->buf._M_buffer)
+    {
+        vfs_pool_free(stream->buf._M_buffer);
+        stream->buf._M_buffer = NULL;
+    }
+
+    stream->buf._M_position = 0;
+    stream->buf._M_size = 0;
 }
 
 
 static VFS_BOOL vfs_stream_eof(vfs_stream* stream )
 {
-	if( stream && stream->_M_position >= stream->_M_size )
+    if( !stream )
+        return VFS_FALSE;
+
+	if( stream->buf._M_position >= stream->buf._M_size )
 		return VFS_TRUE;
 	else
 		return VFS_FALSE;
@@ -209,7 +215,7 @@ static VFS_BOOL vfs_stream_eof(vfs_stream* stream )
 static VFS_UINT64 vfs_stream_tell(vfs_stream* stream)
 {
 	if( stream )
-		return stream->_M_position;
+		return stream->buf._M_position;
 
 	return 0;
 }
@@ -219,7 +225,7 @@ static VFS_UINT64 vfs_stream_size( vfs_stream* stream )
 	if( !stream )
 		return 0;
 
-	return stream->_M_size;
+	return stream->buf._M_size;
 }
 
 static const VFS_VOID* vfs_stream_data( vfs_stream* stream )
@@ -227,7 +233,7 @@ static const VFS_VOID* vfs_stream_data( vfs_stream* stream )
     if( !stream )
         return 0;
 
-    return stream->_M_buffer;
+    return stream->buf._M_buffer;
 }
 
 static VFS_UINT64 vfs_stream_seek(vfs_stream* stream,VFS_INT64 pos, VFS_INT32 mod )
@@ -238,23 +244,23 @@ static VFS_UINT64 vfs_stream_seek(vfs_stream* stream,VFS_INT64 pos, VFS_INT32 mo
 
 	if( mod == SEEK_CUR )
 	{
-		_pos = stream->_M_position + pos;
-		if( _pos >= 0 && _pos < stream->_M_size  )
-			stream->_M_position = pos;
+		_pos = stream->buf._M_position + pos;
+		if( _pos >= 0 && _pos < stream->buf._M_size  )
+			stream->buf._M_position = pos;
 	}
 	else if( mod == SEEK_END )
 	{
-		_pos = stream->_M_size -1 + pos;
-		if( _pos >= 0 && _pos < stream->_M_size )
-			stream->_M_position = _pos;
+		_pos = stream->buf._M_size -1 + pos;
+		if( _pos >= 0 && _pos < stream->buf._M_size )
+			stream->buf._M_position = _pos;
 	}
 	else
 	{
-		if( pos >= 0 && pos < (VFS_INT64)stream->_M_size  )
-			stream->_M_position = pos;
+		if( pos >= 0 && pos < (VFS_INT64)stream->buf._M_size  )
+			stream->buf._M_position = pos;
 	}
 
-	return stream->stream_tell(stream);
+	return stream->ops->stream_tell(stream);
 }
 
 static VFS_SIZE vfs_stream_read(vfs_stream*stream, VFS_VOID* buf , VFS_SIZE size , VFS_SIZE count)
@@ -267,16 +273,16 @@ static VFS_SIZE vfs_stream_read(vfs_stream*stream, VFS_VOID* buf , VFS_SIZE size
 	if(!stream || !buf || !size || !count)
 		return 0;
     
-    realcount = (VFS_SIZE)((stream->stream_size(stream) - stream->stream_tell(stream))/size);
+    realcount = (VFS_SIZE)((stream->ops->stream_size(stream) - stream->ops->stream_tell(stream))/size);
     if( realcount <= 0  )
         return 0;
 
     realcount = realcount<count?realcount:count;
 
     p = (VFS_CHAR*)buf;
-    cursor = &((VFS_CHAR*)stream->stream_data(stream))[stream->stream_tell(stream)];
+    cursor = &((VFS_CHAR*)stream->ops->stream_data(stream))[stream->ops->stream_tell(stream)];
     realsize = realcount* size;
-    stream->_M_position += realsize;
+    stream->buf._M_position += realsize;
     memcpy(p,cursor,(VFS_SIZE)realsize);
     return realcount;
 }
@@ -291,28 +297,28 @@ static VFS_SIZE vfs_stream_write( vfs_stream*stream, VFS_VOID* buf , VFS_SIZE si
 	if( !stream || !buf || !size || !count )
 		return 0;
 
-    realcount = (VFS_SIZE)((stream->stream_size(stream) - stream->stream_tell(stream))/size);
+    realcount = (VFS_SIZE)((stream->ops->stream_size(stream) - stream->ops->stream_tell(stream))/size);
     if(realcount < count )
     {
         needsize = (count - realcount)*size;
-        if( stream->_M_size == 0 )
+        if( stream->buf._M_size == 0 )
         {
             tmp = (VFS_VOID*)vfs_pool_malloc(needsize );
             if( tmp )
             {
-                stream->_M_buffer = tmp;
-                stream->_M_size = needsize;
+                stream->buf._M_buffer = tmp;
+                stream->buf._M_size = needsize;
 
                 realcount = count;
             }
         }
         else
         {
-            tmp = (VFS_VOID*)vfs_pool_realloc(stream->_M_buffer,(VFS_SIZE)(stream->_M_size + needsize) );
+            tmp = (VFS_VOID*)vfs_pool_realloc(stream->buf._M_buffer,(VFS_SIZE)(stream->buf._M_size + needsize) );
             if( tmp )
             {
-                stream->_M_buffer = tmp;
-                stream->_M_size += needsize;
+                stream->buf._M_buffer = tmp;
+                stream->buf._M_size += needsize;
 
                 realcount = count;
             }
@@ -325,8 +331,8 @@ static VFS_SIZE vfs_stream_write( vfs_stream*stream, VFS_VOID* buf , VFS_SIZE si
     p = (VFS_CHAR*)buf;
     realwrite = realcount*size;
 
-	memcpy(&((VFS_CHAR*)stream->_M_buffer)[stream->_M_position],p,(VFS_SIZE)realwrite);
-	stream->_M_position += realwrite;
+	memcpy(&((VFS_CHAR*)stream->buf._M_buffer)[stream->buf._M_position],p,(VFS_SIZE)realwrite);
+	stream->buf._M_position += realwrite;
 	return realcount;
 }
 
@@ -347,18 +353,18 @@ static VFS_BOOL vfs_stream_save(vfs_stream* stream,const VFS_CHAR* saveas)
 	if( !fp )
 		return VFS_FALSE;
 
-	offset = stream->stream_tell(stream);
-    stream->stream_seek(stream,0,SEEK_SET);
-	while( !stream->stream_eof(stream) )
+	offset = stream->ops->stream_tell(stream);
+    stream->ops->stream_seek(stream,0,SEEK_SET);
+	while( !stream->ops->stream_eof(stream) )
 	{
-		realsize = stream->stream_read(stream,buf,1,512);
+		realsize = stream->ops->stream_read(stream,buf,1,512);
 		if( realsize > 0 )
 		{
 			buf[realsize] = 0;
 			if( fwrite(buf,1,(VFS_SIZE)realsize,fp) != realsize )
 			{
 				VFS_SAFE_FCLOSE(fp);
-				stream->stream_seek(stream,offset,SEEK_SET);
+				stream->ops->stream_seek(stream,offset,SEEK_SET);
 				remove(saveas);
 				return VFS_FALSE;
 			}
@@ -366,45 +372,49 @@ static VFS_BOOL vfs_stream_save(vfs_stream* stream,const VFS_CHAR* saveas)
 	}
 
     VFS_SAFE_FCLOSE(fp);
-    stream->stream_seek(stream,offset,SEEK_SET);
+    stream->ops->stream_seek(stream,offset,SEEK_SET);
 	return VFS_TRUE;
 }
 
 
+static vfs_stream_ops vso = {
+    vfs_stream_constructor,
+    vfs_stream_destructor,
 
-vfs_stream* vfs_stream_new()
+    vfs_stream_create,
+    vfs_stream_open,
+    vfs_stream_close,
+    vfs_stream_save,
+
+    vfs_stream_eof,
+    vfs_stream_tell,
+    vfs_stream_seek,
+    vfs_stream_size,
+    vfs_stream_data,
+    vfs_stream_read,
+    vfs_stream_write
+};
+
+
+
+vfs_stream* new_vfs_stream()
 {
     vfs_stream *stream;
 
     stream = (vfs_stream *)vfs_pool_malloc(sizeof(vfs_stream));
     if( !stream )
         return NULL;
-
-    stream->constructor = vfs_stream_constructor;
-    stream->destructor = vfs_stream_destructor;
-
-    stream->stream_create = vfs_stream_create;
-    stream->stream_open = vfs_stream_open;
-    stream->stream_close = vfs_stream_close;
-    stream->stream_save = vfs_stream_save;
-
-    stream->stream_eof = vfs_stream_eof;
-    stream->stream_tell = vfs_stream_tell;
-    stream->stream_seek = vfs_stream_seek;
-    stream->stream_size = vfs_stream_size;
-    stream->stream_data = vfs_stream_data;
-    stream->stream_read = vfs_stream_read;
-    stream->stream_write = vfs_stream_write;
-
-    stream->constructor(stream);
+        
+    stream->ops = &vso;
+    stream->ops->constructor(stream);
     return stream;
 }
 
-VFS_VOID vfs_stream_delete( vfs_stream* stream )
+VFS_VOID delete_vfs_stream( vfs_stream* stream )
 {
     if( stream )
     {
-        stream->destructor(stream);
+        stream->ops->destructor(stream);
         vfs_pool_free(stream);
     }
 }

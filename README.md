@@ -12,6 +12,7 @@
   在程序初始化的时候调用 vfs_create,并指定程序的运行目录  
     
   代码如下：  
+  
     if( VFS_FALSE == vfs_create(VFS_SDK_VERSION,"workpath") )  
         return -1;  
 
@@ -21,6 +22,7 @@
   当工作路径下的包不存在的时候，程序会认会这是开发模式，不会影响正常开发过程中资源频繁更换的问题。  
   
   代码如下：  
+  
     vfs_add_archive("script.pak",NULL);  
     vfs_add_archive("effect.pak",NULL);  
     vfs_add_archive("a/b/c/scene.pak",NULL);  
@@ -83,11 +85,13 @@
   当然 这样，你的初始化PAK的代码得改一改  
    
   原来代码如下：  
+  
     vfs_add_archive("script.pak",NULL);  
     vfs_add_archive("effect.pak",NULL);  
     vfs_add_archive("a/b/c/scene.pak",NULL);  
   
   改后代码如下：  
+  
     vfs_add_archive("script.pak",NULL);  
     vfs_add_archive("effect.pak",NULL);  
     vfs_add_archive("a.pak",NULL);  
@@ -102,6 +106,7 @@
   在退出的地方加上如下代码即可：  
     
   代码如下：   
+  
     vfs_destroy();  
 
 

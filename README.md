@@ -2,9 +2,9 @@
     
 	这是一个通用的跨平台文件打包系统，目前支持LINUX和WINDOWS。  
     适用于发行软件或是服务器端对第三方提供布置环境时，对自己的文件资源进行打包管理进行加密的一项重要措施。  
-    并且提供出来的文件接口很容易与现有的标准的文件系统进行替换。如标准库里的FILE对应的接口，我们已经提供了模拟。  
-    文件系统本身采用纯C语言开发，能适应各种项目和平台的平移。并且本身不做使用上的任何限制。  
-	网址[github](https://github.com/baickl/vfs.git),[oschina](https://git.oschina.net/baickl/vfs.git)
+    文件系统本身采用纯C语言开发，能适应各种项目和平台的平移。
+	
+	网址[github](https://github.com/baickl/vfs.git) ,[oschina](https://git.oschina.net/baickl/vfs.git) 
 
 #用法说明
 ##第一步：
@@ -64,13 +64,18 @@
 
   我们写读取代码就可以这样：
   
-    vfs_file *file = vfs_file_open("a/b/c/map0.scene");  
-    if( file )  
+    vfs_stream *stream = new_vfs_stream();
+	if( !stream )
+		return VFS_FALSE;
+		  
+    if( VFS_TRUE == stream->ops->stream_open(stream,"a/b/c/scene/map0.scene")  
     {    
-        /* 你的处理代码 */  
-        vfs_file_close(file);  
+       /* 你的读取处理 */  
+	  stream->ops->stream_read(....);
   
-    }  
+    } 
+	
+	delete_vfs_stream(stream);  
   
   如果对scene目录进行打包，请务必将scene.pak文件还放到原来scene的目录  
   打包后的目录结构就变成下面这样  

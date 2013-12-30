@@ -4,7 +4,7 @@
     适用于发行软件或是服务器端对第三方提供布置环境时，对自己的文件资源进行打包管理进行加密的一项重要措施。  
     并且提供出来的文件接口很容易与现有的标准的文件系统进行替换。如标准库里的FILE对应的接口，我们已经提供了模拟。  
     文件系统本身采用纯C语言开发，能适应各种项目和平台的平移。并且本身不做使用上的任何限制。  
-	网址[github]https://github.com/baickl/vfs.git,[oschina]https://git.oschina.net/baickl/vfs.git
+	网址[github](https://github.com/baickl/vfs.git),[oschina](https://git.oschina.net/baickl/vfs.git)
 
 #用法说明
 ##第一步：

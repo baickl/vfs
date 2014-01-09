@@ -47,10 +47,10 @@
 
 #define VFS_MAX_FILENAME                            (512)
 
-#define VFS_FOREACH_IGNORE                          0	  /* 返回FOREACH，本次结果不处理，如果是遇到目录返回，则表示不进入目录继续FOREACH */
-#define VFS_FOREACH_CONTINUE                        1     /* 继续FOREACH，主要用于处理目录进入*/
-#define VFS_FOREACH_BREAK                           2     /* 中断FOREACH，一般是找到想要的文件夹或是文件后，不需要继续FOREACH了 */
-#define VFS_FOREACH_PROC_ERROR                      3     /* 处理函数返回错误，要求中断FOREACH行为 */
+#define VFS_FOREACH_IGNORE                          (0)	    /* 返回FOREACH，本次结果不处理，如果是遇到目录返回，则表示不进入目录继续FOREACH */
+#define VFS_FOREACH_CONTINUE                        (1)     /* 继续FOREACH，主要用于处理目录进入*/
+#define VFS_FOREACH_BREAK                           (2)     /* 中断FOREACH，一般是找到想要的文件夹或是文件后，不需要继续FOREACH了 */
+#define VFS_FOREACH_PROC_ERROR                      (3)     /* 处理函数返回错误，要求中断FOREACH行为 */
 
 /************************************************************************/
 /* 检查文件存在的结果 */
@@ -77,20 +77,15 @@
 #ifdef __linux__
     #define VFS_FSEEK                               fseeko
     #define VFS_FTELL                               ftello
+    #define swprintf                                _snwprintf
+    #define snprintf                                _snprintf
+    #define stricmp                                 strcasecmp
 #else
+    #pragma warning(disable:4996)
     #define VFS_FSEEK                               _fseeki64
     #define VFS_FTELL                               _ftelli64
-#endif 
-
-
-#if defined(_MSC_VER) && _MSC_VER > 1310 && !defined (_WIN32_WCE)
-#define swprintf                                    swprintf_s
-#define snprintf                                    sprintf_s
-#pragma warning(disable:4996)
-#else
-#define swprintf                                    _snwprintf
-#define snprintf                                    _snprintf
-#define stricmp                                     strcasecmp
+    #define swprintf                                swprintf_s
+    #define snprintf                                sprintf_s
 #endif
 
 #endif/*_VFS_BASE_H_*/

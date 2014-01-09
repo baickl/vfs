@@ -40,17 +40,16 @@
 
   开发的时候，我们用相对路径来读取数据，例如script目录中有一个_init_.lua脚本,那么我们的读取函数为  
 
-    vfs_stream *stream = new_vfs_stream();
+    struct vfs_stream *stream = vfs_stream_open("script/_init_.lua");
 	if( !stream )
 		return VFS_FALSE;
-		
-    if( VFS_TRUE == stream->ops->stream_open(stream,"script/_init_.lua")  
-    {  
-      /* 你的读取处理 */  
-	  stream->ops->stream_read(....);
-      
-    }
-    delete_vfs_stream(stream);  
+
+    /* 你的读取处理 */  
+	vfs_stream_read(stream,buf,size,count);
+    
+	/* 关闭 */  
+    vfs_stream_close(stream);  
+	stream = NULL;
 
   当读取的时候，如果只有script目录，没有script.pak那么我们会从script目录中读取数据，这就是通常中所说的开发模式  
   在开发模式的时候，完全不需要对任何目录进行打包处理。  
@@ -66,18 +65,16 @@
 
   我们写读取代码就可以这样：
   
-    vfs_stream *stream = new_vfs_stream();
+    struct vfs_stream *stream = vfs_stream_open("a/b/c/scene/map0.scene");
 	if( !stream )
 		return VFS_FALSE;
-		  
-    if( VFS_TRUE == stream->ops->stream_open(stream,"a/b/c/scene/map0.scene")  
-    {    
-       /* 你的读取处理 */  
-	  stream->ops->stream_read(....);
   
-    } 
-	
-	delete_vfs_stream(stream);  
+    /* 你的读取处理 */  
+	vfs_stream_read(stream,buf,size,count);
+  
+	/* 关闭 */  
+    vfs_stream_close(stream);  
+	stream = NULL;
   
   如果对scene目录进行打包，请务必将scene.pak文件还放到原来scene的目录  
   打包后的目录结构就变成下面这样  

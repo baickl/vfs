@@ -111,7 +111,6 @@ VFS_EXTERN VFS_BOOL             vfs_stream_eof( struct vfs_stream *stream );
  */
 VFS_EXTERN VFS_UINT64           vfs_stream_tell( struct vfs_stream *stream );
 
-
 /*****************************************************************************
  * 移动到文件的指定位置 
    
@@ -136,7 +135,6 @@ VFS_EXTERN VFS_UINT64           vfs_stream_seek( struct vfs_stream *stream , VFS
  *
  */
 VFS_EXTERN VFS_UINT64           vfs_stream_size( struct vfs_stream *stream );
-
 
 /*****************************************************************************
  * 获得文件的数据 

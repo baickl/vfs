@@ -32,11 +32,15 @@
 
 #include "../base.h"
 
+/*****************************************************************************
+ * 前置声明
+ */
+typedef VFS_VOID*             vfs_archive;
+typedef VFS_INT32             (*archive_item_foreach_proc)(vfs_archive archive ,const VFS_CHAR* filename, VFS_UINT64 size);
+
 /************************************************************************/
 /* 文件包插件定义                                              */
 /************************************************************************/
-typedef VFS_VOID* vfs_archive;
-typedef VFS_INT32 (*archive_item_foreach_proc)(vfs_archive archive ,const VFS_CHAR* filename, VFS_UINT64 size);
 typedef struct vfs_plugin_archive
 {
     VFS_BOOL                  (*archive_check_suppert)(const VFS_CHAR* archive);

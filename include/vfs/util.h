@@ -314,6 +314,6 @@ VFS_EXTERN const VFS_CHAR*  vfs_util_path_get_filename(const VFS_CHAR *path);
  * .txt
  *
  */
-VFS_EXTERN const VFS_CHAR*   vfs_util_path_get_extension(const VFS_CHAR *path);
+VFS_EXTERN const VFS_CHAR*  vfs_util_path_get_extension(const VFS_CHAR *path);
 
 #endif/* _VFS_UTIL_H_ */

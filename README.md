@@ -25,9 +25,9 @@
   
   代码如下：  
   
-    vfs_add_archive("script.pak",NULL);  
-    vfs_add_archive("effect.pak",NULL);  
-    vfs_add_archive("a/b/c/scene.pak",NULL);  
+    vfs_add_archive("script.pak","");  
+    vfs_add_archive("effect.pak","");  
+    vfs_add_archive("a/b/c/scene.pak","");  
 
   以上接口调用主要用来模拟文件夹，举例说明一下.  
   比如说 当前目录架构是这样的  
@@ -95,15 +95,15 @@
    
   原来代码如下：  
   
-    vfs_add_archive("script.pak",NULL);  
-    vfs_add_archive("effect.pak",NULL);  
-    vfs_add_archive("a/b/c/scene.pak",NULL);  
+    vfs_add_archive("script.pak","");  
+    vfs_add_archive("effect.pak","");  
+    vfs_add_archive("a/b/c/scene.pak","");  
   
   改后代码如下：  
   
-    vfs_add_archive("script.pak",NULL);  
-    vfs_add_archive("effect.pak",NULL);  
-    vfs_add_archive("a.pak",NULL);  
+    vfs_add_archive("script.pak","");  
+    vfs_add_archive("effect.pak","");  
+    vfs_add_archive("a.pak","");  
   
   你的读取代码却不用做任何改变，这样即使调整目录结构，也可以很轻松随意了。  
   

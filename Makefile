@@ -13,7 +13,6 @@ OBJS=objs/pak.o 		\
 	 objs/vfs.o			\
 	 objs/stream.o		\
 	 objs/pool.o		\
-	 objs/buffer.o		\
 	 objs/pak_plugin.o			\
 	 objs/bz2compress_plugin.o	\
 	 objs/hashtable.o			\
@@ -49,9 +48,6 @@ objs/stream.o:src/stream.c
 	
 objs/pool.o:src/pool.c
 	$(CC) $(CFLAGS) -c src/pool.c -o objs/pool.o
-	
-objs/buffer.o:src/buffer.c
-	$(CC) $(CFLAGS) -c src/buffer.c -o objs/buffer.o
 	
 objs/pak_plugin.o:src/plugin/pak_plugin.c
 	$(CC) $(CFLAGS) -c src/plugin/pak_plugin.c -o objs/pak_plugin.o

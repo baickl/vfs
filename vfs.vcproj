@@ -207,14 +207,6 @@
 			Name="src"
 			>
 			<File
-				RelativePath=".\src\buffer.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\buffer.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\pak.c"
 				>
 			</File>

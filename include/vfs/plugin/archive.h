@@ -30,7 +30,7 @@
 #ifndef _VFS_PLUGIN_ARCHIVE_H_
 #define _VFS_PLUGIN_ARCHIVE_H_
 
-#include "base.h"
+#include "../base.h"
 
 /************************************************************************/
 /* 文件包插件定义                                              */

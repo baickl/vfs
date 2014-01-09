@@ -30,7 +30,7 @@
 #ifndef _VFS_PLUGIN_COMPRESS_H_
 #define _VFS_PLUGIN_COMPRESS_H_
 
-#include "base.h"
+#include "../base.h"
 
 /************************************************************************/
 /* 压缩插件定义                                                */

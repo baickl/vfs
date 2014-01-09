@@ -82,4 +82,15 @@
     #define VFS_FTELL                               _ftelli64
 #endif 
 
+
+#if defined(_MSC_VER) && _MSC_VER > 1310 && !defined (_WIN32_WCE)
+#define swprintf                                    swprintf_s
+#define snprintf                                    sprintf_s
+#pragma warning(disable:4996)
+#else
+#define swprintf                                    _snwprintf
+#define snprintf                                    _snprintf
+#define stricmp                                     strcasecmp
+#endif
+
 #endif/*_VFS_BASE_H_*/

@@ -48,7 +48,7 @@ struct vfs_stream;
  *                              失败返回NULL
  *
  */
-VFS_EXTERN struct vfs_stream *  vfs_stream_create( VFS_VOID *buf , VFS_UINT64 bufsize) ;
+VFS_EXTERN struct vfs_stream*   vfs_stream_create( VFS_VOID *buf , VFS_UINT64 bufsize) ;
 
 /*****************************************************************************
  * 打开文件

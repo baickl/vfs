@@ -30,7 +30,7 @@
 #ifndef _VFS_PLUGIN_ENCRYPT_H_
 #define _VFS_PLUGIN_ENCRYPT_H_
 
-#include "base.h"
+#include "../base.h"
 
 /************************************************************************/
 /* 加密插件定义                                                */

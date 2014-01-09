@@ -185,6 +185,22 @@
 					RelativePath=".\include\vfs\vfs.hpp"
 					>
 				</File>
+				<Filter
+					Name="plugin"
+					>
+					<File
+						RelativePath=".\include\vfs\plugin\archive.h"
+						>
+					</File>
+					<File
+						RelativePath=".\include\vfs\plugin\compress.h"
+						>
+					</File>
+					<File
+						RelativePath=".\include\vfs\plugin\encrypt.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

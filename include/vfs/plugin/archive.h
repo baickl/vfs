@@ -1,4 +1,4 @@
-/***********************************************************************************
+ï»¿/***********************************************************************************
  * Copyright (c) 2013, baickl(baickl@gmail.com)
  * All rights reserved.
  * 
@@ -27,69 +27,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***********************************************************************************/
-#include <vfs/vfs.h>
-#include <vfs/stream.h>
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef _VFS_PLUGIN_ARCHIVE_H_
+#define _VFS_PLUGIN_ARCHIVE_H_
 
-int main( void )
+#include "base.h"
+
+/************************************************************************/
+/* æ–‡ä»¶åŒ…æ’ä»¶å®šä¹‰                                              */
+/************************************************************************/
+typedef VFS_VOID* vfs_archive;
+typedef VFS_INT32 (*archive_item_foreach_proc)(vfs_archive archive ,const VFS_CHAR* filename, VFS_UINT64 size);
+typedef struct vfs_plugin_archive
 {
+    VFS_BOOL                  (*archive_check_suppert)(const VFS_CHAR* archive);
+    vfs_archive               (*archive_open)(const VFS_CHAR* archive,const VFS_CHAR* prefix,const VFS_CHAR* passwd);
+    VFS_VOID                  (*archive_close)( vfs_archive archive);
+    const VFS_CHAR*           (*archive_get_name)( vfs_archive archive);
+    VFS_INT32                 (*archive_get_item_count)( vfs_archive archive);
+    VFS_BOOL                  (*archive_foreach_item)( vfs_archive archive,archive_item_foreach_proc proc);
+    VFS_BOOL                  (*archive_locate_item)(vfs_archive archive,const VFS_CHAR* filename,VFS_UINT64* osize);
+    VFS_BOOL                  (*archive_unpack_item_by_filename)( vfs_archive archive, const VFS_CHAR* filename, VFS_VOID* buf, VFS_UINT64 bufsize);
+}vfs_plugin_archive;
 
-	struct vfs_stream *vf;
-    struct vfs_stream *out;
-
-	size_t realsize ;
-	char buf[VFS_MAX_FILENAME+1];
-
-	if( VFS_TRUE != vfs_create(VFS_SDK_VERSION,".."))
-		goto ERROR;
-
-	if( VFS_TRUE != vfs_add_archive("media/src.pak",NULL))
-    {
-        printf("open pak error \n");
-		goto ERROR;
-    }
-
-	vf = vfs_stream_open("mediA/src/bzip2/randtable.c");
-	if( !vf )
-    {
-        printf("vfs_stream_open failed\n");
-		goto ERROR;
-    }
-
-    out = vfs_stream_create(0,0);
-    if( !out )
-    {
-        printf("vfs_stream_create failed\n");
-        goto ERROR;
-    }
-
-	while( out && !vfs_stream_eof(vf) )
-	{
-		realsize = vfs_stream_read(vf,buf,1,(size_t)VFS_MAX_FILENAME);
-		if( realsize > 0 )
-		{
-			buf[realsize] = 0;
-			printf(buf);
-
-            if( vfs_stream_write(out,buf,1,realsize) != realsize )
-            {
-                printf("Write Error!\n");
-            }
-		}
-	}
-
-    /* ±£´æÒ»ÏÂ */
-    vfs_stream_save(out,"./randtable.c");
-
-    vfs_stream_close(out);
-	vfs_stream_close(vf);
-
-	vfs_destroy();
-	return 0;
-
-ERROR:
-	vfs_destroy();
-	return -1;
-
-}
+#endif/*_VFS_PLUGIN_ARCHIVE_H_*/

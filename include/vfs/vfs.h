@@ -149,22 +149,5 @@ VFS_EXTERN VFS_BOOL         vfs_remove_archive( const VFS_CHAR*archive );
  */
 VFS_EXTERN VFS_INT32        vfs_file_exists( const VFS_CHAR *filename );
 
-/*****************************************************************************
- * 打开文件
-  
- * @name                    vfs_file_open
- * @param   filename        要打开的文件名
- * @return  vfs_stream*     成功返回vfs_stream对象
- *                          失败返回NULL
- *
- * 当打开的文件在ARCHIVE包和目录中都同时存在时，优先从ARCHIVE包中读取，
- * 如果ARCHIVE包中没有，仅在目录中存在，那么将从目录中优先加载。
- *
- * 总之，ARCHIVE包的优先级大于目录，索引文件也是优先从ARCHIVE包中索引，
- * 然后才会是从目录中索引。
- *
- */
-VFS_EXTERN vfs_stream*      vfs_file_open( const VFS_CHAR *filename );
-
 
 #endif

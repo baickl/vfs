@@ -71,16 +71,13 @@ public:
     {
         Close();
 
-        _M_file == new_vfs_stream();
-        if( !_M_file )
-            return false;
-        
-        if( VFS_FALSE == _M_file->ops->stream_create(_M_file,buf,bufsize) )
+        struct vfs_stream* stream = vfs_stream_create(buf,bufsize);
+        if( !stream  )
         {
-            Close();
             return false;
         }
 
+        _M_file = stream;
         return true;
     }
 
@@ -89,15 +86,13 @@ public:
         Close();
 
 
-        _M_file = new_vfs_stream();
-        if( !_M_file )
-            return false;
-
-        if(VFS_FALSE == _M_file->ops->stream_open(_M_file,file))
+        struct vfs_stream* stream = vfs_stream_open(file);
+        if( !stream  )
         {
-            Close();
             return false;
         }
+
+        _M_file = stream;
 
         return true;
     }
@@ -106,7 +101,7 @@ public:
     {
         if( _M_file )
         {
-            delete_vfs_stream(_M_file);
+            vfs_stream_close(_M_file);
             _M_file = NULL;
         }
     }
@@ -116,7 +111,7 @@ public:
         if( !_M_file || !file )
             return false;
 
-        return VFS_TRUE == _M_file->ops->stream_save(file);
+        return VFS_TRUE == vfs_stream_save(file);
     }
 
 public:
@@ -126,7 +121,7 @@ public:
         if( !_M_file )
             return true;
 
-        return _M_file->ops->stream_eof(_M_file);
+        return vfs_stream_eof(_M_file);
     }
 
     VFS_UINT64 Tell()const 
@@ -134,7 +129,7 @@ public:
         if( !_M_file )
             return 0;
 
-        return _M_file->ops->stream_tell(_M_file);
+        return vfs_stream_tell(_M_file);
     }
 
     VFS_UINT64 Seek(VFS_UINT64 pos,int mod = SEEK_SET)
@@ -142,7 +137,7 @@ public:
         if( !_M_file )
             return 0;
 
-        return _M_file->ops->stream_seek(_M_file,pos,mod);
+        return vfs_stream_seek(_M_file,pos,mod);
     }
 
     VFS_UINT64 Size()const 
@@ -150,7 +145,7 @@ public:
         if( !_M_file )
             return 0;
 
-        return _M_file->ops->stream_size(_M_file);
+        return vfs_stream_size(_M_file);
     }
 
     const VFS_VOID* Data()const
@@ -158,7 +153,7 @@ public:
         if( !_M_file )
             return 0;
 
-        return _M_file->ops->stream_data(_M_file);
+        return vfs_stream_data(_M_file);
     }
 
     VFS_SIZE Read(VFS_VOID*buf,VFS_SIZE size,VFS_SIZE count )
@@ -166,7 +161,7 @@ public:
         if( !_M_file )
             return 0;
 
-        return _M_file->stream_read(_M_file,buf,size,count);
+        return vfs_stream_read(_M_file,buf,size,count);
     }
 
     VFS_SIZE Write(VFS_VOID*buf,VFS_SIZE size,VFS_SIZE count )
@@ -174,12 +169,12 @@ public:
         if( !_M_file )
             return 0;
 
-        return _M_file->ops->stream_write(_M_file,buf,size,count);
+        return vfs_stream_write(_M_file,buf,size,count);
     }
 
 private:
 
-    vfs_stream *_M_file;
+    struct vfs_stream *_M_file;
 };
 
 

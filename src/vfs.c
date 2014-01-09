@@ -521,26 +521,3 @@ VFS_INT32 vfs_file_exists( const VFS_CHAR* file  )
     /* 不存在文件 */
     return VFS_FILE_NOT_EXISTS;
 }
-
-vfs_stream* vfs_file_open( const VFS_CHAR *filename )
-{
-    vfs_stream * stream;
-
-    if( !filename )
-        return NULL;
-
-    if( VFS_FILE_NOT_EXISTS == vfs_file_exists(filename))
-        return NULL;
-
-    stream = new_vfs_stream();
-    if( !stream )
-        return NULL;
-
-    if( VFS_FALSE == stream->ops->stream_open(stream,filename) )
-    {
-        delete_vfs_stream(stream);
-        return NULL;
-    }
-
-    return stream;
-}

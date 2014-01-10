@@ -55,8 +55,8 @@ VFS_EXTERN struct vfs_stream*   vfs_stream_create( VFS_VOID *buf , VFS_UINT64 bu
    
  * @name                        vfs_stream_open
  * @param   filename            要打开的文件名
- * @return  struct vfs_stream * 成功返回对象，失败返回空
- *                              失败返回VFS_FALSE
+ * @return  struct vfs_stream * 成功返回对象
+ *                              失败返回NULL
  *
  * 当打开的文件在ARCHIVE包和目录中都同时存在时，优先从ARCHIVE包中读取，
  * 如果ARCHIVE包中没有，仅在目录中存在，那么将从目录中优先加载。
